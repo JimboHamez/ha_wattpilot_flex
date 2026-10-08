@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Any, Final, Literal
 from wattpilot_api.exceptions import AuthenticationError
 
 from homeassistant.exceptions import ConfigEntryAuthFailed, ConfigEntryError, ConfigEntryNotReady
+from homeassistant.helpers import config_validation as cv
 from homeassistant.loader import async_get_integration
 
 from .availability import ChargerConnectionMonitor
@@ -39,6 +40,10 @@ if TYPE_CHECKING:
     from .models import WattpilotConfigEntry
 
 _LOGGER: Final = logging.getLogger(__name__)
+
+# The integration is set up from config entries only. async_setup exists to
+# register the service actions, so a YAML block for the domain is logged and ignored.
+CONFIG_SCHEMA: Final = cv.config_entry_only_config_schema(DOMAIN)
 
 # Maps entry_id -> consecutive password rejections seen during setup retries.
 # The stored password is not the problem when this grows: a charger that has
