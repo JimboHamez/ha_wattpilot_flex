@@ -85,7 +85,13 @@ There is no build step (it is an HA custom component, copied into `config/custom
   that way (`ruff format`, `ruff check`). `.github/workflows/test.yml` **gates** on this:
   `pytest --cov-fail-under=95`, `ruff format --check` + `ruff check`, and `mypy` run as three
   separate jobs, with ruff and mypy pinned so a new release cannot break `main` without a
-  deliberate bump.
+  deliberate bump. `pytest` runs on Python 3.13 **and** 3.14: each installs the newest
+  `pytest-homeassistant-custom-component` it can, so 3.14 tests the current Home Assistant and
+  3.13 tests 2026.2, the last release that supports it (which keeps the `compat.py` fallbacks
+  exercised). `mypy` runs on 3.14 only, against the current release's type hints, and fails
+  against 2026.2, where `probatio` does not exist. Until 2026-10 CI only ran 3.13, so the suite
+  had never seen a Home Assistant newer than 2026.2. The local `.venv` (and therefore
+  `./scan.sh`'s mypy step) is still 3.13; check types in a 3.14 environment.
 - **Manual/live check** — copy `custom_components/wattpilot/` into a running HA, restart, and read
   the debug logs. The codebase logs verbosely under the `custom_components.wattpilot` logger
   namespace — enable `logger` debug there to trace behaviour.
@@ -255,6 +261,20 @@ All platform entities subclass this. It centralizes:
   level. Started in `async_setup_entry`, its cancel callable is stored in
   `runtime_data.connection_monitor_cancel` and invoked on unload.
 
+### Supporting older and newer Home Assistant releases: `compat.py`
+`hacs.json` keeps a 2024.11 floor while current Home Assistant has moved on, so anything whose
+API differs across that range goes through `compat.py`, which prefers the current API and falls
+back to the old one:
+- `vol`: `probatio` (Home Assistant's validation engine since 2026.9, whose type hints the flow
+  and service schemas must satisfy), else `voluptuous`. Import `vol` from `.compat`, never
+  `voluptuous` directly.
+- `device_config_entry_ids(device)`: the device's single `config_entry_id` (2026.8+), else the
+  `config_entries` set. Reading `config_entries` on a current release logs a deprecation warning
+  every time and stops working in 2027.10.
+The tests follow the same rule: look a device up with `async_get_device_by_identifier` where it
+exists (`async_get_device` is deprecated and the harness raises on it), else `async_get_device`.
+When the floor is raised past one of these, drop its fallback.
+
 ### Reading and writing charger values
 Always go through the `utils.py` helpers rather than touching the charger object directly:
 - Read: `GetChargerProp` / `async_GetChargerProp` (safe access into `charger.all_properties`).
@@ -378,7 +398,7 @@ and must not drift below what the code actually needs. It declares **2024.11**, 
 flow: `_get_reauth_entry`, `_get_reconfigure_entry` and `_abort_if_unique_id_mismatch` all arrived
 in that release (`entry.runtime_data`, the previous floor, only needed 2024.6). Bump it whenever a
 newer core API is adopted — and check the floor when adopting one, since nothing in the test suite
-catches a too-low declaration. HACS installs from GitHub **releases**, so a version bump in
+catches a too-low declaration (the 3.13 CI job tests 2026.2, not the floor itself). HACS installs from GitHub **releases**, so a version bump in
 `manifest.json` only reaches users once a matching tag/release is cut.
 
 ## Common Charger Property Codes

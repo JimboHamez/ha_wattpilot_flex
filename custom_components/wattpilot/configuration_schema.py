@@ -5,12 +5,11 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any, Final
 
-import voluptuous as vol
-
 import homeassistant.helpers.config_validation as cv
 from homeassistant.const import CONF_FRIENDLY_NAME, CONF_IP_ADDRESS, CONF_PASSWORD, CONF_TIMEOUT
 from homeassistant.helpers.selector import SelectSelector, SelectSelectorConfig
 
+from .compat import vol
 from .const import CONF_CLOUD, CONF_CONNECTION, CONF_LOCAL, CONF_SERIAL, DEFAULT_NAME, DEFAULT_TIMEOUT, DOMAIN
 
 if TYPE_CHECKING:

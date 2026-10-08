@@ -5,7 +5,6 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any, Final
 
-import voluptuous as vol
 from wattpilot_api.exceptions import AuthenticationError
 
 import homeassistant.helpers.config_validation as cv
@@ -14,6 +13,7 @@ from homeassistant.components.diagnostics import async_redact_data
 from homeassistant.const import CONF_FRIENDLY_NAME, CONF_IP_ADDRESS, CONF_PASSWORD, CONF_TIMEOUT
 from homeassistant.data_entry_flow import AbortFlow
 
+from .compat import vol
 from .configuration_schema import (
     CLOUD_SCHEMA,
     CONNECTION_SCHEMA,

@@ -16,6 +16,7 @@ from homeassistant.const import CONF_FRIENDLY_NAME, CONF_IP_ADDRESS, CONF_PASSWO
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.dispatcher import async_dispatcher_send
 
+from .compat import device_config_entry_ids
 from .const import (
     CONF_CLOUD,
     CONF_CONNECTION,
@@ -342,7 +343,7 @@ def _runtime_data_for_device(hass: HomeAssistant, device_id: str) -> WattpilotRu
     The device is assumed to exist; the callers check that first.
     """
     device = dr.async_get(hass).async_get(device_id)
-    for entry_id in device.config_entries if device else ():
+    for entry_id in device_config_entry_ids(device) if device else ():
         entry = hass.config_entries.async_get_entry(entry_id)
         if entry is None or entry.domain != DOMAIN:
             continue

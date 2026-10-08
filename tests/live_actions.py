@@ -95,7 +95,12 @@ async def charger_device(hass):
     assert await hass.config_entries.async_setup(entry.entry_id)
     await hass.async_block_till_done()
     charger = entry.runtime_data.charger
-    device = dr.async_get(hass).async_get_device(identifiers={(DOMAIN, charger.serial)})
+    registry = dr.async_get(hass)
+    # Home Assistant 2026.8 scoped identifiers to a config entry and deprecated async_get_device.
+    if hasattr(registry, "async_get_device_by_identifier"):
+        device = registry.async_get_device_by_identifier((DOMAIN, charger.serial), entry.entry_id)
+    else:
+        device = registry.async_get_device(identifiers={(DOMAIN, charger.serial)})
     assert device is not None
     yield charger, device.id
     await hass.config_entries.async_unload(entry.entry_id)

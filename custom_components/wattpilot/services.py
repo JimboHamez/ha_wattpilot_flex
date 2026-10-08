@@ -23,13 +23,12 @@ import functools
 import logging
 from typing import TYPE_CHECKING, Any, Final, cast
 
-import voluptuous as vol
-
 from homeassistant.config_entries import ConfigEntryState
 from homeassistant.const import CONF_DEVICE_ID, CONF_TRIGGER_TIME
 from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
 from homeassistant.helpers import config_validation as cv, device_registry as dr
 
+from .compat import device_config_entry_ids, vol
 from .const import (
     CLOUD_API_URL_POSTFIX,
     CLOUD_API_URL_PREFIX,
@@ -159,7 +158,7 @@ def _ensure_entry_loaded(hass: HomeAssistant, device_id: str) -> None:
         return
     entries = [
         entry
-        for entry_id in device.config_entries
+        for entry_id in device_config_entry_ids(device)
         if (entry := hass.config_entries.async_get_entry(entry_id)) is not None and entry.domain == DOMAIN
     ]
     if entries and not any(entry.state is ConfigEntryState.LOADED for entry in entries):
