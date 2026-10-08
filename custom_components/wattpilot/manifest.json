@@ -9,7 +9,7 @@
   "issue_tracker": "https://github.com/JimboHamez/ha_wattpilot_flex/issues",
   "quality_scale": "platinum",
   "requirements": ["wattpilot-api>=1.4.0", "aiofiles>=23.2.1"],
-  "version": "0.12.1",
+  "version": "0.12.2",
   "zeroconf": [
     { "type": "_http._tcp.local.", "properties": { "devicefamily": "wattpilot" } }
   ]

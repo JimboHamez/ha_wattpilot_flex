@@ -10,12 +10,23 @@ for attribution.
 
 ## [Unreleased]
 
+_Nothing yet._
+
+## [0.12.2] - 2026-10-08
+
+Ready for Home Assistant 2026.10. The integration already ran on it, but every service action
+logged a deprecation warning that would have turned into a failure in 2027.10; that is fixed, and
+releases back to 2024.11 are still supported. The repository has moved to
+[JimboHamez/ha_wattpilot_flex](https://github.com/JimboHamez/ha_wattpilot_flex). No entity, state
+or setting changes.
+
 ### Changed
 - The repository is now [JimboHamez/ha_wattpilot_flex](https://github.com/JimboHamez/ha_wattpilot_flex)
   (renamed from `JimboHamez/wattpilot-HA`, briefly `JimboHamez/ha_wattpilot-flex`). The
   `manifest.json` documentation and issue-tracker links, the README and info.md badges and links,
-  and the changelog compare links point at the new name. HACS now lists the integration as **Fronius Wattpilot Flex** (was *Fronius Wattpilot-HA*).
-  GitHub redirects the old URLs, so existing HACS installs keep working.
+  and the changelog compare links point at the new name. HACS now lists the integration as
+  **Fronius Wattpilot Flex** (was *Fronius Wattpilot-HA*). GitHub redirects the old URLs, so
+  existing HACS installs keep working.
 
 ### Fixed
 - hassfest passes again. Since the Home Assistant 2026.10 cycle it rejects a custom integration
@@ -783,7 +794,8 @@ Assistant Integration Quality Scale.
   (services registered in `async_setup`).
 - `manifest.json`: added `integration_type` and `issue_tracker`, and sorted keys.
 
-[Unreleased]: https://github.com/JimboHamez/ha_wattpilot_flex/compare/v0.12.1...HEAD
+[Unreleased]: https://github.com/JimboHamez/ha_wattpilot_flex/compare/v0.12.2...HEAD
+[0.12.2]: https://github.com/JimboHamez/ha_wattpilot_flex/compare/v0.12.1...v0.12.2
 [0.12.1]: https://github.com/JimboHamez/ha_wattpilot_flex/compare/v0.12.0...v0.12.1
 [0.12.0]: https://github.com/JimboHamez/ha_wattpilot_flex/compare/v0.11.0...v0.12.0
 [0.11.0]: https://github.com/JimboHamez/ha_wattpilot_flex/compare/v0.10.0...v0.11.0
