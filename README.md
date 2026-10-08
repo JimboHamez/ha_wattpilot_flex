@@ -1,14 +1,14 @@
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg?style=for-the-badge)](https://github.com/hacs/integration)
-![GitHub Release](https://img.shields.io/github/v/release/JimboHamez/ha_wattpilot-flex?style=for-the-badge)
-[![hacs_downloads](https://img.shields.io/github/downloads/JimboHamez/ha_wattpilot-flex/latest/total?style=for-the-badge)](https://github.com/JimboHamez/ha_wattpilot-flex/releases/latest)
-[![Quality Scale](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FJimboHamez%2Fha_wattpilot-flex%2Fmain%2Fcustom_components%2Fwattpilot%2Fmanifest.json&query=%24.quality_scale&label=Quality%20Scale&style=for-the-badge&color=E5E4E2)](https://developers.home-assistant.io/docs/core/integration-quality-scale/)
-![GitHub License](https://img.shields.io/github/license/JimboHamez/ha_wattpilot-flex?style=for-the-badge)
-![GitHub commit activity](https://img.shields.io/github/commit-activity/y/JimboHamez/ha_wattpilot-flex?style=for-the-badge)
+![GitHub Release](https://img.shields.io/github/v/release/JimboHamez/ha_wattpilot_flex?style=for-the-badge)
+[![hacs_downloads](https://img.shields.io/github/downloads/JimboHamez/ha_wattpilot_flex/latest/total?style=for-the-badge)](https://github.com/JimboHamez/ha_wattpilot_flex/releases/latest)
+[![Quality Scale](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FJimboHamez%2Fha_wattpilot_flex%2Fmain%2Fcustom_components%2Fwattpilot%2Fmanifest.json&query=%24.quality_scale&label=Quality%20Scale&style=for-the-badge&color=E5E4E2)](https://developers.home-assistant.io/docs/core/integration-quality-scale/)
+![GitHub License](https://img.shields.io/github/license/JimboHamez/ha_wattpilot_flex?style=for-the-badge)
+![GitHub commit activity](https://img.shields.io/github/commit-activity/y/JimboHamez/ha_wattpilot_flex?style=for-the-badge)
 ![Maintenance](https://img.shields.io/maintenance/yes/2026?style=for-the-badge)
 
-[![Tests](https://github.com/JimboHamez/ha_wattpilot-flex/actions/workflows/test.yml/badge.svg)](https://github.com/JimboHamez/ha_wattpilot-flex/actions/workflows/test.yml)
-[![Validate](https://github.com/JimboHamez/ha_wattpilot-flex/actions/workflows/validate.yaml/badge.svg)](https://github.com/JimboHamez/ha_wattpilot-flex/actions/workflows/validate.yaml) [![hassfest](https://github.com/JimboHamez/ha_wattpilot-flex/actions/workflows/hassfest.yaml/badge.svg)](https://github.com/JimboHamez/ha_wattpilot-flex/actions/workflows/hassfest.yaml)
-[![Security](https://github.com/JimboHamez/ha_wattpilot-flex/actions/workflows/security.yml/badge.svg)](https://github.com/JimboHamez/ha_wattpilot-flex/actions/workflows/security.yml)
+[![Tests](https://github.com/JimboHamez/ha_wattpilot_flex/actions/workflows/test.yml/badge.svg)](https://github.com/JimboHamez/ha_wattpilot_flex/actions/workflows/test.yml)
+[![Validate](https://github.com/JimboHamez/ha_wattpilot_flex/actions/workflows/validate.yaml/badge.svg)](https://github.com/JimboHamez/ha_wattpilot_flex/actions/workflows/validate.yaml) [![hassfest](https://github.com/JimboHamez/ha_wattpilot_flex/actions/workflows/hassfest.yaml/badge.svg)](https://github.com/JimboHamez/ha_wattpilot_flex/actions/workflows/hassfest.yaml)
+[![Security](https://github.com/JimboHamez/ha_wattpilot_flex/actions/workflows/security.yml/badge.svg)](https://github.com/JimboHamez/ha_wattpilot_flex/actions/workflows/security.yml)
 
 > **Note:** This repository began as a fork of
 > [mk-maddin/wattpilot-HA](https://github.com/mk-maddin/wattpilot-HA) by Martin Kraemer
@@ -24,7 +24,7 @@
 > cannot support.
 >
 > **Please report issues with *this* integration
-> [here](https://github.com/JimboHamez/ha_wattpilot-flex/issues), not upstream.** Bug reports about
+> [here](https://github.com/JimboHamez/ha_wattpilot_flex/issues), not upstream.** Bug reports about
 > this fork's code are not upstream's to answer. Go to
 > [mk-maddin/wattpilot-HA](https://github.com/mk-maddin/wattpilot-HA) if you are running
 > the original integration.
@@ -185,7 +185,7 @@ automation:
 ## Reporting issues:
 
 Issues for this fork are tracked at
-[JimboHamez/ha_wattpilot-flex/issues](https://github.com/JimboHamez/ha_wattpilot-flex/issues) — please
+[JimboHamez/ha_wattpilot_flex/issues](https://github.com/JimboHamez/ha_wattpilot_flex/issues) — please
 report them there rather than upstream, since this code has diverged from the original.
 
 When reporting, include the integration version, your charger model/variant and firmware, the
@@ -327,7 +327,7 @@ What that means in practice:
   a charger firmware update can break it.
 
 This is the main reason this fork's behaviour differs from upstream, and why issues belong
-[here](https://github.com/JimboHamez/ha_wattpilot-flex/issues).
+[here](https://github.com/JimboHamez/ha_wattpilot_flex/issues).
 
 ## Entity units
 

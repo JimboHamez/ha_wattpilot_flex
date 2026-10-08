@@ -41,8 +41,9 @@ wallbox / EV charging devices. It wraps the unofficial, reverse-engineered async
 charger over a WebSocket (locally on the LAN, or via the go-e cloud). There is no official
 Fronius API — everything is built on that community library and may break at any time.
 
-This repo is [JimboHamez/ha_wattpilot-flex](https://github.com/JimboHamez/ha_wattpilot-flex), which was
-renamed from `JimboHamez/wattpilot-HA` on 2026-09-29 and is no longer a GitHub fork. GitHub redirects
+This repo is [JimboHamez/ha_wattpilot_flex](https://github.com/JimboHamez/ha_wattpilot_flex), which was
+renamed from `JimboHamez/wattpilot-HA` on 2026-09-29 (as `ha_wattpilot-flex`, then
+`ha_wattpilot_flex` on 2026-10-08) and is no longer a GitHub fork. GitHub redirects
 the old URLs, but all links use the new name, so keep it that way. The code began as a **downstream fork** of
 [mk-maddin/wattpilot-HA](https://github.com/mk-maddin/wattpilot-HA) and has diverged substantially
 (0.5.0 replaced the vendored synchronous `wattpilot` module with async `wattpilot-api`, plus

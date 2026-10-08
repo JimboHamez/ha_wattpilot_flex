@@ -11,10 +11,10 @@ for attribution.
 ## [Unreleased]
 
 ### Changed
-- The repository is now [JimboHamez/ha_wattpilot-flex](https://github.com/JimboHamez/ha_wattpilot-flex)
-  (renamed from `JimboHamez/wattpilot-HA`). The `manifest.json` documentation and issue-tracker
-  links, the README and info.md badges and links, and the changelog compare links point at the new
-  name. HACS now lists the integration as **Fronius Wattpilot Flex** (was *Fronius Wattpilot-HA*).
+- The repository is now [JimboHamez/ha_wattpilot_flex](https://github.com/JimboHamez/ha_wattpilot_flex)
+  (renamed from `JimboHamez/wattpilot-HA`, briefly `JimboHamez/ha_wattpilot-flex`). The
+  `manifest.json` documentation and issue-tracker links, the README and info.md badges and links,
+  and the changelog compare links point at the new name. HACS now lists the integration as **Fronius Wattpilot Flex** (was *Fronius Wattpilot-HA*).
   GitHub redirects the old URLs, so existing HACS installs keep working.
 
 ### Fixed
@@ -774,28 +774,28 @@ Assistant Integration Quality Scale.
   (services registered in `async_setup`).
 - `manifest.json`: added `integration_type` and `issue_tracker`, and sorted keys.
 
-[Unreleased]: https://github.com/JimboHamez/ha_wattpilot-flex/compare/v0.12.1...HEAD
-[0.12.1]: https://github.com/JimboHamez/ha_wattpilot-flex/compare/v0.12.0...v0.12.1
-[0.12.0]: https://github.com/JimboHamez/ha_wattpilot-flex/compare/v0.11.0...v0.12.0
-[0.11.0]: https://github.com/JimboHamez/ha_wattpilot-flex/compare/v0.10.0...v0.11.0
-[0.10.0]: https://github.com/JimboHamez/ha_wattpilot-flex/compare/v0.9.2...v0.10.0
-[0.9.2]: https://github.com/JimboHamez/ha_wattpilot-flex/compare/v0.9.1...v0.9.2
-[0.9.1]: https://github.com/JimboHamez/ha_wattpilot-flex/compare/v0.9.0...v0.9.1
-[0.9.0]: https://github.com/JimboHamez/ha_wattpilot-flex/compare/v0.8.2...v0.9.0
-[0.8.2]: https://github.com/JimboHamez/ha_wattpilot-flex/compare/v0.8.1...v0.8.2
-[0.8.1]: https://github.com/JimboHamez/ha_wattpilot-flex/compare/v0.8.0...v0.8.1
-[0.8.0]: https://github.com/JimboHamez/ha_wattpilot-flex/compare/v0.7.0...v0.8.0
-[0.7.0]: https://github.com/JimboHamez/ha_wattpilot-flex/compare/v0.6.4...v0.7.0
-[0.6.4]: https://github.com/JimboHamez/ha_wattpilot-flex/compare/v0.6.3...v0.6.4
-[0.6.3]: https://github.com/JimboHamez/ha_wattpilot-flex/compare/v0.6.2...v0.6.3
-[0.6.2]: https://github.com/JimboHamez/ha_wattpilot-flex/compare/v0.6.1...v0.6.2
-[0.6.1]: https://github.com/JimboHamez/ha_wattpilot-flex/compare/v0.6.0...v0.6.1
-[0.6.0]: https://github.com/JimboHamez/ha_wattpilot-flex/compare/v0.5.5...v0.6.0
-[0.5.5]: https://github.com/JimboHamez/ha_wattpilot-flex/compare/v0.5.4...v0.5.5
-[0.5.4]: https://github.com/JimboHamez/ha_wattpilot-flex/compare/v0.5.3...v0.5.4
-[0.5.3]: https://github.com/JimboHamez/ha_wattpilot-flex/compare/v0.5.2...v0.5.3
-[0.5.2]: https://github.com/JimboHamez/ha_wattpilot-flex/compare/v0.5.1...v0.5.2
-[0.5.1]: https://github.com/JimboHamez/ha_wattpilot-flex/compare/v0.5.0...v0.5.1
-[0.5.0]: https://github.com/JimboHamez/ha_wattpilot-flex/compare/v0.4.1...v0.5.0
-[0.4.1]: https://github.com/JimboHamez/ha_wattpilot-flex/compare/v0.4.0...v0.4.1
-[0.4.0]: https://github.com/JimboHamez/ha_wattpilot-flex/releases/tag/v0.4.0
+[Unreleased]: https://github.com/JimboHamez/ha_wattpilot_flex/compare/v0.12.1...HEAD
+[0.12.1]: https://github.com/JimboHamez/ha_wattpilot_flex/compare/v0.12.0...v0.12.1
+[0.12.0]: https://github.com/JimboHamez/ha_wattpilot_flex/compare/v0.11.0...v0.12.0
+[0.11.0]: https://github.com/JimboHamez/ha_wattpilot_flex/compare/v0.10.0...v0.11.0
+[0.10.0]: https://github.com/JimboHamez/ha_wattpilot_flex/compare/v0.9.2...v0.10.0
+[0.9.2]: https://github.com/JimboHamez/ha_wattpilot_flex/compare/v0.9.1...v0.9.2
+[0.9.1]: https://github.com/JimboHamez/ha_wattpilot_flex/compare/v0.9.0...v0.9.1
+[0.9.0]: https://github.com/JimboHamez/ha_wattpilot_flex/compare/v0.8.2...v0.9.0
+[0.8.2]: https://github.com/JimboHamez/ha_wattpilot_flex/compare/v0.8.1...v0.8.2
+[0.8.1]: https://github.com/JimboHamez/ha_wattpilot_flex/compare/v0.8.0...v0.8.1
+[0.8.0]: https://github.com/JimboHamez/ha_wattpilot_flex/compare/v0.7.0...v0.8.0
+[0.7.0]: https://github.com/JimboHamez/ha_wattpilot_flex/compare/v0.6.4...v0.7.0
+[0.6.4]: https://github.com/JimboHamez/ha_wattpilot_flex/compare/v0.6.3...v0.6.4
+[0.6.3]: https://github.com/JimboHamez/ha_wattpilot_flex/compare/v0.6.2...v0.6.3
+[0.6.2]: https://github.com/JimboHamez/ha_wattpilot_flex/compare/v0.6.1...v0.6.2
+[0.6.1]: https://github.com/JimboHamez/ha_wattpilot_flex/compare/v0.6.0...v0.6.1
+[0.6.0]: https://github.com/JimboHamez/ha_wattpilot_flex/compare/v0.5.5...v0.6.0
+[0.5.5]: https://github.com/JimboHamez/ha_wattpilot_flex/compare/v0.5.4...v0.5.5
+[0.5.4]: https://github.com/JimboHamez/ha_wattpilot_flex/compare/v0.5.3...v0.5.4
+[0.5.3]: https://github.com/JimboHamez/ha_wattpilot_flex/compare/v0.5.2...v0.5.3
+[0.5.2]: https://github.com/JimboHamez/ha_wattpilot_flex/compare/v0.5.1...v0.5.2
+[0.5.1]: https://github.com/JimboHamez/ha_wattpilot_flex/compare/v0.5.0...v0.5.1
+[0.5.0]: https://github.com/JimboHamez/ha_wattpilot_flex/compare/v0.4.1...v0.5.0
+[0.4.1]: https://github.com/JimboHamez/ha_wattpilot_flex/compare/v0.4.0...v0.4.1
+[0.4.0]: https://github.com/JimboHamez/ha_wattpilot_flex/releases/tag/v0.4.0
