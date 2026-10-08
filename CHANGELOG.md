@@ -17,6 +17,14 @@ for attribution.
   name. HACS now lists the integration as **Fronius Wattpilot Flex** (was *Fronius Wattpilot-HA*).
   GitHub redirects the old URLs, so existing HACS installs keep working.
 
+### Fixed
+- hassfest passes again. Since the Home Assistant 2026.10 cycle it rejects a custom integration
+  that lists a package Home Assistant already installs, so `pyyaml` and `packaging` are gone from
+  the `manifest.json` requirements (the integration still uses both, from Home Assistant's own
+  install). `__init__.py` now declares `CONFIG_SCHEMA` as config-entry only, which hassfest asks of
+  an integration with an `async_setup`; a `wattpilot:` block in `configuration.yaml` is logged and
+  ignored, as before.
+
 ## [0.12.1] - 2026-09-23
 
 A fix for the **Set next trip** action: the departure time you picked reached the charger shifted
