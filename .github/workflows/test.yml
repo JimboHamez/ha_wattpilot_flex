@@ -7,16 +7,24 @@ on:
   workflow_dispatch:
 
 jobs:
+  # Each Python gets the newest pytest-homeassistant-custom-component it can
+  # install, and with it a Home Assistant release: 3.14 tests the current one,
+  # and 3.13 the last release that supports it (2026.2), which keeps the
+  # compat.py fallbacks for older releases exercised.
   pytest:
-    name: pytest
+    name: pytest (${{ matrix.python-version }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.13", "3.14"]
     steps:
       - uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.13"
+          python-version: ${{ matrix.python-version }}
           cache: pip
 
       - name: Install test dependencies
@@ -36,7 +44,7 @@ jobs:
         if: always()
         run: |
           {
-            echo "## Coverage"
+            echo "## Coverage (Python ${{ matrix.python-version }})"
             cat coverage.md 2>/dev/null || echo "_no coverage report produced_"
           } >> "$GITHUB_STEP_SUMMARY"
 
@@ -69,10 +77,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Python 3.14 installs the current Home Assistant release, whose type
+      # hints (Probatio schemas, the device registry) are the ones to check.
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.13"
+          python-version: "3.14"
           cache: pip
 
       # Home Assistant and the client library have to be importable for strict

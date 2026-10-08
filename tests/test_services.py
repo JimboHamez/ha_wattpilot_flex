@@ -20,7 +20,6 @@ from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-import voluptuous as vol
 
 pytest.importorskip("pytest_homeassistant_custom_component")
 from homeassistant.const import CONF_IP_ADDRESS, CONF_PASSWORD
@@ -28,6 +27,7 @@ from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
 from homeassistant.helpers import device_registry as dr
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
+from custom_components.wattpilot.compat import vol
 from custom_components.wattpilot.const import CONF_CONNECTION, CONF_DBG_PROPS, CONF_LOCAL, DOMAIN
 
 PROPS = {
@@ -59,6 +59,18 @@ def _enable_custom_integrations(enable_custom_integrations):
     yield
 
 
+def _device_by_identifier(hass, identifier, entry_id):
+    """Look a device up by identifier on any supported Home Assistant release.
+
+    Home Assistant 2026.8 scoped identifiers to a config entry and deprecated
+    ``async_get_device``, which the test harness turns into an error.
+    """
+    registry = dr.async_get(hass)
+    if hasattr(registry, "async_get_device_by_identifier"):
+        return registry.async_get_device_by_identifier(identifier, entry_id)
+    return registry.async_get_device(identifiers={identifier})
+
+
 @pytest.fixture
 async def charger_device(hass, make_charger):
     """Set up an entry with a mock charger; yield the charger and its device id."""
@@ -73,7 +85,7 @@ async def charger_device(hass, make_charger):
         assert await hass.config_entries.async_setup(entry.entry_id)
         await hass.async_block_till_done()
 
-    device = dr.async_get(hass).async_get_device(identifiers={(DOMAIN, "SN")})
+    device = _device_by_identifier(hass, (DOMAIN, "SN"), entry.entry_id)
     assert device is not None
     yield charger, device.id, entry
 

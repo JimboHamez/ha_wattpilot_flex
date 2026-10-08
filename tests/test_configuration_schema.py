@@ -5,11 +5,11 @@ from __future__ import annotations
 import logging
 
 import pytest
-import voluptuous as vol
 
 pytest.importorskip("homeassistant")
 from homeassistant.const import CONF_FRIENDLY_NAME, CONF_IP_ADDRESS, CONF_PASSWORD, CONF_TIMEOUT
 
+from custom_components.wattpilot.compat import vol
 from custom_components.wattpilot.configuration_schema import (
     CLOUD_SCHEMA,
     LOCAL_SCHEMA,

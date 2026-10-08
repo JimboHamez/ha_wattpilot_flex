@@ -25,6 +25,7 @@ from custom_components.wattpilot import (
     async_setup_entry,
     async_unload_entry,
 )
+from custom_components.wattpilot.availability import ChargerConnectionMonitor
 from custom_components.wattpilot.const import (
     AUTH_FAILURE_REAUTH_THRESHOLD,
     CONF_CONNECTION,
@@ -45,6 +46,28 @@ CHARGER_PROPS = {"amp": 6, "car": 1, "nrg": [0] * 16, "frc": 0, "sse": "SN", "tm
 def _enable_custom_integrations(enable_custom_integrations):
     """Allow the custom component under custom_components/ to be loaded."""
     yield
+
+
+@pytest.fixture(autouse=True)
+def _cancel_connection_monitors():
+    """Cancel every connection monitor a test starts.
+
+    Most tests here call ``async_setup_entry`` directly and never unload the
+    entry, so nothing else stops the monitor's 30-second timer, which the test
+    harness then reports as lingering.
+    """
+    cancels = []
+    start = ChargerConnectionMonitor.async_start
+
+    def _recording_start(self):
+        cancel = start(self)
+        cancels.append(cancel)
+        return cancel
+
+    with patch.object(ChargerConnectionMonitor, "async_start", _recording_start):
+        yield
+    for cancel in cancels:
+        cancel()
 
 
 def _entry(hass):

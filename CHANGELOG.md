@@ -24,6 +24,15 @@ for attribution.
   install). `__init__.py` now declares `CONFIG_SCHEMA` as config-entry only, which hassfest asks of
   an integration with an `async_setup`; a `wattpilot:` block in `configuration.yaml` is logged and
   ignored, as before.
+- Home Assistant 2026.10 compatibility. Service actions no longer log a deprecation warning on
+  every call: they find a device's config entry through `config_entry_id` on current releases
+  (the `config_entries` set they read stops working in 2027.10). The flow and service schemas use
+  Probatio, Home Assistant's validation engine since 2026.9, so strict type checking passes
+  against current releases. Both fall back to the old API on older releases, so the 2024.11
+  minimum is unchanged (`compat.py`).
+- CI tests the current Home Assistant release. It ran only on Python 3.13, which Home Assistant
+  dropped after 2026.2, so it had never tested a newer release; `pytest` now runs on 3.13 and
+  3.14, and `mypy` on 3.14.
 
 ## [0.12.1] - 2026-09-23
 
