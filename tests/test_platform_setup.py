@@ -75,7 +75,7 @@ async def test_setup_without_a_catalog_is_logged(hass, make_charger, module, cap
 
     with (
         caplog.at_level(logging.ERROR, logger=CATALOG_LOGGER),
-        patch.object(catalog.aiofiles, "open", side_effect=OSError("no such file")),
+        patch.object(catalog, "_read_catalog", side_effect=OSError("no such file")),
     ):
         await module.async_setup_entry(hass, entry, added)
 
@@ -145,7 +145,7 @@ async def test_setup_reports_a_failing_entity_definition(hass, make_charger, mod
 async def test_setup_keeps_the_rest_of_the_catalog_after_a_failing_definition(hass, make_charger, module):
     """A broken definition costs only its own entity, not the rest of the platform."""
     entry = _entry(hass, make_charger(props=dict(CHARGER_PROPS), serial="SN", name="WB"))
-    definitions = await catalog.async_load_catalog(entry, module.platform)
+    definitions = await catalog.async_load_catalog(hass, entry, module.platform)
     added = MagicMock()
 
     with patch.object(catalog.yaml, "safe_load", return_value={module.platform: ["not-a-definition", *definitions]}):

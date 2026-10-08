@@ -17,7 +17,6 @@ import logging
 import os
 from typing import TYPE_CHECKING, Any, Final
 
-import aiofiles
 import yaml
 
 if TYPE_CHECKING:
@@ -34,10 +33,28 @@ _LOGGER: Final = logging.getLogger(__name__)
 CATALOG_DIR: Final = os.path.dirname(os.path.realpath(__file__))
 
 
-async def async_load_catalog(entry: WattpilotConfigEntry, platform: str) -> list[Any] | None:
+def _read_catalog(platform: str) -> Any:
+    """Read and parse a platform's YAML catalog. Blocking - call it from an executor.
+
+    Both halves block: the read is disk I/O, and ``yaml.safe_load`` is pure Python
+    that took about 0.3 s per catalog on the event loop. Errors are left to the
+    caller, which logs them.
+
+    Args:
+        platform: The platform name, which is also the catalog's file stem.
+
+    Returns:
+        The parsed YAML document.
+    """
+    with open(os.path.join(CATALOG_DIR, f"{platform}.yaml"), encoding="utf-8") as handle:
+        return yaml.safe_load(handle)
+
+
+async def async_load_catalog(hass: HomeAssistant, entry: WattpilotConfigEntry, platform: str) -> list[Any] | None:
     """Read a platform's YAML catalog and return its entity definitions.
 
     Args:
+        hass: The Home Assistant instance, whose executor reads the catalog.
         entry: The config entry being set up; used to tag the log lines.
         platform: The platform name, which is also the catalog's file stem.
 
@@ -48,8 +65,7 @@ async def async_load_catalog(entry: WattpilotConfigEntry, platform: str) -> list
     """
     _LOGGER.debug("%s - async_setup_entry %s: Reading static yaml configuration", entry.entry_id, platform)
     try:
-        async with aiofiles.open(os.path.join(CATALOG_DIR, f"{platform}.yaml")) as handle:
-            yaml_cfg = yaml.safe_load(await handle.read())
+        yaml_cfg = await hass.async_add_executor_job(_read_catalog, platform)
     except (OSError, yaml.YAMLError) as e:
         _LOGGER.error(
             "%s - async_setup_entry %s: Reading static yaml configuration failed: %s (%s.%s)",
@@ -148,7 +164,7 @@ async def async_setup_catalog_entities(
         required: The definition keys that must be present and non-``None``.
     """
     _LOGGER.debug("Setting up %s platform entry: %s", platform, entry.entry_id)
-    definitions = await async_load_catalog(entry, platform)
+    definitions = await async_load_catalog(hass, entry, platform)
     if definitions is None:
         return
     charger = get_charger(entry, platform)
