@@ -10,7 +10,11 @@ for attribution.
 
 ## [Unreleased]
 
-_Nothing yet._
+### Changed
+- The bundled icon and logo images moved from `brands/` to `brand/`, the directory name Home
+  Assistant 2026.3 and later read a custom integration's own brand images from. Those releases
+  now show them in preference to the brands CDN; older releases keep using the CDN copy, which is
+  the same artwork.
 
 ## [0.12.2] - 2026-10-08
 
