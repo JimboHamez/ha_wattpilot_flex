@@ -10,6 +10,14 @@ for attribution.
 
 ## [Unreleased]
 
+_Nothing yet._
+
+## [0.12.3] - 2026-10-09
+
+Setup no longer stalls Home Assistant while the integration reads its entity definitions, and on
+Home Assistant 2026.3 and later the icon and logo come from the integration itself rather than the
+brands CDN (same artwork). No entity, state or setting changes.
+
 ### Changed
 - The bundled icon and logo images moved from `brands/` to `brand/`, the directory name Home
   Assistant 2026.3 and later read a custom integration's own brand images from. Those releases
@@ -20,7 +28,7 @@ for attribution.
 - Setting up the integration no longer blocks Home Assistant's event loop while it reads the entity
   catalogs. Each platform's YAML catalog was parsed on the loop, costing about 0.3 s per platform
   per charger (switch setup took 0.31 s in a live run on Home Assistant 2026.10); the catalogs are
-  now read and parsed in an executor. No entity, state or setting changes.
+  now read and parsed in an executor.
 
 ## [0.12.2] - 2026-10-08
 
@@ -804,7 +812,8 @@ Assistant Integration Quality Scale.
   (services registered in `async_setup`).
 - `manifest.json`: added `integration_type` and `issue_tracker`, and sorted keys.
 
-[Unreleased]: https://github.com/JimboHamez/ha_wattpilot_flex/compare/v0.12.2...HEAD
+[Unreleased]: https://github.com/JimboHamez/ha_wattpilot_flex/compare/v0.12.3...HEAD
+[0.12.3]: https://github.com/JimboHamez/ha_wattpilot_flex/compare/v0.12.2...v0.12.3
 [0.12.2]: https://github.com/JimboHamez/ha_wattpilot_flex/compare/v0.12.1...v0.12.2
 [0.12.1]: https://github.com/JimboHamez/ha_wattpilot_flex/compare/v0.12.0...v0.12.1
 [0.12.0]: https://github.com/JimboHamez/ha_wattpilot_flex/compare/v0.11.0...v0.12.0
