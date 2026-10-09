@@ -10,6 +10,12 @@ for attribution.
 
 ## [Unreleased]
 
+### Changed
+- The bundled icon and logo images moved from `brands/` to `brand/`, the directory name Home
+  Assistant 2026.3 and later read a custom integration's own brand images from. Those releases
+  now show them in preference to the brands CDN; older releases keep using the CDN copy, which is
+  the same artwork.
+
 ### Fixed
 - Setting up the integration no longer blocks Home Assistant's event loop while it reads the entity
   catalogs. Each platform's YAML catalog was parsed on the loop, costing about 0.3 s per platform
