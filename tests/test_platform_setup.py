@@ -9,6 +9,7 @@ which log and return rather than raising — for all six platforms at once.
 from __future__ import annotations
 
 import logging
+import threading
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -68,6 +69,29 @@ async def test_setup_adds_entities(hass, make_charger, module):
 
 
 @pytest.mark.parametrize("module", PLATFORMS, ids=PLATFORM_IDS)
+async def test_catalog_is_parsed_off_the_event_loop(hass, make_charger, module):
+    """The YAML parse runs in an executor, not on the event loop's thread.
+
+    ``yaml.safe_load`` took about 0.3 s per catalog on the loop before it moved.
+    """
+    entry = _entry(hass, make_charger(props=dict(CHARGER_PROPS), serial="SN", name="WB"))
+    added = MagicMock()
+    real_safe_load = catalog.yaml.safe_load
+    threads: list[threading.Thread] = []
+
+    def recording_safe_load(stream):
+        threads.append(threading.current_thread())
+        return real_safe_load(stream)
+
+    with patch.object(catalog.yaml, "safe_load", side_effect=recording_safe_load):
+        await module.async_setup_entry(hass, entry, added)
+
+    assert threads, f"{module.platform} never parsed its catalog"
+    assert threading.main_thread() not in threads
+    assert added.call_args.args[0], f"{module.platform} added an empty entity list"
+
+
+@pytest.mark.parametrize("module", PLATFORMS, ids=PLATFORM_IDS)
 async def test_setup_without_a_catalog_is_logged(hass, make_charger, module, caplog):
     """An unreadable YAML catalog aborts that platform without raising."""
     entry = _entry(hass, make_charger(props=dict(CHARGER_PROPS)))
@@ -75,7 +99,7 @@ async def test_setup_without_a_catalog_is_logged(hass, make_charger, module, cap
 
     with (
         caplog.at_level(logging.ERROR, logger=CATALOG_LOGGER),
-        patch.object(catalog.aiofiles, "open", side_effect=OSError("no such file")),
+        patch.object(catalog, "_read_catalog", side_effect=OSError("no such file")),
     ):
         await module.async_setup_entry(hass, entry, added)
 
@@ -145,7 +169,7 @@ async def test_setup_reports_a_failing_entity_definition(hass, make_charger, mod
 async def test_setup_keeps_the_rest_of_the_catalog_after_a_failing_definition(hass, make_charger, module):
     """A broken definition costs only its own entity, not the rest of the platform."""
     entry = _entry(hass, make_charger(props=dict(CHARGER_PROPS), serial="SN", name="WB"))
-    definitions = await catalog.async_load_catalog(entry, module.platform)
+    definitions = await catalog.async_load_catalog(hass, entry, module.platform)
     added = MagicMock()
 
     with patch.object(catalog.yaml, "safe_load", return_value={module.platform: ["not-a-definition", *definitions]}):
