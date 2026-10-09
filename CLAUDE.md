@@ -375,7 +375,9 @@ speaks `websockets`, not an aiohttp/httpx session.
 `manifest.json` declares **platinum**, backed by an audit rather than by the file alone: the rule
 list was diffed against `script/hassfest/quality_scale.py` in `home-assistant/core@dev` (54 rules,
 none missing, none invented), the `brands` claim was confirmed against
-`home-assistant/brands/custom_integrations/wattpilot`, and `strict-typing` rests on a clean
+`home-assistant/brands/custom_integrations/wattpilot` (the same images also ship in
+`custom_components/wattpilot/brand/` — singular, the name Home Assistant 2026.3+ reads local brand
+images from and prefers over the CDN; keep both copies in step), and `strict-typing` rests on a clean
 `mypy --strict` plus `py.typed` in both this package and the installed `wattpilot-api`. The two
 weakest `docs-*` rules (`docs-use-cases`, `docs-examples`) and `docs-actions` were thin claims
 until the README gained its **Use cases**, **Example automations** and **Actions** sections —

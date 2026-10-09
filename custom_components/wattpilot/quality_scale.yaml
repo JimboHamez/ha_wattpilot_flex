@@ -17,8 +17,9 @@ rules:
     status: done
     comment: >-
       The 'wattpilot' domain is published in home-assistant/brands under
-      custom_integrations/wattpilot; the assets are also shipped with the
-      component in custom_components/wattpilot/brands/.
+      custom_integrations/wattpilot; the same assets are also shipped with the
+      component in custom_components/wattpilot/brand/, which Home Assistant
+      2026.3+ serves in preference to the brands CDN.
   common-modules: done
   config-flow: done
   config-flow-test-coverage: done
