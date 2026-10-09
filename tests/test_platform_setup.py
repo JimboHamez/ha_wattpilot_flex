@@ -9,6 +9,7 @@ which log and return rather than raising — for all six platforms at once.
 from __future__ import annotations
 
 import logging
+import threading
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -64,6 +65,29 @@ async def test_setup_adds_entities(hass, make_charger, module):
     await module.async_setup_entry(hass, entry, added)
 
     assert added.called, f"{module.platform} added no entities"
+    assert added.call_args.args[0], f"{module.platform} added an empty entity list"
+
+
+@pytest.mark.parametrize("module", PLATFORMS, ids=PLATFORM_IDS)
+async def test_catalog_is_parsed_off_the_event_loop(hass, make_charger, module):
+    """The YAML parse runs in an executor, not on the event loop's thread.
+
+    ``yaml.safe_load`` took about 0.3 s per catalog on the loop before it moved.
+    """
+    entry = _entry(hass, make_charger(props=dict(CHARGER_PROPS), serial="SN", name="WB"))
+    added = MagicMock()
+    real_safe_load = catalog.yaml.safe_load
+    threads: list[threading.Thread] = []
+
+    def recording_safe_load(stream):
+        threads.append(threading.current_thread())
+        return real_safe_load(stream)
+
+    with patch.object(catalog.yaml, "safe_load", side_effect=recording_safe_load):
+        await module.async_setup_entry(hass, entry, added)
+
+    assert threads, f"{module.platform} never parsed its catalog"
+    assert threading.main_thread() not in threads
     assert added.call_args.args[0], f"{module.platform} added an empty entity list"
 
 

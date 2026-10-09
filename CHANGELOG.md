@@ -10,7 +10,11 @@ for attribution.
 
 ## [Unreleased]
 
-_Nothing yet._
+### Fixed
+- Setting up the integration no longer blocks Home Assistant's event loop while it reads the entity
+  catalogs. Each platform's YAML catalog was parsed on the loop, costing about 0.3 s per platform
+  per charger (switch setup took 0.31 s in a live run on Home Assistant 2026.10); the catalogs are
+  now read and parsed in an executor. No entity, state or setting changes.
 
 ## [0.12.2] - 2026-10-08
 

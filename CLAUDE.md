@@ -111,7 +111,8 @@ There is no build step (it is an HA custom component, copied into `config/custom
 - `tests/live_actions.py` runs `set_next_trip` (with the host forced to Australia/Sydney) and
   `set_charging_schedule` (in the action UI's payload shape) through a real `hass` against the
   charger. Each writes back the value the charger already holds and reads it back, so it writes
-  but changes nothing. It passed on the Flex on 2026-09-23.
+  but changes nothing. It passed on the Flex on 2026-09-23, and again on 2026-10-08 against
+  Home Assistant 2026.10.0 (Python 3.14) and 2026.2.3 (Python 3.13), with no deprecation reports.
 - `tests/live_migration.py` is a pytest module run the same explicit way as `live_reauth.py`
   below, with the same socket setup. It lays out a 0.11.0-style registry (an IP-keyed entry,
   name-prefixed entities), sets it up against the physical charger, and checks that the entry and
@@ -183,7 +184,8 @@ touching both files — `tests/test_icons.py` fails on an orphaned key, a re-add
 a non-`mdi:` value, and `tests/test_setup.py` asserts HA actually loads the file.
 
 The setup skeleton itself is shared: **`catalog.py::async_setup_catalog_entities`** reads the
-catalog, pulls the charger out of `entry.runtime_data`, builds one entity per definition and
+catalog (opened and parsed in an executor by `_read_catalog`, since `yaml.safe_load` cost ~0.3 s
+per platform on the event loop), pulls the charger out of `entry.runtime_data`, builds one entity per definition and
 calls `async_add_entities`. Each platform's `async_setup_entry` is a single call to it, passing
 its entity class plus two knobs — `source` (a value source forced onto every definition;
 `sensor` passes none, because its source varies per definition) and `required` (the keys a
