@@ -67,10 +67,18 @@ If you are using older firmware, please read "Known Errors" instructions.
 
 ### Install with HACS
 
-Do you you have [HACS](https://community.home-assistant.io/t/custom-component-hacs) installed?
-You can manually add this repository to your HACS installation. [Here is the manual process](https://hacs.xyz/docs/faq/custom_repositories/).
-Then search for "Wattpilot" and install it directy from HACS.
-HACS will keep track of updates and you can easily upgrade to latest version. See Configuration for how to add it in HA.
+With [HACS](https://hacs.xyz/) installed:
+
+1. In Home Assistant, open **HACS** and search for **Fronius Wattpilot Flex**, or open it directly:
+   [![Open in HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=JimboHamez&repository=ha_wattpilot_flex&category=integration)
+2. Select **Download**, then restart Home Assistant.
+3. Add the charger as described under Configuration below.
+
+HACS keeps track of updates from then on.
+
+If the search finds nothing, your HACS has not picked up the default catalog entry yet: add
+`https://github.com/JimboHamez/ha_wattpilot_flex` as a
+[custom repository](https://hacs.xyz/docs/faq/custom_repositories/) (type **Integration**) and search again.
 
 ### Install manually
 Download the repository and save the "wattpilot" folder into your home assistant custom_components directory.

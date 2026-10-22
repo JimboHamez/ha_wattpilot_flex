@@ -254,7 +254,9 @@ All platform entities subclass this. It centralizes:
   property still at its default state) fall back to `async_local_poll`. Note the corollary: an
   entity whose real value happens to equal its `default_state` keeps polling.
 - The same handler also **fires HA events** (`wattpilot_property_message`) for properties listed
-  in `const.py::EVENT_PROPS` (`ftt`, `cak`), and drives optional property-change debug logging.
+  in `const.py::EVENT_PROPS` (`ftt` only), and drives optional property-change debug logging.
+  Events are recorded and reach every subscriber, so never add a secret there: `cak` (the go-e
+  cloud API key) was in the list until the HACS review flagged it.
 - **Availability logging:** the client reconnects its WebSocket on its own and exposes no
   connection-state callback, so `availability.py::ChargerConnectionMonitor` samples
   `connected` / `properties_initialized` every `const.py::AVAILABILITY_SCAN_INTERVAL` (30 s) and
@@ -446,7 +448,7 @@ to the Default / Eco / Next Trip modes shown in `select.yaml`.
 | `rssi`, `wst`, `ccw` | WiFi signal / WiFi status / WiFi connection info |
 | `rbc`, `rbt` | Reboot counter / ms since last boot |
 | `cci` | Connected solar inverter |
-| `cards_0`…`cards_9` | RFID chip/card slots on firmware that still has the `cards` list — `namespacelist` sources, `value_id: energy` |
+| `cards_0`…`cards_9` | RFID chip/card slots on firmware that still has the `cards` list — `namespacelist` sources, `value_id: energy`. The item's `cardId` is deliberately not an attribute (`tests/test_yaml_catalogs.py` guards it) |
 | `c0e`…`c9e` / `c0n`…`c9n` / `c0i`…`c9i` | The same ten slots on current firmware: energy (Wh) / card name / whether an RFID id is stored. Verified on a Flex (fw 43.4), where `cards` is absent |
 
 ### Charging control (writable)
@@ -488,14 +490,14 @@ to the Default / Eco / Next Trip modes shown in `select.yaml`.
 | Code | Meaning |
 |------|---------|
 | `cae` | Cloud API enabled flag (written to toggle the go-e cloud) |
-| `cak` | Cloud API key returned after enabling — read-only; also in `EVENT_PROPS` |
+| `cak` | Cloud API key returned after enabling — read-only; a secret, so redacted in diagnostics and kept out of `EVENT_PROPS` |
 | `sse` | Serial number (fallback for the charger device identifier) |
 
 ### Device metadata (used by `entities.py::device_info`)
 `typ` (model), `var` (variant, `11`/`22` kW — also the `variant:` gate in YAML),
 `sse` (serial), `onv` (firmware).
 
-`const.py::EVENT_PROPS` (`ftt`, `cak`) lists the properties whose changes are re-broadcast as
+`const.py::EVENT_PROPS` (`ftt`) lists the properties whose changes are re-broadcast as
 `wattpilot_property_message` HA events. `utils.py::async_PropertyDebug` keeps an
 `exclude_properties` list of noisy, high-frequency codes (e.g. `nrg`, `rssi`, `rbt`, `loc`,
 `fbuf_*`, `pvopt_*`) that are suppressed from property-change debug logging.

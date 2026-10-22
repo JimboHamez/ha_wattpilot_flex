@@ -106,6 +106,13 @@ def test_card_energy_sensors_declare_no_default_state():
         assert "default_state" not in entity, f"{entity.get('id')} must not set default_state"
 
 
+def test_no_sensor_exposes_an_rfid_card_identifier():
+    # A card's 'cardId' is what unlocks the charger. State attributes land in the
+    # recorder and reach every subscriber, so it must never become one.
+    for entity in _load("sensor"):
+        assert "cardId" not in (entity.get("attribute_ids") or []), f"{entity.get('id')} exposes cardId"
+
+
 def test_unique_ids_are_unique_per_platform():
     # entities.py builds unique_id from uid|id; collisions would clobber entities.
     # Definitions sharing a uid are only legal when a gate (variant/connection/
