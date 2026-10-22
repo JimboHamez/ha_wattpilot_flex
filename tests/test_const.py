@@ -9,6 +9,7 @@ from __future__ import annotations
 import importlib.util
 import json
 import os
+import re
 
 from .conftest import COMPONENT_DIR
 
@@ -16,7 +17,7 @@ from .conftest import COMPONENT_DIR
 def _const():
     """Load const.py in isolation.
 
-    Importing it as ``custom_components.wattpilot.const`` would first execute the
+    Importing it as ``custom_components.wattpilot_flex.const`` would first execute the
     package ``__init__.py`` (which imports the full HA + vendored-library chain).
     const.py has no such dependencies, so load it directly from its file path.
     """
@@ -43,6 +44,19 @@ def test_manifest_domain_matches_const():
     assert manifest["domain"] == _const().DOMAIN
     assert manifest["version"], "manifest.json must declare a non-empty version (HACS requirement)"
     assert manifest["codeowners"], "manifest.json must declare codeowners (HACS requirement)"
+
+
+def test_domain_matches_folder_and_service_selectors():
+    # Home Assistant loads an integration from custom_components/<domain>, and the
+    # device selectors in services.yaml only offer devices of the named domain.
+    # 'wattpilot' belongs to mk-maddin/wattpilot-HA, which this project started from.
+    domain = _const().DOMAIN
+    assert domain != "wattpilot", "the 'wattpilot' domain belongs to the upstream integration"
+    assert os.path.basename(COMPONENT_DIR) == domain
+    with open(os.path.join(COMPONENT_DIR, "services.yaml"), encoding="utf-8") as handle:
+        selectors = re.findall(r"^\s*integration:\s*(\S+)\s*$", handle.read(), re.MULTILINE)
+    assert selectors, "services.yaml has no integration-filtered device selectors"
+    assert set(selectors) == {domain}
 
 
 def test_event_props_are_strings():

@@ -1,7 +1,7 @@
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg?style=for-the-badge)](https://github.com/hacs/integration)
 ![GitHub Release](https://img.shields.io/github/v/release/JimboHamez/ha_wattpilot_flex?style=for-the-badge)
 [![hacs_downloads](https://img.shields.io/github/downloads/JimboHamez/ha_wattpilot_flex/latest/total?style=for-the-badge)](https://github.com/JimboHamez/ha_wattpilot_flex/releases/latest)
-[![Quality Scale](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FJimboHamez%2Fha_wattpilot_flex%2Fmain%2Fcustom_components%2Fwattpilot%2Fmanifest.json&query=%24.quality_scale&label=Quality%20Scale&style=for-the-badge&color=E5E4E2)](https://developers.home-assistant.io/docs/core/integration-quality-scale/)
+[![Quality Scale](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FJimboHamez%2Fha_wattpilot_flex%2Fmain%2Fcustom_components%2Fwattpilot_flex%2Fmanifest.json&query=%24.quality_scale&label=Quality%20Scale&style=for-the-badge&color=E5E4E2)](https://developers.home-assistant.io/docs/core/integration-quality-scale/)
 ![GitHub License](https://img.shields.io/github/license/JimboHamez/ha_wattpilot_flex?style=for-the-badge)
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/y/JimboHamez/ha_wattpilot_flex?style=for-the-badge)
 ![Maintenance](https://img.shields.io/maintenance/yes/2026?style=for-the-badge)
@@ -28,6 +28,10 @@
 > this fork's code are not upstream's to answer. Go to
 > [mk-maddin/wattpilot-HA](https://github.com/mk-maddin/wattpilot-HA) if you are running
 > the original integration.
+
+> **Upgrading from 0.12.x or earlier?** The integration's domain changed from `wattpilot` to
+> `wattpilot_flex` in 0.13.0, and your chargers have to be added again once. Follow
+> [Moving from the `wattpilot` domain](#moving-from-the-wattpilot-domain) **before** you update.
 
 # What This Is:
 
@@ -140,7 +144,7 @@ automation:
         event: start
         offset: "-12:00:00"
     actions:
-      - action: wattpilot.set_next_trip
+      - action: wattpilot_flex.set_next_trip
         data:
           device_id: !secret wattpilot_device_id
           # trigger_time is a time of day (HH:MM:SS), not a full timestamp.
@@ -163,7 +167,7 @@ automation:
         to: "off"
         id: end
     actions:
-      - action: wattpilot.set_charging_schedule
+      - action: wattpilot_flex.set_charging_schedule
         data:
           device_id: !secret wattpilot_device_id
           day_type: weekdays
@@ -226,16 +230,63 @@ If the search finds nothing, your HACS has not picked up the default catalog ent
 [custom repository](https://hacs.xyz/docs/faq/custom_repositories/) (type **Integration**) and search again.
 
 ### Install manually
-Download the repository and save the "wattpilot" folder into your home assistant custom_components directory.
+Download the repository and save the `custom_components/wattpilot_flex` folder into your home assistant custom_components directory.
 
 Once the files are downloaded, you’ll need to **restart HomeAssistant** and wait some minutes (probably clear your browser cache),
 for the integration to appear within the integration store.
+
+## Moving from the `wattpilot` domain
+
+Up to 0.12.x this integration used the domain `wattpilot`, the same as
+[mk-maddin/wattpilot-HA](https://github.com/mk-maddin/wattpilot-HA), the project it started
+from. Two integrations cannot share one domain, because both install into
+`custom_components/wattpilot` and whichever is installed second overwrites the other. The
+original project had the domain first, so from **0.13.0** this one is `wattpilot_flex`.
+
+Home Assistant treats a new domain as a new integration, so existing charger entries do not
+carry over and each charger has to be added again once.
+
+**What carries over:** entity IDs, and with them the state history and long-term statistics
+(energy dashboard included), as long as the re-added entities get the same IDs. They are built
+from the charger's device name, so they match when you give the charger the same name as before
+and have not renamed an entity yourself.
+
+**What does not carry over:** entity and device renames, areas, labels, which entities you
+enabled or disabled, and the device ID. Action names, the event name and the logger name change
+too (see step 7).
+
+1. **Before updating**, write down what you have customised: renamed entities, areas, the
+   entities you enabled (many are disabled by default), and the automations, scripts and
+   dashboards that use the actions, the event or the charger's device.
+2. Go to **Settings → Devices & services → Fronius Wattpilot** and **Delete** each charger entry
+   (⋮ menu on the entry). Do this first. An entry left behind keeps its entity IDs reserved, and
+   the re-added entities then get a `_2` suffix and start a fresh history. If you have already
+   updated, the old entries are still listed as failing to load, and you can delete them the
+   same way.
+3. Update the integration in HACS (or, for a manual install, copy in the new
+   `custom_components/wattpilot_flex` folder). Then delete the old `custom_components/wattpilot`
+   folder if it is still there, unless you installed mk-maddin's integration into it on purpose.
+4. Restart Home Assistant.
+5. Add the charger again (see [Configuration](#configuration)), or accept it when it is
+   discovered, with the same connection details and the **same name** as before.
+6. Check that the entity IDs match the old ones. Rename any that do not back to the old ID so its
+   history continues. Then re-apply your areas, names and enabled entities.
+7. Update automations, scripts and configuration:
+
+   | Before | From 0.13.0 |
+   |--------|-------------|
+   | `wattpilot.set_next_trip` and the other actions | `wattpilot_flex.set_next_trip`, … |
+   | event `wattpilot_property_message` | event `wattpilot_flex_property_message` |
+   | logger `custom_components.wattpilot` | logger `custom_components.wattpilot_flex` |
+   | the charger's old `device_id` (actions, device triggers) | pick the re-added device again |
+
+   The [example packages](packages/wattpilot) already use the new names.
 
 ## Configuration
 
 ### Using MyHA:
 
-[MyHA - Add Integration](https://my.home-assistant.io/redirect/config_flow_start?domain=wattpilot)
+[MyHA - Add Integration](https://my.home-assistant.io/redirect/config_flow_start?domain=wattpilot_flex)
 
 ### Manually:
 
@@ -287,12 +338,12 @@ automations.
 
 | Action | Parameters | What it does |
 |--------|-----------|--------------|
-| `wattpilot.set_next_trip` | `trigger_time` (time of day, e.g. `06:30:00`) | Sets the departure time used by the Next Trip charging mode, as a time of day on the charger's own clock. The charger applies its time zone and daylight saving itself, whatever time zone Home Assistant runs in. Also fires a `wattpilot_property_message` event whenever the charger's own next-trip time changes, so a helper can be kept in sync. |
-| `wattpilot.set_charging_schedule` | `day_type` (`weekdays`, `saturday` or `sunday`), then any of `limit_charging_times` (boolean), `pv_surplus_outside_times` (boolean), `ranges` (list of `{begin: "HH:MM", end: "HH:MM"}`) | Writes one day type of the app's charging times. The charger only takes the whole schedule object, so the action reads the current one and rewrites it with the fields you supply changed — leave a field out to keep it. Windows are checked before anything is written: each must end after it begins on the same day (a window over midnight is split into an evening and a morning one, as the app does — each day type has its own schedule) and they must not overlap. The matching *Charging Schedule* sensor shows the result: state is the mode, the windows and flags are attributes. |
-| `wattpilot.set_goe_cloud` | `cloud_api` (boolean) | Enables or disables go-e cloud API access and caches the returned key/URL. Enabling is at your own responsibility — see the note under [What It Does](#what-it-does). |
-| `wattpilot.set_debug_properties` | `debug_properties` (`true`, `false`, or a list of property codes) | Logs charger property changes as warnings. `true` logs everything (noisy), a list logs only those codes — e.g. `[wda, cci, err]`. |
-| `wattpilot.disconnect_charger` | – | Closes the charger's WebSocket session; its entities go unavailable. Useful on a Wattpilot GO, which allows only one connection at a time, when you want the phone app to take over. |
-| `wattpilot.reconnect_charger` | – | Reopens the session after `disconnect_charger`, or forces a reconnect. |
+| `wattpilot_flex.set_next_trip` | `trigger_time` (time of day, e.g. `06:30:00`) | Sets the departure time used by the Next Trip charging mode, as a time of day on the charger's own clock. The charger applies its time zone and daylight saving itself, whatever time zone Home Assistant runs in. Also fires a `wattpilot_flex_property_message` event whenever the charger's own next-trip time changes, so a helper can be kept in sync. |
+| `wattpilot_flex.set_charging_schedule` | `day_type` (`weekdays`, `saturday` or `sunday`), then any of `limit_charging_times` (boolean), `pv_surplus_outside_times` (boolean), `ranges` (list of `{begin: "HH:MM", end: "HH:MM"}`) | Writes one day type of the app's charging times. The charger only takes the whole schedule object, so the action reads the current one and rewrites it with the fields you supply changed — leave a field out to keep it. Windows are checked before anything is written: each must end after it begins on the same day (a window over midnight is split into an evening and a morning one, as the app does — each day type has its own schedule) and they must not overlap. The matching *Charging Schedule* sensor shows the result: state is the mode, the windows and flags are attributes. |
+| `wattpilot_flex.set_goe_cloud` | `cloud_api` (boolean) | Enables or disables go-e cloud API access and caches the returned key/URL. Enabling is at your own responsibility — see the note under [What It Does](#what-it-does). |
+| `wattpilot_flex.set_debug_properties` | `debug_properties` (`true`, `false`, or a list of property codes) | Logs charger property changes as warnings. `true` logs everything (noisy), a list logs only those codes — e.g. `[wda, cci, err]`. |
+| `wattpilot_flex.disconnect_charger` | – | Closes the charger's WebSocket session; its entities go unavailable. Useful on a Wattpilot GO, which allows only one connection at a time, when you want the phone app to take over. |
+| `wattpilot_flex.reconnect_charger` | – | Reopens the session after `disconnect_charger`, or forces a reconnect. |
 
 Failures surface as errors on the calling script rather than being silently logged, so an
 automation stops when a charger cannot carry out what it was asked. The same holds for the
@@ -478,9 +529,9 @@ work on it directly.
   logger:
     default: warning
     logs:
-      custom_components.wattpilot: debug
+      custom_components.wattpilot_flex: debug
   ```
-- **Watch specific charger properties** as log warnings using the `wattpilot.set_debug_properties`
+- **Watch specific charger properties** as log warnings using the `wattpilot_flex.set_debug_properties`
   service, and download a redacted **diagnostics** file from the device page to share when
   reporting an issue.
 - Services (`disconnect_charger`, `reconnect_charger`, `set_goe_cloud`, `set_debug_properties`,
@@ -490,7 +541,7 @@ work on it directly.
 
 Go to **Settings → Devices & services**, open the Fronius Wattpilot integration, and
 use the menu on the charger entry to **Delete**. No files remain in your configuration;
-if you installed manually, also remove the `custom_components/wattpilot` folder.
+if you installed manually, also remove the `custom_components/wattpilot_flex` folder.
 
 # Credits:
 

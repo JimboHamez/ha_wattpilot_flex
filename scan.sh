@@ -3,13 +3,13 @@
 # Static-analysis / security scan for the custom component only.
 #
 # Runs bandit, semgrep, mypy and pip-audit. All file-scanning tools are
-# scoped to the integration package under custom_components/wattpilot, and
+# scoped to the integration package under custom_components/wattpilot_flex, and
 # the vendored upstream `wattpilot` library bundled at
-# custom_components/wattpilot/wattpilot/ is excluded so third-party code
+# custom_components/wattpilot_flex/wattpilot/ is excluded so third-party code
 # doesn't drown out findings in this repo's own code. See CLAUDE.md.
 #
 # Usage:
-#   ./scan.sh                     # scan custom_components/wattpilot
+#   ./scan.sh                     # scan custom_components/wattpilot_flex
 #   ./scan.sh path/to/other/pkg   # scan a different target directory
 
 set -e
@@ -18,7 +18,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 VENV_DIR="$SCRIPT_DIR/.venv"
 
 # Target: default to the integration package, allow an override via $1.
-TARGET="${1:-$SCRIPT_DIR/custom_components/wattpilot}"
+TARGET="${1:-$SCRIPT_DIR/custom_components/wattpilot_flex}"
 if [ ! -d "$TARGET" ]; then
     echo "Error: target directory not found: $TARGET"
     exit 1
@@ -30,9 +30,9 @@ echo "Scan target: $TARGET"
 # target the *nested* wattpilot/wattpilot subtree specifically — a bare
 # "wattpilot" pattern would match the target root and skip everything.
 VENDORED_DIR="$TARGET/wattpilot"
-VENDORED_REL="wattpilot/wattpilot/"
+VENDORED_REL="wattpilot_flex/wattpilot/"
 # semgrep matches --exclude against git-relative paths, so give it the vendored
-# dir relative to the repo root (e.g. custom_components/wattpilot/wattpilot).
+# dir relative to the repo root (e.g. custom_components/wattpilot_flex/wattpilot).
 VENDORED_GIT_REL="$(realpath --relative-to="$SCRIPT_DIR" "$VENDORED_DIR")"
 
 echo "=== 1. Setting up Virtual Environment ==="

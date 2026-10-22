@@ -27,8 +27,8 @@ from homeassistant.data_entry_flow import FlowResultType
 from homeassistant.helpers.service_info.zeroconf import ZeroconfServiceInfo
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.wattpilot.config_flow import ConfigFlowHandler
-from custom_components.wattpilot.const import (
+from custom_components.wattpilot_flex.config_flow import ConfigFlowHandler
+from custom_components.wattpilot_flex.const import (
     CONF_CLOUD,
     CONF_CONNECTION,
     CONF_LOCAL,
@@ -66,9 +66,11 @@ async def test_local_flow_creates_entry(hass):
     assert result["step_id"] == CONF_LOCAL
 
     with (
-        patch("custom_components.wattpilot.config_flow.async_ConnectCharger", new=AsyncMock(return_value=object())),
-        patch("custom_components.wattpilot.config_flow.async_DisconnectCharger", new=AsyncMock()),
-        patch("custom_components.wattpilot.async_setup_entry", return_value=True),
+        patch(
+            "custom_components.wattpilot_flex.config_flow.async_ConnectCharger", new=AsyncMock(return_value=object())
+        ),
+        patch("custom_components.wattpilot_flex.config_flow.async_DisconnectCharger", new=AsyncMock()),
+        patch("custom_components.wattpilot_flex.async_setup_entry", return_value=True),
     ):
         result = await hass.config_entries.flow.async_configure(
             result["flow_id"],
@@ -95,9 +97,11 @@ async def test_cloud_flow_creates_entry(hass):
     assert result["step_id"] == CONF_CLOUD
 
     with (
-        patch("custom_components.wattpilot.config_flow.async_ConnectCharger", new=AsyncMock(return_value=object())),
-        patch("custom_components.wattpilot.config_flow.async_DisconnectCharger", new=AsyncMock()),
-        patch("custom_components.wattpilot.async_setup_entry", return_value=True),
+        patch(
+            "custom_components.wattpilot_flex.config_flow.async_ConnectCharger", new=AsyncMock(return_value=object())
+        ),
+        patch("custom_components.wattpilot_flex.config_flow.async_DisconnectCharger", new=AsyncMock()),
+        patch("custom_components.wattpilot_flex.async_setup_entry", return_value=True),
     ):
         result = await hass.config_entries.flow.async_configure(
             result["flow_id"],
@@ -167,8 +171,10 @@ async def test_duplicate_local_charger_without_a_serial_aborts_by_address(hass):
     result = await _start_flow(hass)
     result = await hass.config_entries.flow.async_configure(result["flow_id"], {CONF_CONNECTION: CONF_LOCAL})
     with (
-        patch("custom_components.wattpilot.config_flow.async_ConnectCharger", new=AsyncMock(return_value=object())),
-        patch("custom_components.wattpilot.config_flow.async_DisconnectCharger", new=AsyncMock()),
+        patch(
+            "custom_components.wattpilot_flex.config_flow.async_ConnectCharger", new=AsyncMock(return_value=object())
+        ),
+        patch("custom_components.wattpilot_flex.config_flow.async_DisconnectCharger", new=AsyncMock()),
     ):
         result = await hass.config_entries.flow.async_configure(
             result["flow_id"],
@@ -185,7 +191,7 @@ async def test_local_flow_invalid_auth_shows_error(hass):
     result = await hass.config_entries.flow.async_configure(result["flow_id"], {CONF_CONNECTION: CONF_LOCAL})
 
     with patch(
-        "custom_components.wattpilot.config_flow.async_ConnectCharger",
+        "custom_components.wattpilot_flex.config_flow.async_ConnectCharger",
         new=AsyncMock(side_effect=AuthenticationError("wrong password")),
     ):
         result = await hass.config_entries.flow.async_configure(
@@ -258,7 +264,7 @@ async def test_zeroconf_confirm_tests_the_password(hass, connect, error):
         DOMAIN, context={"source": config_entries.SOURCE_ZEROCONF}, data=_discovery()
     )
 
-    with patch("custom_components.wattpilot.config_flow.async_ConnectCharger", **connect):
+    with patch("custom_components.wattpilot_flex.config_flow.async_ConnectCharger", **connect):
         result = await hass.config_entries.flow.async_configure(result["flow_id"], {CONF_PASSWORD: "wrong"})
 
     assert result["type"] == FlowResultType.FORM
@@ -348,9 +354,11 @@ async def test_reauth_updates_password(hass):
     assert result["step_id"] == "reauth_confirm"
 
     with (
-        patch("custom_components.wattpilot.config_flow.async_ConnectCharger", new=AsyncMock(return_value=object())),
-        patch("custom_components.wattpilot.config_flow.async_DisconnectCharger", new=AsyncMock()),
-        patch("custom_components.wattpilot.async_setup_entry", return_value=True),
+        patch(
+            "custom_components.wattpilot_flex.config_flow.async_ConnectCharger", new=AsyncMock(return_value=object())
+        ),
+        patch("custom_components.wattpilot_flex.config_flow.async_DisconnectCharger", new=AsyncMock()),
+        patch("custom_components.wattpilot_flex.async_setup_entry", return_value=True),
     ):
         result = await hass.config_entries.flow.async_configure(result["flow_id"], {CONF_PASSWORD: "newpass"})
         await hass.async_block_till_done()
@@ -367,7 +375,7 @@ async def test_reauth_invalid_password_shows_error(hass):
     result = await entry.start_reauth_flow(hass)
 
     with patch(
-        "custom_components.wattpilot.config_flow.async_ConnectCharger",
+        "custom_components.wattpilot_flex.config_flow.async_ConnectCharger",
         new=AsyncMock(side_effect=AuthenticationError("wrong password")),
     ):
         result = await hass.config_entries.flow.async_configure(result["flow_id"], {CONF_PASSWORD: "wrong"})
@@ -382,11 +390,11 @@ def _reachable(serial: str = "91111999"):
     """Patch the flow so connecting succeeds and reports the given charger serial."""
     return (
         patch(
-            "custom_components.wattpilot.config_flow.async_ConnectCharger",
+            "custom_components.wattpilot_flex.config_flow.async_ConnectCharger",
             new=AsyncMock(return_value=MockCharger({"sse": serial})),
         ),
-        patch("custom_components.wattpilot.config_flow.async_DisconnectCharger", new=AsyncMock()),
-        patch("custom_components.wattpilot.async_setup_entry", return_value=True),
+        patch("custom_components.wattpilot_flex.config_flow.async_DisconnectCharger", new=AsyncMock()),
+        patch("custom_components.wattpilot_flex.async_setup_entry", return_value=True),
     )
 
 
@@ -430,7 +438,7 @@ async def test_reconfigure_moves_an_ip_keyed_entry_without_a_serial_to_the_new_a
     _connect, disconnect, setup = _reachable()
     with (
         patch(
-            "custom_components.wattpilot.config_flow.async_ConnectCharger",
+            "custom_components.wattpilot_flex.config_flow.async_ConnectCharger",
             new=AsyncMock(return_value=MockCharger({})),
         ),
         disconnect,
@@ -576,7 +584,7 @@ async def test_reconfigure_unreachable_charger_shows_error(hass):
     entry.add_to_hass(hass)
     result = await entry.start_reconfigure_flow(hass)
 
-    with patch("custom_components.wattpilot.config_flow.async_ConnectCharger", new=AsyncMock(return_value=False)):
+    with patch("custom_components.wattpilot_flex.config_flow.async_ConnectCharger", new=AsyncMock(return_value=False)):
         result = await hass.config_entries.flow.async_configure(
             result["flow_id"],
             {CONF_FRIENDLY_NAME: "Garage", CONF_IP_ADDRESS: "192.168.1.99", CONF_PASSWORD: "secret"},
@@ -593,7 +601,7 @@ async def test_reconfigure_unexpected_failure_aborts(hass):
     entry.add_to_hass(hass)
     result = await entry.start_reconfigure_flow(hass)
 
-    with patch("custom_components.wattpilot.config_flow.async_ConnectCharger", side_effect=RuntimeError("boom")):
+    with patch("custom_components.wattpilot_flex.config_flow.async_ConnectCharger", side_effect=RuntimeError("boom")):
         result = await hass.config_entries.flow.async_configure(
             result["flow_id"],
             {CONF_FRIENDLY_NAME: "Garage", CONF_IP_ADDRESS: "192.168.1.99", CONF_PASSWORD: "secret"},
@@ -625,7 +633,7 @@ async def _setup_live_entry(hass, charger):
         },
     )
     entry.add_to_hass(hass)
-    with patch("custom_components.wattpilot.async_ConnectCharger", new=AsyncMock(return_value=charger)):
+    with patch("custom_components.wattpilot_flex.async_ConnectCharger", new=AsyncMock(return_value=charger)):
         assert await hass.config_entries.async_setup(entry.entry_id)
         await hass.async_block_till_done()
     return entry
@@ -638,9 +646,9 @@ async def test_reconfigure_of_a_loaded_entry_keeps_its_data(hass):
 
     result = await entry.start_reconfigure_flow(hass)
     with (
-        patch("custom_components.wattpilot.config_flow.async_ConnectCharger", new=AsyncMock(return_value=charger)),
-        patch("custom_components.wattpilot.config_flow.async_DisconnectCharger", new=AsyncMock()),
-        patch("custom_components.wattpilot.async_ConnectCharger", new=AsyncMock(return_value=charger)),
+        patch("custom_components.wattpilot_flex.config_flow.async_ConnectCharger", new=AsyncMock(return_value=charger)),
+        patch("custom_components.wattpilot_flex.config_flow.async_DisconnectCharger", new=AsyncMock()),
+        patch("custom_components.wattpilot_flex.async_ConnectCharger", new=AsyncMock(return_value=charger)),
     ):
         result = await hass.config_entries.flow.async_configure(
             result["flow_id"],
@@ -661,9 +669,9 @@ async def test_reauth_of_a_loaded_entry_keeps_its_data(hass):
 
     result = await entry.start_reauth_flow(hass)
     with (
-        patch("custom_components.wattpilot.config_flow.async_ConnectCharger", new=AsyncMock(return_value=charger)),
-        patch("custom_components.wattpilot.config_flow.async_DisconnectCharger", new=AsyncMock()),
-        patch("custom_components.wattpilot.async_ConnectCharger", new=AsyncMock(return_value=charger)),
+        patch("custom_components.wattpilot_flex.config_flow.async_ConnectCharger", new=AsyncMock(return_value=charger)),
+        patch("custom_components.wattpilot_flex.config_flow.async_DisconnectCharger", new=AsyncMock()),
+        patch("custom_components.wattpilot_flex.async_ConnectCharger", new=AsyncMock(return_value=charger)),
     ):
         result = await hass.config_entries.flow.async_configure(result["flow_id"], {CONF_PASSWORD: "newpass"})
         await hass.async_block_till_done()
@@ -682,7 +690,7 @@ async def test_user_step_reports_a_failure(hass, caplog):
     flow.hass = hass
 
     with (
-        caplog.at_level(logging.ERROR, logger="custom_components.wattpilot.config_flow"),
+        caplog.at_level(logging.ERROR, logger="custom_components.wattpilot_flex.config_flow"),
         patch.object(flow, "async_step_connection", side_effect=RuntimeError("boom")),
     ):
         result = await flow.async_step_user()
@@ -696,7 +704,7 @@ async def test_connection_step_reports_a_failure(hass, caplog):
     flow.hass = hass
 
     with (
-        caplog.at_level(logging.ERROR, logger="custom_components.wattpilot.config_flow"),
+        caplog.at_level(logging.ERROR, logger="custom_components.wattpilot_flex.config_flow"),
         patch.object(flow, "async_step_local", side_effect=RuntimeError("boom")),
     ):
         result = await flow.async_step_connection({CONF_CONNECTION: CONF_LOCAL})
@@ -717,7 +725,7 @@ async def test_connection_steps_report_a_failure(hass, caplog, step, validator, 
     flow.hass = hass
 
     with (
-        caplog.at_level(logging.ERROR, logger="custom_components.wattpilot.config_flow"),
+        caplog.at_level(logging.ERROR, logger="custom_components.wattpilot_flex.config_flow"),
         patch.object(flow, validator, side_effect=RuntimeError("boom")),
     ):
         result = await getattr(flow, step)(dict(user_input))
@@ -731,7 +739,7 @@ async def test_zeroconf_step_reports_a_failure(hass, caplog):
     flow.hass = hass
 
     # Reaches the step (it logs the host) but has no discovery properties.
-    with caplog.at_level(logging.ERROR, logger="custom_components.wattpilot.config_flow"):
+    with caplog.at_level(logging.ERROR, logger="custom_components.wattpilot_flex.config_flow"):
         result = await flow.async_step_zeroconf(SimpleNamespace(host="1.2.3.4"))
 
     assert result["reason"] == "exception"
@@ -743,7 +751,7 @@ async def test_zeroconf_confirm_reports_a_failure(hass, caplog):
     flow.hass = hass
     flow.data = None  # breaks the name lookup
 
-    with caplog.at_level(logging.ERROR, logger="custom_components.wattpilot.config_flow"):
+    with caplog.at_level(logging.ERROR, logger="custom_components.wattpilot_flex.config_flow"):
         result = await flow.async_step_zeroconf_confirm()
 
     assert result["reason"] == "exception"
@@ -757,7 +765,7 @@ async def test_reauth_reports_a_charger_it_cannot_reach(hass):
     await hass.async_block_till_done()
     flow = next(f for f in hass.config_entries.flow.async_progress() if f["handler"] == DOMAIN)
 
-    with patch("custom_components.wattpilot.config_flow.async_ConnectCharger", new=AsyncMock(return_value=False)):
+    with patch("custom_components.wattpilot_flex.config_flow.async_ConnectCharger", new=AsyncMock(return_value=False)):
         result = await hass.config_entries.flow.async_configure(flow["flow_id"], {CONF_PASSWORD: "new"})
 
     assert result["type"] is FlowResultType.FORM

@@ -19,8 +19,8 @@ import pytest
 
 pytest.importorskip("wattpilot_api", reason="integration import unavailable")
 
-from custom_components.wattpilot import schedule
-from custom_components.wattpilot.sensor import ChargerSensor
+from custom_components.wattpilot_flex import schedule
+from custom_components.wattpilot_flex.sensor import ChargerSensor
 
 from .test_platform_entities import _build
 
@@ -235,8 +235,8 @@ async def test_schedule_sensor_decode_failure_is_logged(make_charger, caplog):
     entity, _charger = _schedule_sensor(make_charger)
 
     with (
-        caplog.at_level(logging.ERROR, logger="custom_components.wattpilot.sensor"),
-        patch("custom_components.wattpilot.sensor.decode_schedule", side_effect=RuntimeError("boom")),
+        caplog.at_level(logging.ERROR, logger="custom_components.wattpilot_flex.sensor"),
+        patch("custom_components.wattpilot_flex.sensor.decode_schedule", side_effect=RuntimeError("boom")),
     ):
         assert await entity._async_update_validate_property(_raw_schedule()) is None
 
@@ -263,7 +263,7 @@ async def test_other_sensors_still_use_the_base_validation(make_charger):
 
 async def test_set_charger_prop_sends_a_dict_as_is(make_charger):
     """A dict (the schedule object) is passed to the client as the JSON value, not stringified."""
-    from custom_components.wattpilot import utils
+    from custom_components.wattpilot_flex import utils
 
     charger = make_charger(props={"sch_week": _raw_schedule()})
     payload = schedule.build_schedule(True, True, [(datetime.time(0), datetime.time(6))])
@@ -276,7 +276,7 @@ async def test_set_charger_prop_sends_a_dict_as_is(make_charger):
 
 async def test_set_charger_prop_sends_a_list_as_is(make_charger):
     """A list value is likewise handed over untouched."""
-    from custom_components.wattpilot import utils
+    from custom_components.wattpilot_flex import utils
 
     charger = make_charger(props={"clp": [10, 16]})
 
@@ -289,13 +289,13 @@ async def test_set_charger_prop_sends_a_list_as_is(make_charger):
 
 async def test_service_handler_merges_supplied_fields_into_the_current_schedule(make_charger):
     """Only the supplied fields change; the rest of the object is rewritten from the charger."""
-    from custom_components.wattpilot import services
+    from custom_components.wattpilot_flex import services
 
     charger = make_charger(props={"sch_week": _raw_schedule(3)}, name="WB")
     call = MagicMock()
     call.data = {"device_id": "dev", "day_type": "weekdays", "pv_surplus_outside_times": False}
 
-    with patch("custom_components.wattpilot.services._async_get_charger", new=AsyncMock(return_value=charger)):
+    with patch("custom_components.wattpilot_flex.services._async_get_charger", new=AsyncMock(return_value=charger)):
         await services.async_service_SetChargingSchedule(MagicMock(), call)
 
     assert charger.sent[-1] == (
@@ -312,7 +312,7 @@ async def test_service_handler_merges_supplied_fields_into_the_current_schedule(
 
 async def test_service_handler_writes_new_ranges_and_string_booleans(make_charger):
     """Ranges replace the current windows, and "true"/"false" strings are accepted for the flags."""
-    from custom_components.wattpilot import services
+    from custom_components.wattpilot_flex import services
 
     charger = make_charger(props={"sch_sund": _raw_schedule(0)}, name="WB")
     call = MagicMock()
@@ -323,7 +323,7 @@ async def test_service_handler_writes_new_ranges_and_string_booleans(make_charge
         "ranges": [{"begin": "22:00", "end": "23:59:59"}],
     }
 
-    with patch("custom_components.wattpilot.services._async_get_charger", new=AsyncMock(return_value=charger)):
+    with patch("custom_components.wattpilot_flex.services._async_get_charger", new=AsyncMock(return_value=charger)):
         await services.async_service_SetChargingSchedule(MagicMock(), call)
 
     assert charger.sent[-1] == (

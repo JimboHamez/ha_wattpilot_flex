@@ -17,16 +17,16 @@ import pytest
 pytest.importorskip("pytest_homeassistant_custom_component")
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.wattpilot import button, catalog, number, select, sensor, switch, update
-from custom_components.wattpilot.const import DOMAIN
-from custom_components.wattpilot.models import WattpilotRuntimeData
+from custom_components.wattpilot_flex import button, catalog, number, select, sensor, switch, update
+from custom_components.wattpilot_flex.const import DOMAIN
+from custom_components.wattpilot_flex.models import WattpilotRuntimeData
 
 PLATFORMS = [button, number, select, sensor, switch, update]
 PLATFORM_IDS = [module.platform for module in PLATFORMS]
 
 # The setup skeleton itself now lives in catalog.py, so that is where its
 # collaborators are patched and where its log records are emitted.
-CATALOG_LOGGER = "custom_components.wattpilot.catalog"
+CATALOG_LOGGER = "custom_components.wattpilot_flex.catalog"
 
 CHARGER_PROPS = {
     "amp": 6,

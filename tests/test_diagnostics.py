@@ -10,9 +10,9 @@ pytest.importorskip("pytest_homeassistant_custom_component")
 from homeassistant.const import CONF_IP_ADDRESS, CONF_PASSWORD
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.wattpilot.const import CONF_CONNECTION, CONF_LOCAL, DOMAIN
-from custom_components.wattpilot.diagnostics import async_get_config_entry_diagnostics
-from custom_components.wattpilot.models import WattpilotRuntimeData
+from custom_components.wattpilot_flex.const import CONF_CONNECTION, CONF_LOCAL, DOMAIN
+from custom_components.wattpilot_flex.diagnostics import async_get_config_entry_diagnostics
+from custom_components.wattpilot_flex.models import WattpilotRuntimeData
 
 ENTRY_DATA = {
     CONF_CONNECTION: CONF_LOCAL,
@@ -91,7 +91,7 @@ async def test_diagnostics_without_a_usable_config_returns_empty(hass, make_char
     """A config section that cannot be built aborts the download."""
     entry = _entry(hass, make_charger(props={"amp": 6}))
 
-    with patch("custom_components.wattpilot.diagnostics.async_redact_data", side_effect=RuntimeError("boom")):
+    with patch("custom_components.wattpilot_flex.diagnostics.async_redact_data", side_effect=RuntimeError("boom")):
         assert await async_get_config_entry_diagnostics(hass, entry) == {}
 
 
@@ -99,7 +99,7 @@ async def test_diagnostics_keeps_earlier_sections_when_versions_fail(hass, make_
     """Unreadable dependency versions still leave config and properties in place."""
     entry = _entry(hass, make_charger(props={"amp": 6}))
 
-    with patch("custom_components.wattpilot.diagnostics.version", side_effect=RuntimeError("boom")):
+    with patch("custom_components.wattpilot_flex.diagnostics.version", side_effect=RuntimeError("boom")):
         diag = await async_get_config_entry_diagnostics(hass, entry)
 
     assert diag["charger_properties"]["amp"] == 6

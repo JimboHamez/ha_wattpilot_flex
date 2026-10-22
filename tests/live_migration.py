@@ -32,7 +32,7 @@ from homeassistant.data_entry_flow import FlowResultType
 from homeassistant.helpers import entity_registry as er
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.wattpilot.const import CONF_CONNECTION, CONF_LOCAL, CONF_SERIAL, DOMAIN
+from custom_components.wattpilot_flex.const import CONF_CONNECTION, CONF_LOCAL, CONF_SERIAL, DOMAIN
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRETS_FILE = os.path.join(REPO_ROOT, ".wp_test.json")

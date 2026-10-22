@@ -1,5 +1,5 @@
 {
-  "domain": "wattpilot",
+  "domain": "wattpilot_flex",
   "name": "Fronius Wattpilot",
   "codeowners": ["@JimboHamez"],
   "config_flow": true,

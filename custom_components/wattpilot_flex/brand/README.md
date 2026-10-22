@@ -1,12 +1,14 @@
 # Brand assets
 
 These icon and logo images are the Home Assistant brand assets for the
-`wattpilot` integration. Since Home Assistant 2026.3, a custom integration can
+`wattpilot_flex` integration. Since Home Assistant 2026.3, a custom integration can
 ship its own images in a `brand/` directory, and Home Assistant serves them in
 preference to its brands CDN. Older releases ignore this directory and take the
 images from the
-[home-assistant/brands](https://github.com/home-assistant/brands/tree/master/custom_integrations/wattpilot)
-repository, which holds the same files.
+[home-assistant/brands](https://github.com/home-assistant/brands/tree/master/custom_integrations)
+repository. It holds the same files under `custom_integrations/wattpilot`, the
+domain before the rename; `custom_integrations/wattpilot_flex` still has to be
+added there for those releases to show them.
 
 | File          | Dimensions | Purpose            |
 |---------------|------------|--------------------|

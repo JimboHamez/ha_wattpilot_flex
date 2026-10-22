@@ -10,6 +10,18 @@ for attribution.
 
 ## [Unreleased]
 
+### Changed (breaking)
+- The integration's domain is now `wattpilot_flex`, not `wattpilot`, and it installs into
+  `custom_components/wattpilot_flex`. `wattpilot` is the domain of
+  [mk-maddin/wattpilot-HA](https://github.com/mk-maddin/wattpilot-HA), the project this one
+  started from, and two integrations with one domain overwrite each other's files. Home Assistant
+  sees the renamed integration as a new one, so **each charger has to be deleted and added again
+  once**: see [Moving from the `wattpilot` domain](README.md#moving-from-the-wattpilot-domain).
+  Entity IDs and history carry over when the charger is given the same name. Also renamed:
+  - actions: `wattpilot.<action>` → `wattpilot_flex.<action>`;
+  - event: `wattpilot_property_message` → `wattpilot_flex_property_message`;
+  - logger: `custom_components.wattpilot` → `custom_components.wattpilot_flex`.
+
 ### Security
 - The go-e cloud API key (`cak`) is no longer fired as a `wattpilot_property_message` event.
   Events are kept in the recorder's history and reach every event subscriber, so the key ended up

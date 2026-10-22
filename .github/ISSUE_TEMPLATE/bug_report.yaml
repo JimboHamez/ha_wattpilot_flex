@@ -61,16 +61,16 @@ body:
     attributes:
       label: What version of Wattpilot integration is installed?
       description: >
-        Can be found in: [Settings ⇒ Devices & services ⇒ Fronius Wattpilot ⇒ upper left; directly below the fronius logo](https://my.home-assistant.io/redirect/integration/?domain=wattpilot).
-        [![Open your Home Assistant instance and show an integration.](https://my.home-assistant.io/badges/integration.svg)](https://my.home-assistant.io/redirect/integration/?domain=wattpilot)
+        Can be found in: [Settings ⇒ Devices & services ⇒ Fronius Wattpilot ⇒ upper left; directly below the fronius logo](https://my.home-assistant.io/redirect/integration/?domain=wattpilot_flex).
+        [![Open your Home Assistant instance and show an integration.](https://my.home-assistant.io/badges/integration.svg)](https://my.home-assistant.io/redirect/integration/?domain=wattpilot_flex)
   - type: dropdown
     validations:
       required: true
     attributes:
       label: What type of Wattpilot Charger are you using?
       description: >
-        Can be found in: [Settings ⇒ Devices & services ⇒ Fronius Wattpilot ⇒ Select your charger device => upper left; Hardware](https://my.home-assistant.io/redirect/integration/?domain=wattpilot).
-        [![Open your Home Assistant instance and show an integration.](https://my.home-assistant.io/badges/integration.svg)](https://my.home-assistant.io/redirect/integration/?domain=wattpilot)
+        Can be found in: [Settings ⇒ Devices & services ⇒ Fronius Wattpilot ⇒ Select your charger device => upper left; Hardware](https://my.home-assistant.io/redirect/integration/?domain=wattpilot_flex).
+        [![Open your Home Assistant instance and show an integration.](https://my.home-assistant.io/badges/integration.svg)](https://my.home-assistant.io/redirect/integration/?domain=wattpilot_flex)
       options:
         - 11KW
         - 22KW
@@ -90,7 +90,7 @@ body:
       description: >
         Can be found in: [Settings ⇒ System ⇒ Logs](https://my.home-assistant.io/redirect/logs/?).
         [![Open your Home Assistant instance and show your Home Assistant logs.](https://my.home-assistant.io/badges/logs.svg)](https://my.home-assistant.io/redirect/logs/?)
-      placeholder: 22-03-10 09:47:47 ERROR (MainThread) [custom_components.wattpilot] MyErrorMessage
+      placeholder: 22-03-10 09:47:47 ERROR (MainThread) [custom_components.wattpilot_flex] MyErrorMessage
   - type: textarea
     attributes:
       label: Diagnostics information

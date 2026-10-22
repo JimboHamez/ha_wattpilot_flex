@@ -14,7 +14,7 @@ from types import SimpleNamespace
 import pytest
 
 try:
-    from custom_components.wattpilot.sensor import ChargerSensor
+    from custom_components.wattpilot_flex.sensor import ChargerSensor
 except ImportError as exc:
     pytest.skip(f"integration import unavailable: {exc}", allow_module_level=True)
 

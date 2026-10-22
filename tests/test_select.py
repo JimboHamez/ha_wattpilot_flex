@@ -14,9 +14,9 @@ from unittest.mock import MagicMock, patch
 
 import yaml
 
-from custom_components.wattpilot import select as _select_mod
-from custom_components.wattpilot.select import ChargerSelect
-from custom_components.wattpilot.utils import property_update_signal
+from custom_components.wattpilot_flex import select as _select_mod
+from custom_components.wattpilot_flex.select import ChargerSelect
+from custom_components.wattpilot_flex.utils import property_update_signal
 
 _SELECT_YAML = os.path.join(os.path.dirname(_select_mod.__file__), "select.yaml")
 with open(_SELECT_YAML, encoding="utf-8") as _handle:
@@ -125,7 +125,7 @@ async def test_preset_select_clears_the_selection_for_a_value_between_presets(ma
     entity.async_write_ha_state = MagicMock()
     entity._attr_current_option = "16"
 
-    with caplog.at_level(logging.ERROR, logger="custom_components.wattpilot.select"):
+    with caplog.at_level(logging.ERROR, logger="custom_components.wattpilot_flex.select"):
         assert await entity._async_update_validate_platform_state(13) is None
 
     assert entity._attr_current_option is None
@@ -165,8 +165,8 @@ async def test_preset_select_subscribes_to_clp_on_add(make_charger):
     entity.async_on_remove = MagicMock()
 
     with (
-        patch("custom_components.wattpilot.select.async_dispatcher_connect") as connect_select,
-        patch("custom_components.wattpilot.entities.async_dispatcher_connect") as connect_base,
+        patch("custom_components.wattpilot_flex.select.async_dispatcher_connect") as connect_select,
+        patch("custom_components.wattpilot_flex.entities.async_dispatcher_connect") as connect_base,
     ):
         await entity.async_added_to_hass()
 
@@ -184,8 +184,8 @@ async def test_static_select_does_not_subscribe_to_an_options_property(make_char
     entity.async_on_remove = MagicMock()
 
     with (
-        patch("custom_components.wattpilot.select.async_dispatcher_connect") as connect_select,
-        patch("custom_components.wattpilot.entities.async_dispatcher_connect"),
+        patch("custom_components.wattpilot_flex.select.async_dispatcher_connect") as connect_select,
+        patch("custom_components.wattpilot_flex.entities.async_dispatcher_connect"),
     ):
         await entity.async_added_to_hass()
 

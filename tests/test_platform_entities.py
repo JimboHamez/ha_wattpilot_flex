@@ -18,13 +18,13 @@ pytest.importorskip("wattpilot_api", reason="integration import unavailable")
 from homeassistant.const import STATE_OFF, STATE_ON, STATE_UNKNOWN
 from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
 
-from custom_components.wattpilot import button as button_mod
-from custom_components.wattpilot.button import ChargerButton
-from custom_components.wattpilot.number import ChargerNumber
-from custom_components.wattpilot.select import ChargerSelect
-from custom_components.wattpilot.sensor import ChargerSensor
-from custom_components.wattpilot.switch import ChargerSwitch
-from custom_components.wattpilot.update import ChargerUpdate
+from custom_components.wattpilot_flex import button as button_mod
+from custom_components.wattpilot_flex.button import ChargerButton
+from custom_components.wattpilot_flex.number import ChargerNumber
+from custom_components.wattpilot_flex.select import ChargerSelect
+from custom_components.wattpilot_flex.sensor import ChargerSensor
+from custom_components.wattpilot_flex.switch import ChargerSwitch
+from custom_components.wattpilot_flex.update import ChargerUpdate
 
 COMPONENT_DIR = os.path.dirname(button_mod.__file__)
 
@@ -67,7 +67,7 @@ async def test_button_press_raises_when_the_charger_rejects_it(make_charger):
     entity = _build(ChargerButton, "button", "frc1", charger)
 
     with (
-        patch("custom_components.wattpilot.entities.async_SetChargerProp", new=AsyncMock(return_value=False)),
+        patch("custom_components.wattpilot_flex.entities.async_SetChargerProp", new=AsyncMock(return_value=False)),
         pytest.raises(HomeAssistantError) as err,
     ):
         await entity.async_press()
@@ -80,8 +80,8 @@ async def test_button_press_wraps_an_unexpected_failure(make_charger, caplog):
     entity = _build(ChargerButton, "button", "frc1", charger)
 
     with (
-        caplog.at_level(logging.ERROR, logger="custom_components.wattpilot.entities"),
-        patch("custom_components.wattpilot.entities.async_SetChargerProp", side_effect=RuntimeError("boom")),
+        caplog.at_level(logging.ERROR, logger="custom_components.wattpilot_flex.entities"),
+        patch("custom_components.wattpilot_flex.entities.async_SetChargerProp", side_effect=RuntimeError("boom")),
         pytest.raises(HomeAssistantError) as err,
     ):
         await entity.async_press()
@@ -93,7 +93,7 @@ async def test_button_without_a_set_value_is_reported(make_charger, caplog):
     """A definition missing 'set_value' is reported at construction."""
     charger = make_charger(props={"frc": 0, "typ": "m", "var": 11})
 
-    with caplog.at_level(logging.ERROR, logger="custom_components.wattpilot.button"):
+    with caplog.at_level(logging.ERROR, logger="custom_components.wattpilot_flex.button"):
         _build(ChargerButton, "button", "frc1", charger, set_value=None)
 
     assert any("'set_value' missing" in r.getMessage() for r in caplog.records)
@@ -127,7 +127,7 @@ async def test_switch_reports_an_unmappable_value(make_charger, caplog):
     charger = make_charger(props={"fup": False, "typ": "m", "var": 11})
     entity = _build(ChargerSwitch, "switch", "fup", charger)
 
-    with caplog.at_level(logging.WARNING, logger="custom_components.wattpilot.switch"):
+    with caplog.at_level(logging.WARNING, logger="custom_components.wattpilot_flex.switch"):
         assert await entity._async_update_validate_platform_state("maybe") == STATE_UNKNOWN
 
     assert any("not valid for switch platform" in r.getMessage() for r in caplog.records)
@@ -194,15 +194,15 @@ async def test_switch_write_failure_is_raised(make_charger, caplog, method):
     entity = _build(ChargerSwitch, "switch", "fup", charger)
 
     with (
-        patch("custom_components.wattpilot.entities.async_SetChargerProp", new=AsyncMock(return_value=False)),
+        patch("custom_components.wattpilot_flex.entities.async_SetChargerProp", new=AsyncMock(return_value=False)),
         pytest.raises(HomeAssistantError) as err,
     ):
         await getattr(entity, method)()
     assert err.value.translation_key == "entity_write_failed"
 
     with (
-        caplog.at_level(logging.ERROR, logger="custom_components.wattpilot.entities"),
-        patch("custom_components.wattpilot.entities.async_SetChargerProp", side_effect=RuntimeError("boom")),
+        caplog.at_level(logging.ERROR, logger="custom_components.wattpilot_flex.entities"),
+        patch("custom_components.wattpilot_flex.entities.async_SetChargerProp", side_effect=RuntimeError("boom")),
         pytest.raises(HomeAssistantError) as err,
     ):
         await getattr(entity, method)()
@@ -259,15 +259,15 @@ async def test_number_write_failure_is_raised(make_charger, caplog):
     entity = _build(ChargerNumber, "number", "amp", charger, variant=None)
 
     with (
-        patch("custom_components.wattpilot.entities.async_SetChargerProp", new=AsyncMock(return_value=False)),
+        patch("custom_components.wattpilot_flex.entities.async_SetChargerProp", new=AsyncMock(return_value=False)),
         pytest.raises(HomeAssistantError) as err,
     ):
         await entity.async_set_native_value(16)
     assert err.value.translation_key == "entity_write_failed"
 
     with (
-        caplog.at_level(logging.ERROR, logger="custom_components.wattpilot.entities"),
-        patch("custom_components.wattpilot.entities.async_SetChargerProp", side_effect=RuntimeError("boom")),
+        caplog.at_level(logging.ERROR, logger="custom_components.wattpilot_flex.entities"),
+        patch("custom_components.wattpilot_flex.entities.async_SetChargerProp", side_effect=RuntimeError("boom")),
         pytest.raises(HomeAssistantError) as err,
     ):
         await entity.async_set_native_value(16)
@@ -286,7 +286,7 @@ async def test_number_fte_stops_when_the_unit_switch_is_rejected(make_charger):
         return identifier != "esk"
 
     with (
-        patch("custom_components.wattpilot.entities.async_SetChargerProp", new=_write),
+        patch("custom_components.wattpilot_flex.entities.async_SetChargerProp", new=_write),
         pytest.raises(HomeAssistantError),
     ):
         await entity.async_set_native_value(20)
@@ -458,7 +458,7 @@ async def test_update_reports_unsortable_versions(make_charger, caplog):
     entity = _update_entity(charger)
 
     with (
-        caplog.at_level(logging.ERROR, logger="custom_components.wattpilot.update"),
+        caplog.at_level(logging.ERROR, logger="custom_components.wattpilot_flex.update"),
         patch.object(entity, "_get_versions_dict", return_value={"not-a-version": "x"}),
     ):
         assert entity._update_available_versions(["x"], True) == entity._dummy_version
@@ -472,7 +472,7 @@ async def test_update_version_cleanup_failure_is_logged(make_charger, caplog):
     charger = make_charger(props={"fwv": "38.5", "onv": ["38.5"], "typ": "m", "var": 11})
     entity = _update_entity(charger)
 
-    with caplog.at_level(logging.ERROR, logger="custom_components.wattpilot.update"):
+    with caplog.at_level(logging.ERROR, logger="custom_components.wattpilot_flex.update"):
         assert entity._get_versions_dict([object()]) is None
 
     assert any("_get_versions_dict failed" in r.getMessage() for r in caplog.records)
@@ -496,7 +496,7 @@ async def test_update_install_triggers_the_charger(make_charger):
     async def _reconnect(_seconds):
         charger.connected = True
 
-    with patch("custom_components.wattpilot.update.asyncio.sleep", new=_reconnect):
+    with patch("custom_components.wattpilot_flex.update.asyncio.sleep", new=_reconnect):
         await entity.async_install("40.1", backup=False)
 
     assert any(identifier == "oct" and value == "40.1" for identifier, value in charger.sent)
@@ -520,7 +520,7 @@ async def test_update_install_reports_a_charger_that_never_disconnects(make_char
     entity = _update_entity(charger)
 
     with (
-        patch("custom_components.wattpilot.update.asyncio.sleep", new=AsyncMock()),
+        patch("custom_components.wattpilot_flex.update.asyncio.sleep", new=AsyncMock()),
         pytest.raises(HomeAssistantError) as err,
     ):
         await entity.async_install("40.1", backup=False)
@@ -535,7 +535,7 @@ async def test_update_install_reports_a_charger_that_never_returns(make_charger)
     charger.connected = False
 
     with (
-        patch("custom_components.wattpilot.update.asyncio.sleep", new=AsyncMock()),
+        patch("custom_components.wattpilot_flex.update.asyncio.sleep", new=AsyncMock()),
         pytest.raises(HomeAssistantError) as err,
     ):
         await entity.async_install("40.1", backup=False)
@@ -551,7 +551,7 @@ async def test_select_rejects_a_value_outside_its_options(make_charger, caplog):
     charger = make_charger(props={"lmo": 3, "typ": "m", "var": 11})
     entity = _build(ChargerSelect, "select", "lmo", charger)
 
-    with caplog.at_level(logging.ERROR, logger="custom_components.wattpilot.select"):
+    with caplog.at_level(logging.ERROR, logger="custom_components.wattpilot_flex.select"):
         assert await entity._async_update_validate_platform_state(99) is None
 
     assert any("not within options" in r.getMessage() for r in caplog.records)
@@ -571,7 +571,7 @@ async def test_select_state_validation_failure_is_logged(make_charger, caplog):
     entity = _build(ChargerSelect, "select", "lmo", charger)
     entity._opt_dict = None  # breaks the membership test
 
-    with caplog.at_level(logging.ERROR, logger="custom_components.wattpilot.select"):
+    with caplog.at_level(logging.ERROR, logger="custom_components.wattpilot_flex.select"):
         assert await entity._async_update_validate_platform_state(3) is None
 
     assert any("_async_update_validate_platform_state failed" in r.getMessage() for r in caplog.records)
@@ -595,15 +595,15 @@ async def test_select_write_failure_is_raised(make_charger, caplog):
     entity = _build(ChargerSelect, "select", "lmo", charger)
 
     with (
-        patch("custom_components.wattpilot.entities.async_SetChargerProp", new=AsyncMock(return_value=False)),
+        patch("custom_components.wattpilot_flex.entities.async_SetChargerProp", new=AsyncMock(return_value=False)),
         pytest.raises(HomeAssistantError) as err,
     ):
         await entity.async_select_option("eco")
     assert err.value.translation_key == "entity_write_failed"
 
     with (
-        caplog.at_level(logging.ERROR, logger="custom_components.wattpilot.entities"),
-        patch("custom_components.wattpilot.entities.async_SetChargerProp", side_effect=RuntimeError("boom")),
+        caplog.at_level(logging.ERROR, logger="custom_components.wattpilot_flex.entities"),
+        patch("custom_components.wattpilot_flex.entities.async_SetChargerProp", side_effect=RuntimeError("boom")),
         pytest.raises(HomeAssistantError) as err,
     ):
         await entity.async_select_option("eco")
@@ -686,7 +686,7 @@ async def test_sensor_state_validation_failure_is_logged(make_charger, caplog):
     entity = _build(ChargerSensor, "sensor", "car", charger)
     entity._state_enum = None  # breaks the membership test
 
-    with caplog.at_level(logging.ERROR, logger="custom_components.wattpilot.sensor"):
+    with caplog.at_level(logging.ERROR, logger="custom_components.wattpilot_flex.sensor"):
         assert await entity._async_update_validate_platform_state(1) is None
 
     assert any("_async_update_validate_platform_state failed" in r.getMessage() for r in caplog.records)
@@ -711,8 +711,8 @@ async def test_update_install_failure_is_raised(make_charger, caplog):
     entity = _update_entity(charger)
 
     with (
-        caplog.at_level(logging.ERROR, logger="custom_components.wattpilot.entities"),
-        patch("custom_components.wattpilot.entities.async_SetChargerProp", side_effect=RuntimeError("boom")),
+        caplog.at_level(logging.ERROR, logger="custom_components.wattpilot_flex.entities"),
+        patch("custom_components.wattpilot_flex.entities.async_SetChargerProp", side_effect=RuntimeError("boom")),
         pytest.raises(HomeAssistantError) as err,
     ):
         await entity.async_install("40.1", backup=False)

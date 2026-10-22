@@ -1,6 +1,6 @@
 """Live check of the next-trip and charging-schedule actions against a real charger.
 
-Runs ``wattpilot.set_next_trip`` and ``wattpilot.set_charging_schedule`` through a
+Runs ``wattpilot_flex.set_next_trip`` and ``wattpilot_flex.set_charging_schedule`` through a
 real Home Assistant instance, as the action UI would call them, against the
 physical charger. Each test writes back the value the charger already holds and
 reads it back, so the charger's settings do not change.
@@ -31,9 +31,9 @@ from homeassistant.const import CONF_FRIENDLY_NAME, CONF_IP_ADDRESS, CONF_PASSWO
 from homeassistant.helpers import device_registry as dr
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.wattpilot.const import CONF_CONNECTION, CONF_LOCAL, DOMAIN
-from custom_components.wattpilot.schedule import decode_schedule
-from custom_components.wattpilot.utils import GetChargerProp
+from custom_components.wattpilot_flex.const import CONF_CONNECTION, CONF_LOCAL, DOMAIN
+from custom_components.wattpilot_flex.schedule import decode_schedule
+from custom_components.wattpilot_flex.utils import GetChargerProp
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRETS_FILE = os.path.join(REPO_ROOT, ".wp_test.json")

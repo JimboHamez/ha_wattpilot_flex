@@ -16,8 +16,8 @@ pytest.importorskip("pytest_homeassistant_custom_component")
 from homeassistant.util import dt as dt_util
 from pytest_homeassistant_custom_component.common import async_fire_time_changed
 
-from custom_components.wattpilot.availability import ChargerConnectionMonitor, charger_available
-from custom_components.wattpilot.const import AVAILABILITY_SCAN_INTERVAL
+from custom_components.wattpilot_flex.availability import ChargerConnectionMonitor, charger_available
+from custom_components.wattpilot_flex.const import AVAILABILITY_SCAN_INTERVAL
 
 
 def test_charger_available_reads_both_flags(mock_charger):
@@ -45,7 +45,7 @@ async def test_logs_once_when_unavailable_and_once_on_recovery(hass, mock_charge
     """The monitor logs each availability transition exactly once."""
     monitor = ChargerConnectionMonitor(hass, "entry-1", mock_charger)
 
-    with caplog.at_level(logging.INFO, logger="custom_components.wattpilot.availability"):
+    with caplog.at_level(logging.INFO, logger="custom_components.wattpilot_flex.availability"):
         # Still connected: nothing to report.
         await monitor._async_check()
         assert caplog.records == []
@@ -73,7 +73,7 @@ async def test_timer_drives_the_check_and_cancel_stops_it(hass, mock_charger, ca
     cancel = monitor.async_start()
     assert callable(cancel)
 
-    with caplog.at_level(logging.INFO, logger="custom_components.wattpilot.availability"):
+    with caplog.at_level(logging.INFO, logger="custom_components.wattpilot_flex.availability"):
         mock_charger.connected = False
         async_fire_time_changed(hass, dt_util.utcnow() + AVAILABILITY_SCAN_INTERVAL + timedelta(seconds=1))
         await hass.async_block_till_done()

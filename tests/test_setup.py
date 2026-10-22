@@ -18,7 +18,7 @@ from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.icon import async_get_icons
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.wattpilot.const import CONF_CONNECTION, CONF_LOCAL, DOMAIN
+from custom_components.wattpilot_flex.const import CONF_CONNECTION, CONF_LOCAL, DOMAIN
 
 
 @pytest.fixture(autouse=True)
@@ -40,7 +40,7 @@ async def test_setup_stores_runtime_data_and_push_updates_entity(hass, make_char
     )
     entry.add_to_hass(hass)
 
-    with patch("custom_components.wattpilot.async_ConnectCharger", new=AsyncMock(return_value=charger)):
+    with patch("custom_components.wattpilot_flex.async_ConnectCharger", new=AsyncMock(return_value=charger)):
         assert await hass.config_entries.async_setup(entry.entry_id)
         await hass.async_block_till_done()
 
@@ -87,7 +87,7 @@ async def test_switch_actions_reach_the_charger(hass, make_charger):
     )
     entry.add_to_hass(hass)
 
-    with patch("custom_components.wattpilot.async_ConnectCharger", new=AsyncMock(return_value=charger)):
+    with patch("custom_components.wattpilot_flex.async_ConnectCharger", new=AsyncMock(return_value=charger)):
         assert await hass.config_entries.async_setup(entry.entry_id)
         await hass.async_block_till_done()
 
@@ -118,13 +118,13 @@ async def test_a_rejected_switch_write_reaches_the_caller_translated(hass, make_
     )
     entry.add_to_hass(hass)
 
-    with patch("custom_components.wattpilot.async_ConnectCharger", new=AsyncMock(return_value=charger)):
+    with patch("custom_components.wattpilot_flex.async_ConnectCharger", new=AsyncMock(return_value=charger)):
         assert await hass.config_entries.async_setup(entry.entry_id)
         await hass.async_block_till_done()
 
     entity_id = er.async_get(hass).async_get_entity_id("switch", DOMAIN, "SN-fup")
     with (
-        patch("custom_components.wattpilot.entities.async_SetChargerProp", new=AsyncMock(return_value=False)),
+        patch("custom_components.wattpilot_flex.entities.async_SetChargerProp", new=AsyncMock(return_value=False)),
         pytest.raises(HomeAssistantError) as err,
     ):
         await hass.services.async_call("switch", "turn_off", {"entity_id": entity_id}, blocking=True)
