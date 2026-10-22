@@ -17,7 +17,7 @@ from homeassistant.const import CONF_IP_ADDRESS, CONF_PASSWORD
 from homeassistant.helpers import entity_registry as er
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.wattpilot.const import CONF_CLOUD, CONF_CONNECTION, CONF_LOCAL, CONF_SERIAL, DOMAIN
+from custom_components.wattpilot_flex.const import CONF_CLOUD, CONF_CONNECTION, CONF_LOCAL, CONF_SERIAL, DOMAIN
 
 PROPS = {"tma": 5.0, "fup": True, "car": 1, "typ": "model", "var": 11, "sse": "SN"}
 LOCAL_DATA = {CONF_CONNECTION: CONF_LOCAL, CONF_IP_ADDRESS: "1.2.3.4", "friendly_name": "WB", CONF_PASSWORD: "p"}
@@ -45,7 +45,7 @@ def _register(hass, entry, domain, unique_id, object_id):
 
 async def _setup(hass, entry, charger):
     """Set the entry up against the given charger."""
-    with patch("custom_components.wattpilot.async_ConnectCharger", new=AsyncMock(return_value=charger)):
+    with patch("custom_components.wattpilot_flex.async_ConnectCharger", new=AsyncMock(return_value=charger)):
         assert await hass.config_entries.async_setup(entry.entry_id)
         await hass.async_block_till_done()
 
@@ -95,7 +95,7 @@ async def test_an_entity_whose_new_id_is_taken_is_left_alone(hass, make_charger,
     old = _register(hass, entry, "sensor", "WB-tma", "garage_temperature")
     new = _register(hass, entry, "sensor", "SN-tma", "garage_temperature_2")
 
-    with caplog.at_level(logging.WARNING, logger="custom_components.wattpilot.migration"):
+    with caplog.at_level(logging.WARNING, logger="custom_components.wattpilot_flex.migration"):
         await _setup(hass, entry, make_charger(props=dict(PROPS), serial="SN", name="WB"))
 
     ent_reg = er.async_get(hass)
@@ -131,7 +131,7 @@ async def test_two_chargers_with_the_default_name_both_get_their_entities(hass, 
     async def _connect(entry_id, _data):
         return chargers[entry_id]
 
-    with patch("custom_components.wattpilot.async_ConnectCharger", new=_connect):
+    with patch("custom_components.wattpilot_flex.async_ConnectCharger", new=_connect):
         assert await hass.config_entries.async_setup(first.entry_id)
         await hass.async_block_till_done()
 
@@ -174,7 +174,7 @@ async def test_the_same_charger_configured_twice_keeps_the_entry_key(hass, make_
     MockConfigEntry(domain=DOMAIN, unique_id="SN", title="Discovered", data=dict(LOCAL_DATA)).add_to_hass(hass)
     entry = _ip_keyed_entry(hass)
 
-    with caplog.at_level(logging.WARNING, logger="custom_components.wattpilot.migration"):
+    with caplog.at_level(logging.WARNING, logger="custom_components.wattpilot_flex.migration"):
         await _setup(hass, entry, make_charger(props=dict(PROPS), serial="SN", name="WB"))
 
     assert entry.unique_id == "1.2.3.4"
@@ -197,8 +197,8 @@ async def test_a_failing_migration_does_not_block_setup(hass, make_charger, capl
     entry = _ip_keyed_entry(hass)
 
     with (
-        caplog.at_level(logging.ERROR, logger="custom_components.wattpilot"),
-        patch("custom_components.wattpilot.async_migrate_unique_ids", side_effect=RuntimeError("boom")),
+        caplog.at_level(logging.ERROR, logger="custom_components.wattpilot_flex"),
+        patch("custom_components.wattpilot_flex.async_migrate_unique_ids", side_effect=RuntimeError("boom")),
     ):
         await _setup(hass, entry, make_charger(props=dict(PROPS), serial="SN", name="WB"))
 

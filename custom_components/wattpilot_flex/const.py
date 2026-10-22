@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import timedelta
 from typing import Final
 
-DOMAIN: Final = "wattpilot"
+DOMAIN: Final = "wattpilot_flex"
 # Plain strings rather than homeassistant.const.Platform members: const.py is
 # deliberately free of Home Assistant imports so tests/test_const.py can load it
 # in isolation, without pulling in the whole HA stack.

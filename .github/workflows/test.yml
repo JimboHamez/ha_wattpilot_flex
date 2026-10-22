@@ -35,7 +35,7 @@ jobs:
       - name: Run pytest
         run: |
           pytest -q \
-            --cov=custom_components.wattpilot \
+            --cov=custom_components.wattpilot_flex \
             --cov-report=term-missing \
             --cov-report=markdown:coverage.md \
             --cov-fail-under=95
@@ -66,10 +66,10 @@ jobs:
         run: pip install ruff==0.16.0
 
       - name: Check formatting
-        run: ruff format --check --diff custom_components/wattpilot tests
+        run: ruff format --check --diff custom_components/wattpilot_flex tests
 
       - name: Lint
-        run: ruff check --output-format=github custom_components/wattpilot
+        run: ruff check --output-format=github custom_components/wattpilot_flex
 
   mypy:
     name: mypy
@@ -93,4 +93,4 @@ jobs:
       # Strict typing is a quality-scale rule (Platinum); pyproject.toml scopes
       # it to the integration package.
       - name: Type check
-        run: mypy custom_components/wattpilot
+        run: mypy custom_components/wattpilot_flex

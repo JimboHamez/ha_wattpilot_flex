@@ -20,13 +20,13 @@ from homeassistant.exceptions import ConfigEntryAuthFailed, ConfigEntryError, Co
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 from wattpilot_api.exceptions import AuthenticationError
 
-from custom_components.wattpilot import (
+from custom_components.wattpilot_flex import (
     async_setup,
     async_setup_entry,
     async_unload_entry,
 )
-from custom_components.wattpilot.availability import ChargerConnectionMonitor
-from custom_components.wattpilot.const import (
+from custom_components.wattpilot_flex.availability import ChargerConnectionMonitor
+from custom_components.wattpilot_flex.const import (
     AUTH_FAILURE_REAUTH_THRESHOLD,
     CONF_CONNECTION,
     CONF_LOCAL,
@@ -106,8 +106,8 @@ async def test_async_setup_registers_the_services(hass):
 async def test_async_setup_reports_a_registration_failure(hass, caplog):
     """A failure while registering services is logged and reported."""
     with (
-        caplog.at_level(logging.ERROR, logger="custom_components.wattpilot"),
-        patch("custom_components.wattpilot.async_registerService", side_effect=RuntimeError("boom")),
+        caplog.at_level(logging.ERROR, logger="custom_components.wattpilot_flex"),
+        patch("custom_components.wattpilot_flex.async_registerService", side_effect=RuntimeError("boom")),
     ):
         assert await async_setup(hass, {}) is False
 
@@ -124,7 +124,7 @@ async def test_setup_entry_stores_runtime_data_and_starts_the_monitor(hass, make
 
     with (
         _no_platforms(hass),
-        patch("custom_components.wattpilot.async_ConnectCharger", new=AsyncMock(return_value=charger)),
+        patch("custom_components.wattpilot_flex.async_ConnectCharger", new=AsyncMock(return_value=charger)),
     ):
         assert await async_setup_entry(hass, entry) is True
 
@@ -139,7 +139,7 @@ async def test_setup_entry_retries_when_the_charger_is_unreachable(hass):
     entry = _entry(hass)
 
     with (
-        patch("custom_components.wattpilot.async_ConnectCharger", new=AsyncMock(return_value=False)),
+        patch("custom_components.wattpilot_flex.async_ConnectCharger", new=AsyncMock(return_value=False)),
         pytest.raises(ConfigEntryNotReady),
     ):
         await async_setup_entry(hass, entry)
@@ -151,7 +151,7 @@ async def test_setup_entry_retries_a_transient_password_rejection(hass):
 
     with (
         patch(
-            "custom_components.wattpilot.async_ConnectCharger",
+            "custom_components.wattpilot_flex.async_ConnectCharger",
             new=AsyncMock(side_effect=AuthenticationError("nope")),
         ),
         pytest.raises(ConfigEntryNotReady),
@@ -164,7 +164,7 @@ async def test_setup_entry_starts_reauth_after_repeated_bad_passwords(hass):
     entry = _entry(hass)
 
     with patch(
-        "custom_components.wattpilot.async_ConnectCharger",
+        "custom_components.wattpilot_flex.async_ConnectCharger",
         new=AsyncMock(side_effect=AuthenticationError("nope")),
     ):
         # The first attempts retry as "not ready"; the threshold-th escalates.
@@ -183,7 +183,7 @@ async def test_setup_entry_resets_auth_failures_after_a_clean_connect(hass, make
     # One transient rejection primes the per-entry counter.
     with (
         patch(
-            "custom_components.wattpilot.async_ConnectCharger",
+            "custom_components.wattpilot_flex.async_ConnectCharger",
             new=AsyncMock(side_effect=AuthenticationError("nope")),
         ),
         pytest.raises(ConfigEntryNotReady),
@@ -193,13 +193,13 @@ async def test_setup_entry_resets_auth_failures_after_a_clean_connect(hass, make
     # A clean connect must reset the count so the next rejection starts over.
     with (
         _no_platforms(hass),
-        patch("custom_components.wattpilot.async_ConnectCharger", new=AsyncMock(return_value=charger)),
+        patch("custom_components.wattpilot_flex.async_ConnectCharger", new=AsyncMock(return_value=charger)),
     ):
         assert await async_setup_entry(hass, entry) is True
 
     with (
         patch(
-            "custom_components.wattpilot.async_ConnectCharger",
+            "custom_components.wattpilot_flex.async_ConnectCharger",
             new=AsyncMock(side_effect=AuthenticationError("nope")),
         ),
         pytest.raises(ConfigEntryNotReady),
@@ -212,8 +212,8 @@ async def test_setup_entry_retries_after_an_unexpected_connect_error(hass, caplo
     entry = _entry(hass)
 
     with (
-        caplog.at_level(logging.ERROR, logger="custom_components.wattpilot"),
-        patch("custom_components.wattpilot.async_ConnectCharger", new=AsyncMock(side_effect=RuntimeError("boom"))),
+        caplog.at_level(logging.ERROR, logger="custom_components.wattpilot_flex"),
+        patch("custom_components.wattpilot_flex.async_ConnectCharger", new=AsyncMock(side_effect=RuntimeError("boom"))),
         pytest.raises(ConfigEntryNotReady),
     ):
         await async_setup_entry(hass, entry)
@@ -227,10 +227,10 @@ async def test_setup_entry_survives_an_unknown_integration_version(hass, make_ch
     entry = _entry(hass)
 
     with (
-        caplog.at_level(logging.WARNING, logger="custom_components.wattpilot"),
+        caplog.at_level(logging.WARNING, logger="custom_components.wattpilot_flex"),
         _no_platforms(hass),
-        patch("custom_components.wattpilot.async_get_integration", side_effect=RuntimeError("boom")),
-        patch("custom_components.wattpilot.async_ConnectCharger", new=AsyncMock(return_value=charger)),
+        patch("custom_components.wattpilot_flex.async_get_integration", side_effect=RuntimeError("boom")),
+        patch("custom_components.wattpilot_flex.async_ConnectCharger", new=AsyncMock(return_value=charger)),
     ):
         assert await async_setup_entry(hass, entry) is True
 
@@ -256,7 +256,7 @@ async def test_setup_entry_aborts_when_a_step_fails(hass, make_charger, caplog, 
     entry = _entry(hass)
 
     patches = [
-        patch("custom_components.wattpilot.async_ConnectCharger", new=AsyncMock(return_value=charger)),
+        patch("custom_components.wattpilot_flex.async_ConnectCharger", new=AsyncMock(return_value=charger)),
         patch.object(hass.config_entries, "async_unload_platforms", AsyncMock(return_value=True)),
     ]
     if target == "async_forward_entry_setups":
@@ -268,9 +268,11 @@ async def test_setup_entry_aborts_when_a_step_fails(hass, make_charger, caplog, 
     if target == "on_property_change":
         charger.on_property_change = MagicMock(side_effect=RuntimeError("boom"))
     if target == "connection_monitor":
-        patches.append(patch("custom_components.wattpilot.ChargerConnectionMonitor", side_effect=RuntimeError("boom")))
+        patches.append(
+            patch("custom_components.wattpilot_flex.ChargerConnectionMonitor", side_effect=RuntimeError("boom"))
+        )
 
-    with caplog.at_level(logging.ERROR, logger="custom_components.wattpilot"):
+    with caplog.at_level(logging.ERROR, logger="custom_components.wattpilot_flex"):
         for p in patches:
             p.start()
         try:
@@ -295,7 +297,7 @@ async def test_unload_entry_releases_everything(hass, make_charger):
 
     with (
         _no_platforms(hass),
-        patch("custom_components.wattpilot.async_ConnectCharger", new=AsyncMock(return_value=charger)),
+        patch("custom_components.wattpilot_flex.async_ConnectCharger", new=AsyncMock(return_value=charger)),
     ):
         assert await async_setup_entry(hass, entry) is True
         assert await async_unload_entry(hass, entry) is True
@@ -311,13 +313,13 @@ async def test_unload_entry_reports_a_failing_disconnect(hass, make_charger, cap
 
     with (
         _no_platforms(hass),
-        patch("custom_components.wattpilot.async_ConnectCharger", new=AsyncMock(return_value=charger)),
+        patch("custom_components.wattpilot_flex.async_ConnectCharger", new=AsyncMock(return_value=charger)),
     ):
         assert await async_setup_entry(hass, entry) is True
         with (
-            caplog.at_level(logging.ERROR, logger="custom_components.wattpilot"),
+            caplog.at_level(logging.ERROR, logger="custom_components.wattpilot_flex"),
             patch(
-                "custom_components.wattpilot.async_DisconnectCharger",
+                "custom_components.wattpilot_flex.async_DisconnectCharger",
                 new=AsyncMock(side_effect=RuntimeError("boom")),
             ),
         ):
@@ -331,7 +333,7 @@ async def test_unload_entry_reports_a_missing_runtime_data(hass, caplog):
     entry = _entry(hass)
 
     with (
-        caplog.at_level(logging.ERROR, logger="custom_components.wattpilot"),
+        caplog.at_level(logging.ERROR, logger="custom_components.wattpilot_flex"),
         patch.object(hass.config_entries, "async_unload_platforms", AsyncMock(return_value=True)),
     ):
         assert await async_unload_entry(hass, entry) is False
@@ -358,8 +360,8 @@ async def test_setup_entry_reports_a_failing_runtime_data_store(hass, make_charg
             raise RuntimeError("boom")
 
     with (
-        caplog.at_level(logging.ERROR, logger="custom_components.wattpilot"),
-        patch("custom_components.wattpilot.async_ConnectCharger", new=AsyncMock(return_value=charger)),
+        caplog.at_level(logging.ERROR, logger="custom_components.wattpilot_flex"),
+        patch("custom_components.wattpilot_flex.async_ConnectCharger", new=AsyncMock(return_value=charger)),
         pytest.raises(ConfigEntryError),
     ):
         await async_setup_entry(hass, _BrokenEntry())
@@ -382,7 +384,7 @@ async def test_unload_entry_reports_a_failing_teardown_step(hass, make_charger, 
 
     with (
         _no_platforms(hass),
-        patch("custom_components.wattpilot.async_ConnectCharger", new=AsyncMock(return_value=charger)),
+        patch("custom_components.wattpilot_flex.async_ConnectCharger", new=AsyncMock(return_value=charger)),
     ):
         assert await async_setup_entry(hass, entry) is True
 
@@ -390,7 +392,7 @@ async def test_unload_entry_reports_a_failing_teardown_step(hass, make_charger, 
             raise RuntimeError("boom")
 
         setattr(entry.runtime_data, key, _explode)
-        with caplog.at_level(logging.ERROR, logger="custom_components.wattpilot"):
+        with caplog.at_level(logging.ERROR, logger="custom_components.wattpilot_flex"):
             assert await async_unload_entry(hass, entry) is True
 
     assert any(message in r.getMessage() for r in caplog.records)
@@ -403,12 +405,12 @@ async def test_unload_entry_reports_a_platform_that_will_not_unload(hass, make_c
 
     with (
         _no_platforms(hass),
-        patch("custom_components.wattpilot.async_ConnectCharger", new=AsyncMock(return_value=charger)),
+        patch("custom_components.wattpilot_flex.async_ConnectCharger", new=AsyncMock(return_value=charger)),
     ):
         assert await async_setup_entry(hass, entry) is True
 
     with (
-        caplog.at_level(logging.ERROR, logger="custom_components.wattpilot"),
+        caplog.at_level(logging.ERROR, logger="custom_components.wattpilot_flex"),
         patch.object(hass.config_entries, "async_unload_platforms", AsyncMock(return_value=False)),
     ):
         assert await async_unload_entry(hass, entry) is False

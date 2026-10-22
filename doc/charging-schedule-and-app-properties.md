@@ -80,7 +80,7 @@ Also seen and not exposed: `awpl`, the hourly price list for dynamic pricing (a 
 
 1. ~~Treat schedule `control` as flags (bit 0 = limit times, bit 1 = allow PV surplus
    outside the times) rather than the 0/1/2 enum, and tolerate unknown values.~~ Done
-   (#13): `custom_components/wattpilot/schedule.py` decodes the two bits and masks the
+   (#13): `custom_components/wattpilot_flex/schedule.py` decodes the two bits and masks the
    state onto them, keeping the raw value as an attribute.
 2. ~~Expose `sch_week` / `sch_satur` / `sch_sund` — at minimum as read-only sensors with
    the ranges as attributes, ideally editable through a service.~~ Done (#13): the three

@@ -58,6 +58,11 @@ Allows for control of [Fronius Wattpilot](https://www.fronius.com/en/solar-energ
 
 ![screenshot of Next Trip service](doc/service_view1.jpg)
 
+> **Upgrading from 0.12.x or earlier?** The integration's domain changed from `wattpilot` to
+> `wattpilot_flex` in 0.13.0, and your chargers have to be added again once. Follow
+> [Moving from the `wattpilot` domain](https://github.com/JimboHamez/ha_wattpilot_flex#moving-from-the-wattpilot-domain)
+> **before** you update.
+
 # Installation and Configuration
 
 ATTENTION: Default configuration is for wattpilot firmware version > 38.5 !!
@@ -81,7 +86,7 @@ If the search finds nothing, your HACS has not picked up the default catalog ent
 [custom repository](https://hacs.xyz/docs/faq/custom_repositories/) (type **Integration**) and search again.
 
 ### Install manually
-Download the repository and save the "wattpilot" folder into your home assistant custom_components directory.
+Download the repository and save the `custom_components/wattpilot_flex` folder into your home assistant custom_components directory.
 
 Once the files are downloaded, you’ll need to **restart HomeAssistant** and wait some minutes (probably clear your browser cache),
 for the integration to appear within the integration store.
@@ -90,7 +95,7 @@ for the integration to appear within the integration store.
 
 ### Using MyHA:
 
-[MyHA - Add Integration](https://my.home-assistant.io/redirect/config_flow_start?domain=wattpilot)
+[MyHA - Add Integration](https://my.home-assistant.io/redirect/config_flow_start?domain=wattpilot_flex)
 
 ### Manually:
 

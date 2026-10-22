@@ -14,13 +14,13 @@ from types import SimpleNamespace
 
 import pytest
 
-# Make the repository root importable so ``custom_components.wattpilot`` resolves
+# Make the repository root importable so ``custom_components.wattpilot_flex`` resolves
 # (``custom_components`` is a PEP-420 namespace package with no __init__.py).
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if REPO_ROOT not in sys.path:
     sys.path.insert(0, REPO_ROOT)
 
-COMPONENT_DIR = os.path.join(REPO_ROOT, "custom_components", "wattpilot")
+COMPONENT_DIR = os.path.join(REPO_ROOT, "custom_components", "wattpilot_flex")
 
 
 class MockCharger:

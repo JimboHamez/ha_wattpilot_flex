@@ -23,7 +23,7 @@ from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from wattpilot_api.exceptions import AuthenticationError, WattpilotError
 
-from custom_components.wattpilot.const import (
+from custom_components.wattpilot_flex.const import (
     CONF_CLOUD,
     CONF_CONNECTION,
     CONF_LOCAL,
@@ -32,13 +32,13 @@ from custom_components.wattpilot.const import (
     EVENT_PROPS,
     EVENT_PROPS_ID,
 )
-from custom_components.wattpilot.models import WattpilotRuntimeData
+from custom_components.wattpilot_flex.models import WattpilotRuntimeData
 
 # Importing utils triggers Home Assistant imports and the dynamic load of the
 # vendored wattpilot library (needs websocket-client). Skip the whole module
 # cleanly if any of that is unavailable.
 try:
-    from custom_components.wattpilot import utils
+    from custom_components.wattpilot_flex import utils
 except ImportError as exc:
     pytest.skip(f"integration import unavailable: {exc}", allow_module_level=True)
 
@@ -126,14 +126,14 @@ def test_get_prop_on_object_without_allprops_returns_default():
 async def test_async_programming_debug_lists_attributes(caplog):
     """The object dump logs public attributes at debug level."""
     obj = SimpleNamespace(visible="yes")
-    with caplog.at_level(logging.DEBUG, logger="custom_components.wattpilot.utils"):
+    with caplog.at_level(logging.DEBUG, logger="custom_components.wattpilot_flex.utils"):
         await utils.async_ProgrammingDebug(obj)
     assert any("visible = yes" in r.getMessage() for r in caplog.records)
 
 
 def test_programming_debug_lists_attributes(caplog):
     """The synchronous dump behaves like the async one."""
-    with caplog.at_level(logging.DEBUG, logger="custom_components.wattpilot.utils"):
+    with caplog.at_level(logging.DEBUG, logger="custom_components.wattpilot_flex.utils"):
         utils.ProgrammingDebug(SimpleNamespace(visible="yes"))
     assert any("visible = yes" in r.getMessage() for r in caplog.records)
 
@@ -146,28 +146,28 @@ def test_programming_debug_survives_a_broken_object(caplog):
         def boom(self):
             raise RuntimeError("no")
 
-    with caplog.at_level(logging.DEBUG, logger="custom_components.wattpilot.utils"):
+    with caplog.at_level(logging.DEBUG, logger="custom_components.wattpilot_flex.utils"):
         utils.ProgrammingDebug(_Exploding())
     assert any(r.levelno == logging.ERROR for r in caplog.records)
 
 
 async def test_property_debug_skips_noisy_properties(caplog):
     """Properties on the exclusion list are not logged when debugging is on."""
-    with caplog.at_level(logging.WARNING, logger="custom_components.wattpilot.utils"):
+    with caplog.at_level(logging.WARNING, logger="custom_components.wattpilot_flex.utils"):
         await utils.async_PropertyDebug("nrg", "1", True)
     assert caplog.records == []
 
 
 async def test_property_debug_logs_other_properties(caplog):
     """Any property not excluded is logged while debugging is on."""
-    with caplog.at_level(logging.WARNING, logger="custom_components.wattpilot.utils"):
+    with caplog.at_level(logging.WARNING, logger="custom_components.wattpilot_flex.utils"):
         await utils.async_PropertyDebug("amp", "16", True)
     assert any("amp => 16" in r.getMessage() for r in caplog.records)
 
 
 async def test_property_debug_honours_an_explicit_property_list(caplog):
     """An explicit watch list logs only the properties it names."""
-    with caplog.at_level(logging.WARNING, logger="custom_components.wattpilot.utils"):
+    with caplog.at_level(logging.WARNING, logger="custom_components.wattpilot_flex.utils"):
         await utils.async_PropertyDebug("nrg", "1", ["nrg"])
         await utils.async_PropertyDebug("amp", "16", ["nrg"])
     messages = [r.getMessage() for r in caplog.records]
@@ -240,7 +240,7 @@ async def test_property_update_triggers_debug_logging(hass, caplog):
     """With debugging enabled the handler also runs the property debug log."""
     entry = _entry_with_runtime_data(hass, dbg=True)
 
-    with caplog.at_level(logging.WARNING, logger="custom_components.wattpilot.utils"):
+    with caplog.at_level(logging.WARNING, logger="custom_components.wattpilot_flex.utils"):
         await utils.async_PropertyUpdateHandler(hass, entry, "amp", "16")
         await hass.async_block_till_done()
 
@@ -252,7 +252,7 @@ async def test_property_update_without_runtime_data_is_logged(hass, caplog):
     entry = MockConfigEntry(domain=DOMAIN, data={})
     entry.add_to_hass(hass)
 
-    with caplog.at_level(logging.ERROR, logger="custom_components.wattpilot.utils"):
+    with caplog.at_level(logging.ERROR, logger="custom_components.wattpilot_flex.utils"):
         assert await utils.async_PropertyUpdateHandler(hass, entry, "amp", "16") is None
 
     assert any("async_PropertyUpdateHandler" in r.getMessage() for r in caplog.records)
@@ -315,7 +315,7 @@ async def test_set_prop_reports_a_failing_write(make_charger, caplog):
     charger = make_charger(props={"amp": 6})
     charger.set_property = AsyncMock(side_effect=RuntimeError("boom"))
 
-    with caplog.at_level(logging.ERROR, logger="custom_components.wattpilot.utils"):
+    with caplog.at_level(logging.ERROR, logger="custom_components.wattpilot_flex.utils"):
         assert await utils.async_SetChargerProp(charger, "amp", 16) is False
 
     assert any("Could not set property amp" in r.getMessage() for r in caplog.records)
@@ -378,7 +378,7 @@ async def test_connect_local_charger_uses_the_ip_address():
     client, instance = _client_mock()
     data = {CONF_CONNECTION: CONF_LOCAL, CONF_IP_ADDRESS: "1.2.3.4", CONF_PASSWORD: "p"}
 
-    with patch("custom_components.wattpilot.utils.Wattpilot", client):
+    with patch("custom_components.wattpilot_flex.utils.Wattpilot", client):
         assert await utils.async_ConnectCharger("entry-1", data) is instance
 
     assert client.call_args.kwargs["host"] == "1.2.3.4"
@@ -391,7 +391,7 @@ async def test_connect_cloud_charger_uses_the_serial():
     client, instance = _client_mock()
     data = {CONF_CONNECTION: CONF_CLOUD, CONF_SERIAL: "SN", CONF_PASSWORD: "p"}
 
-    with patch("custom_components.wattpilot.utils.Wattpilot", client):
+    with patch("custom_components.wattpilot_flex.utils.Wattpilot", client):
         assert await utils.async_ConnectCharger("entry-1", data) is instance
 
     assert client.call_args.kwargs["host"] == "SN"
@@ -403,7 +403,7 @@ async def test_reconnect_reuses_the_existing_charger():
     """Reconnecting an existing charger does not build a second client."""
     client, instance = _client_mock()
 
-    with patch("custom_components.wattpilot.utils.Wattpilot", client):
+    with patch("custom_components.wattpilot_flex.utils.Wattpilot", client):
         assert await utils.async_ConnectCharger("entry-1", {}, instance) is instance
 
     client.assert_not_called()
@@ -415,7 +415,7 @@ async def test_connect_reraises_authentication_errors():
     client, instance = _client_mock()
     instance.connect = AsyncMock(side_effect=AuthenticationError("bad password"))
 
-    with patch("custom_components.wattpilot.utils.Wattpilot", client), pytest.raises(AuthenticationError):
+    with patch("custom_components.wattpilot_flex.utils.Wattpilot", client), pytest.raises(AuthenticationError):
         await utils.async_ConnectCharger("entry-1", {CONF_IP_ADDRESS: "1.2.3.4"})
 
 
@@ -425,7 +425,7 @@ async def test_connect_failures_return_false(error):
     client, instance = _client_mock()
     instance.connect = AsyncMock(side_effect=error)
 
-    with patch("custom_components.wattpilot.utils.Wattpilot", client):
+    with patch("custom_components.wattpilot_flex.utils.Wattpilot", client):
         assert await utils.async_ConnectCharger("entry-1", {CONF_IP_ADDRESS: "1.2.3.4"}) is False
 
 
@@ -446,7 +446,7 @@ async def test_the_api_definition_is_read_only_once(hass, make_charger):
     second._api_def_cache = None
 
     assert await utils.async_PreloadApiDefinition(hass, "entry-1", first) is True
-    with patch("custom_components.wattpilot.utils.load_api_definition", side_effect=AssertionError("re-read")):
+    with patch("custom_components.wattpilot_flex.utils.load_api_definition", side_effect=AssertionError("re-read")):
         assert await utils.async_PreloadApiDefinition(hass, "entry-2", second) is True
 
     assert second._api_def_cache is first._api_def_cache
@@ -464,7 +464,7 @@ async def test_preload_api_definition_without_a_definition_is_a_no_op(hass, make
     charger = make_charger(props={})
     charger._api_def_cache = None
 
-    with patch("custom_components.wattpilot.utils._load_api_definition", return_value=None):
+    with patch("custom_components.wattpilot_flex.utils._load_api_definition", return_value=None):
         assert await utils.async_PreloadApiDefinition(hass, "entry-1", charger) is False
 
     assert charger._api_def_cache is None
@@ -481,7 +481,7 @@ async def test_preload_api_definition_failure_is_logged(hass, caplog):
         def __setattr__(self, name, value):
             raise RuntimeError("boom")
 
-    with caplog.at_level(logging.ERROR, logger="custom_components.wattpilot.utils"):
+    with caplog.at_level(logging.ERROR, logger="custom_components.wattpilot_flex.utils"):
         assert await utils.async_PreloadApiDefinition(hass, "entry-1", _Unwritable()) is False
 
     assert any("Preloading the API definition failed" in r.getMessage() for r in caplog.records)
@@ -492,8 +492,8 @@ def test_load_api_definition_failure_is_logged(caplog):
     utils._load_api_definition.cache_clear()
     try:
         with (
-            caplog.at_level(logging.ERROR, logger="custom_components.wattpilot.utils"),
-            patch("custom_components.wattpilot.utils.load_api_definition", side_effect=RuntimeError("boom")),
+            caplog.at_level(logging.ERROR, logger="custom_components.wattpilot_flex.utils"),
+            patch("custom_components.wattpilot_flex.utils.load_api_definition", side_effect=RuntimeError("boom")),
         ):
             assert utils._load_api_definition() is None
     finally:
@@ -519,7 +519,7 @@ async def test_disconnect_failure_is_logged(make_charger, caplog):
     charger = make_charger(props={})
     charger.disconnect = AsyncMock(side_effect=RuntimeError("boom"))
 
-    with caplog.at_level(logging.ERROR, logger="custom_components.wattpilot.utils"):
+    with caplog.at_level(logging.ERROR, logger="custom_components.wattpilot_flex.utils"):
         assert await utils.async_DisconnectCharger("entry-1", charger) is None
 
     assert any("Disconnect charger failed" in r.getMessage() for r in caplog.records)
@@ -533,13 +533,13 @@ async def test_async_programming_debug_survives_a_broken_object(caplog):
         def boom(self):
             raise RuntimeError("no")
 
-    with caplog.at_level(logging.DEBUG, logger="custom_components.wattpilot.utils"):
+    with caplog.at_level(logging.DEBUG, logger="custom_components.wattpilot_flex.utils"):
         await utils.async_ProgrammingDebug(_Exploding())
     assert any(r.levelno == logging.ERROR for r in caplog.records)
 
 
 async def test_lookups_degrade_when_the_device_registry_fails(hass):
     """A registry failure is logged and reported, not raised."""
-    with patch("custom_components.wattpilot.utils.dr.async_get", side_effect=RuntimeError("boom")):
+    with patch("custom_components.wattpilot_flex.utils.dr.async_get", side_effect=RuntimeError("boom")):
         assert await utils.async_GetChargerFromDeviceID(hass, "any") is False
         assert await utils.async_GetDataStoreFromDeviceID(hass, "any") is False

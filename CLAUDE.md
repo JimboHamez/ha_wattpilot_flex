@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Always use the Context7 MCP server to fetch version-accurate API references and code snippets before generating or modifying code that uses external libraries. Do not rely on base training data for fast-evolving frameworks.
 - If asked to implement or modify features using frameworks like Home Assistant Core or auxiliary dependencies, always precede your response by invoking the Context7 tools.
 - Append "use context7" to your planning steps if you need to research the latest documentation.
-- Before writing or editing any Python file under `custom_components/wattpilot/`, query Context7 for each Home Assistant API the change touches, unless that API was already checked in this session. A `PreToolUse` hook in `.claude/settings.local.json` fires on `Edit`/`Write` of those files as a reminder.
+- Before writing or editing any Python file under `custom_components/wattpilot_flex/`, query Context7 for each Home Assistant API the change touches, unless that API was already checked in this session. A `PreToolUse` hook in `.claude/settings.local.json` fires on `Edit`/`Write` of those files as a reminder.
 - The server is defined in a local `.mcp.json` at the repo root. The file is git-ignored on purpose and never committed, and is enabled through `enabledMcpjsonServers` in `.claude/settings.local.json`. It reads its key from the `CONTEXT7_API_KEY` environment variable. Never write the key into the file.
 - Known library IDs. Pass these straight to `query-docs` and skip `resolve-library-id`:
   - `/home-assistant/developers.home-assistant`: the HA developer docs, covering integrations, `DataUpdateCoordinator`, config/options flows, entities, the quality scale and translations. Use this one first.
@@ -51,7 +51,17 @@ translated entities, discovery/reauth, quality-scale work, and human-scale entit
 tracked in **this** repo, not upstream. Links to `mk-maddin/wattpilot-HA` are credit to the original
 project, so leave them as they are.
 
-The installable component lives entirely in `custom_components/wattpilot/`. Everything else
+**The domain is `wattpilot_flex`** (0.13.0 on; it was `wattpilot` up to 0.12.x). The HACS
+default-catalog review asked for the change: `wattpilot` is upstream's domain, upstream is in the
+catalog too, and two entries with one domain install into the same `custom_components/<domain>`
+folder and overwrite each other. Never move back to `wattpilot`; `tests/test_const.py` guards it.
+The move is documented for users in the README (*Moving from the `wattpilot` domain*) as a
+delete-and-re-add. There is deliberately no automatic import of old `wattpilot` entries, because
+that domain's entries may belong to upstream. Older names you will still see: the `devicefamily:
+wattpilot` zeroconf matcher (the charger's own mDNS property, not the domain), `packages/wattpilot/`,
+and history in `CHANGELOG.md` and `doc/`.
+
+The installable component lives entirely in `custom_components/wattpilot_flex/`. Everything else
 (`packages/`, `doc/`, `info.md`, `set_values_test.py`) is documentation, HA config examples,
 or manual test scaffolding.
 
@@ -61,7 +71,7 @@ There is no build step (it is an HA custom component, copied into `config/custom
 
 - **Tests** — the suite lives in `tests/`. Install with `pip install -r requirements_test.txt`
   and run `pytest`. Coverage is a **quality-scale rule (Silver, ≥95%)** — check it with
-  `pytest --cov=custom_components.wattpilot --cov-report=term-missing` before claiming a change is
+  `pytest --cov=custom_components.wattpilot_flex --cov-report=term-missing` before claiming a change is
   done. Layers:
   - `test_yaml_catalogs.py` / `test_const.py` — dependency-free (pyyaml + isolated `const.py`
     load); validate the data-driven entity catalogs and manifest/const consistency.
@@ -76,12 +86,12 @@ There is no build step (it is an HA custom component, copied into `config/custom
     an `all_properties` dict and a `set_property` recorder; use it instead of a live device.
   - Because the repo convention wraps every function in `try/except`, **the error branches are
     most of the uncovered surface**. The established way to reach them is to patch the collaborator
-    the function calls (`patch("custom_components.wattpilot.<module>.<helper>", side_effect=...)`)
+    the function calls (`patch("custom_components.wattpilot_flex.<module>.<helper>", side_effect=...)`)
     and assert on `caplog` — see `test_platform_setup.py` for the parametrized version.
   - `pytest.ini` sets `asyncio_mode = auto` and **enables** the
     `pytest-homeassistant-custom-component` plugin (it used to be disabled via `-p no:homeassistant`).
 - **Static analysis** — `./scan.sh` runs bandit, semgrep, mypy and pip-audit in a `.venv`, scoped
-  to `custom_components/wattpilot`. (Its exclusion logic for the old vendored `wattpilot/` subtree
+  to `custom_components/wattpilot_flex`. (Its exclusion logic for the old vendored `wattpilot/` subtree
   is now a no-op — the subtree is gone.) The code is ruff-formatted and strict-mypy clean; keep it
   that way (`ruff format`, `ruff check`). `.github/workflows/test.yml` **gates** on this:
   `pytest --cov-fail-under=95`, `ruff format --check` + `ruff check`, and `mypy` run as three
@@ -93,8 +103,8 @@ There is no build step (it is an HA custom component, copied into `config/custom
   against 2026.2, where `probatio` does not exist. Until 2026-10 CI only ran 3.13, so the suite
   had never seen a Home Assistant newer than 2026.2. The local `.venv` (and therefore
   `./scan.sh`'s mypy step) is still 3.13; check types in a 3.14 environment.
-- **Manual/live check** — copy `custom_components/wattpilot/` into a running HA, restart, and read
-  the debug logs. The codebase logs verbosely under the `custom_components.wattpilot` logger
+- **Manual/live check** — copy `custom_components/wattpilot_flex/` into a running HA, restart, and read
+  the debug logs. The codebase logs verbosely under the `custom_components.wattpilot_flex` logger
   namespace — enable `logger` debug there to trace behaviour.
 - **Live device scripts** — `tests/live_probe.py` (read-only property dump), `tests/live_e2e.py`
   (integration helpers, one idempotent no-op write), `tests/live_schedule.py` (decodes the three
@@ -132,7 +142,7 @@ There is no build step (it is an HA custom component, copied into `config/custom
   property values and the type-coercion order, but unlike those two it **writes real settings**
   (toggles battery boost, overwrites `acs`/`ocppcs`/`npd`/`ebv`/`cll`) — run it only against a
   charger you are happy to reconfigure.
-- The integration `version` is set in `custom_components/wattpilot/manifest.json` and must be
+- The integration `version` is set in `custom_components/wattpilot_flex/manifest.json` and must be
   bumped there for HACS releases.
 
 ## Architecture
@@ -253,7 +263,7 @@ All platform entities subclass this. It centralizes:
 - **Poll:** entities whose `should_poll` is true (attribute/namespacelist sources, or a
   property still at its default state) fall back to `async_local_poll`. Note the corollary: an
   entity whose real value happens to equal its `default_state` keeps polling.
-- The same handler also **fires HA events** (`wattpilot_property_message`) for properties listed
+- The same handler also **fires HA events** (`wattpilot_flex_property_message`) for properties listed
   in `const.py::EVENT_PROPS` (`ftt` only), and drives optional property-change debug logging.
   Events are recorded and reach every subscriber, so never add a secret there: `cak` (the go-e
   cloud API key) was in the list until the HACS review flagged it.
@@ -359,7 +369,7 @@ names to it.
 
 The integration targets the [HA Integration Quality Scale](https://developers.home-assistant.io/docs/core/integration-quality-scale/).
 `manifest.json` declares `"quality_scale": "platinum"`, and
-`custom_components/wattpilot/quality_scale.yaml` tracks every rule as `done`, `exempt` (with a
+`custom_components/wattpilot_flex/quality_scale.yaml` tracks every rule as `done`, `exempt` (with a
 reason) or `todo`. **All four tiers are met** — every one of the 54 rules is `done` or `exempt`.
 
 Keep the file honest — it is a self-declaration, and the `manifest.json` tier must not run ahead
@@ -380,8 +390,9 @@ speaks `websockets`, not an aiohttp/httpx session.
 list was diffed against `script/hassfest/quality_scale.py` in `home-assistant/core@dev` (54 rules,
 none missing, none invented), the `brands` claim was confirmed against
 `home-assistant/brands/custom_integrations/wattpilot` (the same images also ship in
-`custom_components/wattpilot/brand/` — singular, the name Home Assistant 2026.3+ reads local brand
-images from and prefers over the CDN; keep both copies in step), and `strict-typing` rests on a clean
+`custom_components/wattpilot_flex/brand/` — singular, the name Home Assistant 2026.3+ reads local brand
+images from and prefers over the CDN; keep both copies in step). Since the domain rename the brands
+repo still needs a `custom_integrations/wattpilot_flex` entry, or releases before 2026.3 show no icon, and `strict-typing` rests on a clean
 `mypy --strict` plus `py.typed` in both this package and the installed `wattpilot-api`. The two
 weakest `docs-*` rules (`docs-use-cases`, `docs-examples`) and `docs-actions` were thin claims
 until the README gained its **Use cases**, **Example automations** and **Actions** sections —
@@ -400,7 +411,7 @@ past actions without agreeing that separately.
 ## HACS packaging
 `hacs.json` (repo root) declares the HACS metadata. `"name"` is the name HACS shows,
 **Fronius Wattpilot Flex**. The integration's own name in Home Assistant is `manifest.json`'s
-`"name"`, "Fronius Wattpilot", and its domain stays `wattpilot`. `"homeassistant"` is the **minimum HA version**
+`"name"`, "Fronius Wattpilot", and its domain is `wattpilot_flex`. `"homeassistant"` is the **minimum HA version**
 and must not drift below what the code actually needs. It declares **2024.11**, set by the config
 flow: `_get_reauth_entry`, `_get_reconfigure_entry` and `_abort_if_unique_id_mismatch` all arrived
 in that release (`entry.runtime_data`, the previous floor, only needed 2024.6). Bump it whenever a
@@ -498,7 +509,7 @@ to the Default / Eco / Next Trip modes shown in `select.yaml`.
 `sse` (serial), `onv` (firmware).
 
 `const.py::EVENT_PROPS` (`ftt`) lists the properties whose changes are re-broadcast as
-`wattpilot_property_message` HA events. `utils.py::async_PropertyDebug` keeps an
+`wattpilot_flex_property_message` HA events. `utils.py::async_PropertyDebug` keeps an
 `exclude_properties` list of noisy, high-frequency codes (e.g. `nrg`, `rssi`, `rbt`, `loc`,
 `fbuf_*`, `pvopt_*`) that are suppressed from property-change debug logging.
 

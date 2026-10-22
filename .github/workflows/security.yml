@@ -28,11 +28,11 @@ jobs:
       # predates the strict standards in CLAUDE.md), but they surface in logs.
       - name: Bandit
         continue-on-error: true
-        run: bandit -r custom_components/wattpilot -x custom_components/wattpilot/wattpilot
+        run: bandit -r custom_components/wattpilot_flex -x custom_components/wattpilot_flex/wattpilot
 
       # Audits the integration's declared runtime dependencies (manifest.json)
       # for known-vulnerable packages. This one gates the job.
       - name: pip-audit (manifest requirements)
         run: |
-          python -c "import json; print('\n'.join(json.load(open('custom_components/wattpilot/manifest.json'))['requirements']))" > requirements-manifest.txt
+          python -c "import json; print('\n'.join(json.load(open('custom_components/wattpilot_flex/manifest.json'))['requirements']))" > requirements-manifest.txt
           pip-audit -r requirements-manifest.txt

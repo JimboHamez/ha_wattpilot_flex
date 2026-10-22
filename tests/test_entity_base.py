@@ -18,8 +18,8 @@ import pytest
 pytest.importorskip("wattpilot_api", reason="integration import unavailable")
 from homeassistant.const import STATE_UNKNOWN, EntityCategory
 
-from custom_components.wattpilot.const import CONF_CLOUD, CONF_CONNECTION, CONF_LOCAL
-from custom_components.wattpilot.entities import ChargerPlatformEntity
+from custom_components.wattpilot_flex.const import CONF_CLOUD, CONF_CONNECTION, CONF_LOCAL
+from custom_components.wattpilot_flex.entities import ChargerPlatformEntity
 
 BASE_PROPS = {"amp": 6, "onv": "38.5", "sse": "SN", "typ": "model", "var": 11}
 
@@ -66,7 +66,7 @@ def test_firmware_gate_rejects_an_unknown_operator(make_charger, caplog):
     """A test string with no comparison prefix disables the entity."""
     charger = make_charger(props=dict(BASE_PROPS), firmware="38.5")
 
-    with caplog.at_level(logging.ERROR, logger="custom_components.wattpilot.entities"):
+    with caplog.at_level(logging.ERROR, logger="custom_components.wattpilot_flex.entities"):
         entity = _build(charger, firmware="38.5")
 
     assert entity._fw_supported is False
@@ -77,7 +77,7 @@ def test_firmware_gate_without_a_readable_firmware(make_charger, caplog):
     """A charger that reports no firmware fails the gate."""
     charger = make_charger(props={"amp": 6, "typ": "model", "var": 11})
 
-    with caplog.at_level(logging.ERROR, logger="custom_components.wattpilot.entities"):
+    with caplog.at_level(logging.ERROR, logger="custom_components.wattpilot_flex.entities"):
         entity = _build(charger, firmware=">=38.0")
 
     assert entity._fw_supported is False
@@ -136,8 +136,8 @@ def test_construction_failure_is_logged(make_charger, caplog):
     charger = make_charger(props=dict(BASE_PROPS))
 
     with (
-        caplog.at_level(logging.ERROR, logger="custom_components.wattpilot.entities"),
-        patch("custom_components.wattpilot.entities.slugify", side_effect=RuntimeError("boom")),
+        caplog.at_level(logging.ERROR, logger="custom_components.wattpilot_flex.entities"),
+        patch("custom_components.wattpilot_flex.entities.slugify", side_effect=RuntimeError("boom")),
     ):
         entity = _build(charger)
 
@@ -202,7 +202,7 @@ def test_entity_registry_enabled_default_degrades_to_enabled(make_charger, caplo
     entity._entity_cfg = MagicMock()
     entity._entity_cfg.get.side_effect = RuntimeError("boom")
 
-    with caplog.at_level(logging.ERROR, logger="custom_components.wattpilot.entities"):
+    with caplog.at_level(logging.ERROR, logger="custom_components.wattpilot_flex.entities"):
         assert entity.entity_registry_enabled_default is True
 
     assert any("entity_registry_enabled_default failed" in r.getMessage() for r in caplog.records)
@@ -214,7 +214,7 @@ def test_device_info_describes_the_charger(make_charger):
 
     info = _build(charger).device_info
 
-    assert info["identifiers"] == {("wattpilot", "SN")}
+    assert info["identifiers"] == {("wattpilot_flex", "SN")}
     assert info["manufacturer"] == "Fronius"
     assert info["model"] == "model"
     assert info["sw_version"] == "38.5"
@@ -369,7 +369,7 @@ async def test_namespace_value_without_value_id_is_reported(make_charger, caplog
     entity = _build(charger, source="namespacelist", id="cards_0", value_id="energy")
     entity._entity_cfg = {"source": "namespacelist", "id": "cards_0"}
 
-    with caplog.at_level(logging.ERROR, logger="custom_components.wattpilot.entities"):
+    with caplog.at_level(logging.ERROR, logger="custom_components.wattpilot_flex.entities"):
         assert await entity._async_update_validate_property(SimpleNamespace(energy=5)) is None
 
     assert any("please specify the 'value_id'" in r.getMessage() for r in caplog.records)
@@ -452,7 +452,7 @@ async def test_unknown_value_reduce_is_logged(make_charger, caplog):
     charger = make_charger(props={**BASE_PROPS, "tma": [1, 2]})
     entity = _build(charger, id="tma", value_reduce="average")
 
-    with caplog.at_level(logging.ERROR, logger="custom_components.wattpilot.entities"):
+    with caplog.at_level(logging.ERROR, logger="custom_components.wattpilot_flex.entities"):
         assert await entity._async_update_validate_property([1, 2]) is None
 
     assert any("unknown value_reduce" in r.getMessage() for r in caplog.records)
@@ -463,7 +463,7 @@ async def test_value_validation_failure_is_logged(make_charger, caplog):
     charger = make_charger(props={**BASE_PROPS, "nrg": [1]})
     entity = _build(charger, id="nrg", value_id=5)
 
-    with caplog.at_level(logging.ERROR, logger="custom_components.wattpilot.entities"):
+    with caplog.at_level(logging.ERROR, logger="custom_components.wattpilot_flex.entities"):
         assert await entity._async_update_validate_property([1]) is None
 
     assert any("_async_update_validate_property failed" in r.getMessage() for r in caplog.records)
@@ -512,7 +512,7 @@ async def test_poll_failure_is_logged(make_charger, caplog):
     entity = _build(charger)
     entity.async_write_ha_state = MagicMock(side_effect=RuntimeError("boom"))
 
-    with caplog.at_level(logging.ERROR, logger="custom_components.wattpilot.entities"):
+    with caplog.at_level(logging.ERROR, logger="custom_components.wattpilot_flex.entities"):
         await entity.async_local_poll()
 
     assert any("async_local_poll failed" in r.getMessage() for r in caplog.records)
@@ -555,7 +555,7 @@ async def test_push_failure_is_logged(make_charger, caplog):
     entity = _build(charger)
     entity.async_write_ha_state = MagicMock(side_effect=RuntimeError("boom"))
 
-    with caplog.at_level(logging.ERROR, logger="custom_components.wattpilot.entities"):
+    with caplog.at_level(logging.ERROR, logger="custom_components.wattpilot_flex.entities"):
         await entity.async_local_push(16)
 
     assert any("async_local_push failed" in r.getMessage() for r in caplog.records)
@@ -606,7 +606,7 @@ async def test_update_failure_is_logged(make_charger, caplog):
     entity = _build(charger)
 
     with (
-        caplog.at_level(logging.ERROR, logger="custom_components.wattpilot.entities"),
+        caplog.at_level(logging.ERROR, logger="custom_components.wattpilot_flex.entities"),
         patch.object(type(entity), "available", property(lambda self: (_ for _ in ()).throw(RuntimeError("boom")))),
     ):
         await entity.async_update()

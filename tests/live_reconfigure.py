@@ -26,8 +26,8 @@ REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if REPO_ROOT not in sys.path:
     sys.path.insert(0, REPO_ROOT)
 
-from custom_components.wattpilot.config_flow import ConfigFlowHandler  # noqa: E402
-from custom_components.wattpilot.const import (  # noqa: E402
+from custom_components.wattpilot_flex.config_flow import ConfigFlowHandler  # noqa: E402
+from custom_components.wattpilot_flex.const import (  # noqa: E402
     CONF_CLOUD,
     CONF_CONNECTION,
     CONF_LOCAL,

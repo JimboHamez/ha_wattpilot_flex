@@ -70,7 +70,7 @@ ignore = [
 # whose behaviour is its name + class attributes, and whose methods are trivial
 # `native_value`/`__init__` overrides. Mandatory docstrings on those add only noise,
 # so the doc rules are relaxed here (substantive modules keep them).
-"custom_components/wattpilot/sensor.py" = ["D101", "D102", "D107"]
+"custom_components/wattpilot_flex/sensor.py" = ["D101", "D102", "D107"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google" # Home Assistant explicitly relies on Google-style documentation blocks

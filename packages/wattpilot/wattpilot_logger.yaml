@@ -6,5 +6,5 @@
 
 logger:
   logs:
-    custom_components.wattpilot: debug
+    custom_components.wattpilot_flex: debug
     wattpilot_api: debug

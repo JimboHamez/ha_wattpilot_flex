@@ -8,7 +8,7 @@ import pytest
 
 pytest.importorskip("homeassistant")
 
-from custom_components.wattpilot.compat import device_config_entry_ids, vol
+from custom_components.wattpilot_flex.compat import device_config_entry_ids, vol
 
 
 def test_device_config_entry_ids_prefers_the_single_config_entry_id():

@@ -22,13 +22,13 @@ REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if REPO_ROOT not in sys.path:
     sys.path.insert(0, REPO_ROOT)
 
-from custom_components.wattpilot.const import (  # noqa: E402
+from custom_components.wattpilot_flex.const import (  # noqa: E402
     CONF_CONNECTION,
     CONF_LOCAL,
     CONF_CLOUD,
     CONF_SERIAL,
 )
-from custom_components.wattpilot.utils import (  # noqa: E402
+from custom_components.wattpilot_flex.utils import (  # noqa: E402
     async_ConnectCharger,
     async_DisconnectCharger,
     async_GetChargerProp,

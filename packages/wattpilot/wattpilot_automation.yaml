@@ -4,7 +4,7 @@
 # Keeps the input_datetime helper from wattpilot_input_datetime.yaml and the charger's
 # next-trip time (property 'ftt') in sync in both directions: writing the helper pushes
 # the new departure time to the charger, and a change made in the Wattpilot app comes
-# back as a wattpilot_property_message event and updates the helper.
+# back as a wattpilot_flex_property_message event and updates the helper.
 #
 # Replace the device_id below with your charger's (Settings > Devices > Wattpilot).
 
@@ -19,7 +19,7 @@ automation:
         entity_id: input_datetime.wattpilot_next_trip_timing
       - id: 'get_value'
         trigger: event
-        event_type: 'wattpilot_property_message'
+        event_type: 'wattpilot_flex_property_message'
         event_data:
           # If you have multiple chargers, add charger_id here to pick which one this
           # automation handles.
@@ -33,7 +33,7 @@ automation:
               - condition: trigger
                 id: 'set_value'
             sequence:
-              - action: wattpilot.set_next_trip
+              - action: wattpilot_flex.set_next_trip
                 data:
                   device_id: "{{ device_id }}"
                   trigger_time: "{{ states(input_dt) | string }}"

@@ -19,8 +19,8 @@ import pytest
 try:
     from homeassistant.const import STATE_UNKNOWN
 
-    from custom_components.wattpilot.entities import ChargerPlatformEntity
-    from custom_components.wattpilot.sensor import ChargerSensor
+    from custom_components.wattpilot_flex.entities import ChargerPlatformEntity
+    from custom_components.wattpilot_flex.sensor import ChargerSensor
 except ImportError as exc:
     pytest.skip(f"integration import unavailable: {exc}", allow_module_level=True)
 

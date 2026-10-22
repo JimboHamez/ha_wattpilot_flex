@@ -13,7 +13,7 @@ from types import SimpleNamespace
 import pytest
 
 try:
-    from custom_components.wattpilot.entities import ChargerPlatformEntity
+    from custom_components.wattpilot_flex.entities import ChargerPlatformEntity
 except ImportError as exc:
     pytest.skip(f"integration import unavailable: {exc}", allow_module_level=True)
 

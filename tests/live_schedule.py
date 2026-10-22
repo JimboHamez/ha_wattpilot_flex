@@ -25,14 +25,14 @@ REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if REPO_ROOT not in sys.path:
     sys.path.insert(0, REPO_ROOT)
 
-from custom_components.wattpilot.schedule import (  # noqa: E402
+from custom_components.wattpilot_flex.schedule import (  # noqa: E402
     SCHEDULE_PROPS,
     build_schedule,
     decode_schedule,
     parse_time,
     validate_ranges,
 )
-from custom_components.wattpilot.utils import async_GetChargerProp, async_SetChargerProp  # noqa: E402
+from custom_components.wattpilot_flex.utils import async_GetChargerProp, async_SetChargerProp  # noqa: E402
 
 SECRETS_FILE = os.path.join(REPO_ROOT, ".wp_test.json")
 

@@ -12,7 +12,7 @@ set_next_trip:
       example: 1625eec2e3f83829c2d52999ecdd2036
       selector:
         device:
-          integration: wattpilot
+          integration: wattpilot_flex
     trigger_time:
       name: NextTrip
       description: Next trip time
@@ -30,7 +30,7 @@ set_charging_schedule:
       example: 1625eec2e3f83829c2d52999ecdd2036
       selector:
         device:
-          integration: wattpilot
+          integration: wattpilot_flex
     day_type:
       name: Day type
       description: Which schedule to change - weekdays, saturday or sunday
@@ -76,7 +76,7 @@ set_goe_cloud:
       example: 1625eec2e3f83829c2d52999ecdd2036
       selector:
         device:
-          integration: wattpilot
+          integration: wattpilot_flex
     cloud_api:
       name: CloudAPI
       description: Turn E-Cloud Api access ON or OFF
@@ -94,7 +94,7 @@ set_debug_properties:
       example: 1625eec2e3f83829c2d52999ecdd2036
       selector:
         device:
-          integration: wattpilot
+          integration: wattpilot_flex
     debug_properties:
       name: Debug
       description: TRUE to debug all properties; FALSE to debug none; list of properties to debug only these
@@ -113,7 +113,7 @@ disconnect_charger:
       example: 1625eec2e3f83829c2d52999ecdd2036
       selector:
         device:
-          integration: wattpilot
+          integration: wattpilot_flex
 
 reconnect_charger:
   name: ReConnect Charger
@@ -125,4 +125,4 @@ reconnect_charger:
       example: 1625eec2e3f83829c2d52999ecdd2036
       selector:
         device:
-          integration: wattpilot
+          integration: wattpilot_flex

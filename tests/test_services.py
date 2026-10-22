@@ -27,8 +27,8 @@ from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
 from homeassistant.helpers import device_registry as dr
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.wattpilot.compat import vol
-from custom_components.wattpilot.const import CONF_CONNECTION, CONF_DBG_PROPS, CONF_LOCAL, DOMAIN
+from custom_components.wattpilot_flex.compat import vol
+from custom_components.wattpilot_flex.const import CONF_CONNECTION, CONF_DBG_PROPS, CONF_LOCAL, DOMAIN
 
 PROPS = {
     "tma": 5.0,
@@ -81,7 +81,7 @@ async def charger_device(hass, make_charger):
     )
     entry.add_to_hass(hass)
 
-    with patch("custom_components.wattpilot.async_ConnectCharger", new=AsyncMock(return_value=charger)):
+    with patch("custom_components.wattpilot_flex.async_ConnectCharger", new=AsyncMock(return_value=charger)):
         assert await hass.config_entries.async_setup(entry.entry_id)
         await hass.async_block_till_done()
 
@@ -217,7 +217,7 @@ async def test_set_next_trip_write_failure_raises(hass, charger_device):
     _charger, device_id, _entry = charger_device
 
     with (
-        patch("custom_components.wattpilot.services.async_SetChargerProp", new=AsyncMock(return_value=False)),
+        patch("custom_components.wattpilot_flex.services.async_SetChargerProp", new=AsyncMock(return_value=False)),
         pytest.raises(HomeAssistantError) as err,
     ):
         await hass.services.async_call(
@@ -291,7 +291,7 @@ async def test_reconnect_charger_reuses_the_charger_object(hass, charger_device)
     charger, device_id, _entry = charger_device
 
     with patch(
-        "custom_components.wattpilot.services.async_ConnectCharger", new=AsyncMock(return_value=charger)
+        "custom_components.wattpilot_flex.services.async_ConnectCharger", new=AsyncMock(return_value=charger)
     ) as connect:
         await hass.services.async_call(DOMAIN, "reconnect_charger", {"device_id": device_id}, blocking=True)
 
@@ -304,7 +304,7 @@ async def test_reconnect_charger_failure_raises(hass, charger_device):
     _charger, device_id, _entry = charger_device
 
     with (
-        patch("custom_components.wattpilot.services.async_ConnectCharger", new=AsyncMock(return_value=False)),
+        patch("custom_components.wattpilot_flex.services.async_ConnectCharger", new=AsyncMock(return_value=False)),
         pytest.raises(HomeAssistantError) as err,
     ):
         await hass.services.async_call(DOMAIN, "reconnect_charger", {"device_id": device_id}, blocking=True)
@@ -328,7 +328,7 @@ async def test_set_goe_cloud_key_timeout_raises(hass, charger_device):
 
     # The handler polls with one-second sleeps; skip the real waiting.
     with (
-        patch("custom_components.wattpilot.services.asyncio.sleep", new=AsyncMock()),
+        patch("custom_components.wattpilot_flex.services.asyncio.sleep", new=AsyncMock()),
         pytest.raises(HomeAssistantError) as err,
     ):
         await hass.services.async_call(
@@ -344,7 +344,7 @@ async def test_set_goe_cloud_write_failure_raises(hass, charger_device):
     _charger, device_id, _entry = charger_device
 
     with (
-        patch("custom_components.wattpilot.services.async_SetChargerProp", new=AsyncMock(return_value=False)),
+        patch("custom_components.wattpilot_flex.services.async_SetChargerProp", new=AsyncMock(return_value=False)),
         pytest.raises(HomeAssistantError) as err,
     ):
         await hass.services.async_call(
@@ -355,12 +355,12 @@ async def test_set_goe_cloud_write_failure_raises(hass, charger_device):
 
 async def test_service_registration_failure_is_logged(caplog):
     """A failure while registering a service is logged, not raised."""
-    from custom_components.wattpilot.services import async_registerService
+    from custom_components.wattpilot_flex.services import async_registerService
 
     hass = MagicMock()
     hass.services.has_service.side_effect = RuntimeError("boom")
 
-    with caplog.at_level(logging.ERROR, logger="custom_components.wattpilot.services"):
+    with caplog.at_level(logging.ERROR, logger="custom_components.wattpilot_flex.services"):
         await async_registerService(hass, "set_next_trip", AsyncMock())
 
     assert any("async_registerService: failed" in r.getMessage() for r in caplog.records)
@@ -368,7 +368,7 @@ async def test_service_registration_failure_is_logged(caplog):
 
 async def test_registering_an_existing_service_is_skipped():
     """Re-registering an existing service is a no-op."""
-    from custom_components.wattpilot.services import async_registerService
+    from custom_components.wattpilot_flex.services import async_registerService
 
     hass = MagicMock()
     hass.services.has_service.return_value = True
@@ -410,7 +410,7 @@ async def test_unexpected_failures_become_home_assistant_errors(hass, charger_de
     _charger, device_id, _entry = charger_device
 
     with (
-        patch(f"custom_components.wattpilot.services.{target}", side_effect=RuntimeError("boom")),
+        patch(f"custom_components.wattpilot_flex.services.{target}", side_effect=RuntimeError("boom")),
         pytest.raises(HomeAssistantError) as err,
     ):
         await hass.services.async_call(DOMAIN, service, {"device_id": device_id, **data}, blocking=True)
@@ -437,7 +437,7 @@ async def test_set_goe_cloud_enable_failure_raises(hass, charger_device):
     _charger, device_id, _entry = charger_device
 
     with (
-        patch("custom_components.wattpilot.services.async_SetChargerProp", new=AsyncMock(return_value=False)),
+        patch("custom_components.wattpilot_flex.services.async_SetChargerProp", new=AsyncMock(return_value=False)),
         pytest.raises(HomeAssistantError) as err,
     ):
         await hass.services.async_call(
@@ -452,7 +452,7 @@ async def test_reconnect_charger_skips_disconnect_when_already_offline(hass, cha
     charger.connected = False
     charger.disconnect = AsyncMock()
 
-    with patch("custom_components.wattpilot.services.async_ConnectCharger", new=AsyncMock(return_value=charger)):
+    with patch("custom_components.wattpilot_flex.services.async_ConnectCharger", new=AsyncMock(return_value=charger)):
         await hass.services.async_call(DOMAIN, "reconnect_charger", {"device_id": device_id}, blocking=True)
 
     charger.disconnect.assert_not_awaited()
@@ -599,7 +599,7 @@ async def test_set_charging_schedule_write_failure_raises(hass, charger_device):
     _charger, device_id, _entry = charger_device
 
     with (
-        patch("custom_components.wattpilot.services.async_SetChargerProp", new=AsyncMock(return_value=False)),
+        patch("custom_components.wattpilot_flex.services.async_SetChargerProp", new=AsyncMock(return_value=False)),
         pytest.raises(HomeAssistantError) as err,
     ):
         await hass.services.async_call(
