@@ -1,4 +1,4 @@
-[![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg?style=for-the-badge)](https://github.com/hacs/integration)
+[![hacs_badge](https://img.shields.io/badge/HACS-Default-41BDF5.svg?style=for-the-badge)](https://github.com/hacs/default)
 ![GitHub Release](https://img.shields.io/github/v/release/JimboHamez/ha_wattpilot_flex?style=for-the-badge)
 [![hacs_downloads](https://img.shields.io/github/downloads/JimboHamez/ha_wattpilot_flex/latest/total?style=for-the-badge)](https://github.com/JimboHamez/ha_wattpilot_flex/releases/latest)
 [![Quality Scale](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FJimboHamez%2Fha_wattpilot_flex%2Fmain%2Fcustom_components%2Fwattpilot_flex%2Fmanifest.json&query=%24.quality_scale&label=Quality%20Scale&style=for-the-badge&color=E5E4E2)](https://developers.home-assistant.io/docs/core/integration-quality-scale/)
@@ -30,7 +30,7 @@
 > the original integration.
 
 > **Upgrading from 0.12.x or earlier?** The integration's domain changed from `wattpilot` to
-> `wattpilot_flex` in 0.13.0, and your chargers have to be added again once. Follow
+> `wattpilot_flex` in 1.0.0, and your chargers have to be added again once. Follow
 > [Moving from the `wattpilot` domain](#moving-from-the-wattpilot-domain) **before** you update.
 
 # What This Is:
@@ -214,6 +214,9 @@ When reporting, include the integration version, your charger model/variant and 
 
 ## Installation
 
+Install it either through HACS, which is recommended and keeps it up to date, or manually (see
+[Install manually](#install-manually)).
+
 ### Install with HACS
 
 With [HACS](https://hacs.xyz/) installed:
@@ -225,8 +228,8 @@ With [HACS](https://hacs.xyz/) installed:
 
 HACS keeps track of updates from then on.
 
-If the search finds nothing, your HACS has not picked up the default catalog entry yet: add
-`https://github.com/JimboHamez/ha_wattpilot_flex` as a
+If the search finds nothing, your HACS has not picked up the integration's default-catalog entry
+yet: add `https://github.com/JimboHamez/ha_wattpilot_flex` as a
 [custom repository](https://hacs.xyz/docs/faq/custom_repositories/) (type **Integration**) and search again.
 
 ### Install manually
@@ -241,7 +244,8 @@ Up to 0.12.x this integration used the domain `wattpilot`, the same as
 [mk-maddin/wattpilot-HA](https://github.com/mk-maddin/wattpilot-HA), the project it started
 from. Two integrations cannot share one domain, because both install into
 `custom_components/wattpilot` and whichever is installed second overwrites the other. The
-original project had the domain first, so from **0.13.0** this one is `wattpilot_flex`.
+original project had the domain first, so from **1.0.0** this one is `wattpilot_flex`, and it
+shows in Home Assistant as **Wattpilot Flex**.
 
 Home Assistant treats a new domain as a new integration, so existing charger entries do not
 carry over and each charger has to be added again once.
@@ -258,7 +262,8 @@ too (see step 7).
 1. **Before updating**, write down what you have customised: renamed entities, areas, the
    entities you enabled (many are disabled by default), and the automations, scripts and
    dashboards that use the actions, the event or the charger's device.
-2. Go to **Settings → Devices & services → Fronius Wattpilot** and **Delete** each charger entry
+2. Go to **Settings → Devices & services → Fronius Wattpilot** (the old integration's name) and
+   **Delete** each charger entry
    (⋮ menu on the entry). Do this first. An entry left behind keeps its entity IDs reserved, and
    the re-added entities then get a `_2` suffix and start a fresh history. If you have already
    updated, the old entries are still listed as failing to load, and you can delete them the
@@ -267,13 +272,13 @@ too (see step 7).
    `custom_components/wattpilot_flex` folder). Then delete the old `custom_components/wattpilot`
    folder if it is still there, unless you installed mk-maddin's integration into it on purpose.
 4. Restart Home Assistant.
-5. Add the charger again (see [Configuration](#configuration)), or accept it when it is
-   discovered, with the same connection details and the **same name** as before.
+5. Add the charger again as **Wattpilot Flex** (see [Configuration](#configuration)), or accept
+   it when it is discovered, with the same connection details and the **same name** as before.
 6. Check that the entity IDs match the old ones. Rename any that do not back to the old ID so its
    history continues. Then re-apply your areas, names and enabled entities.
 7. Update automations, scripts and configuration:
 
-   | Before | From 0.13.0 |
+   | Before | From 1.0.0 |
    |--------|-------------|
    | `wattpilot.set_next_trip` and the other actions | `wattpilot_flex.set_next_trip`, … |
    | event `wattpilot_property_message` | event `wattpilot_flex_property_message` |
@@ -294,7 +299,7 @@ too (see step 7).
 2. In the sidebar click on Configuration.
 3. From the configuration menu select: Integrations.
 4. In the bottom right, click on the Add Integration button.
-5. From the list, search and select "Fronius Wattpilot".
+5. From the list, search and select "Wattpilot Flex".
 6. Follow the instruction on screen to complete the set up.
    (If connecting local/LAN you will require the local IP - for cloud connection your wattpilot serial is required)
 
@@ -492,6 +497,9 @@ work on it directly.
   [`wattpilot-api`](https://pypi.org/project/wattpilot-api/) library and may break
   after a charger firmware update.
 - Requires **Python 3.12+** (a modern Home Assistant release satisfies this).
+- On Home Assistant releases **before 2026.3** the integration shows no icon. Those releases
+  take icons only from the brands repository, which no longer accepts new custom integrations;
+  2026.3 and later use the images bundled with the integration.
 - Local mode needs the charger reachable on your LAN; cloud mode needs the go-e cloud
   reachable and the charger's serial number.
 - Some entities are **disabled by default** (diagnostics, rarely-used settings) — enable
@@ -539,7 +547,7 @@ work on it directly.
 
 ## Removing the integration
 
-Go to **Settings → Devices & services**, open the Fronius Wattpilot integration, and
+Go to **Settings → Devices & services**, open the Wattpilot Flex integration, and
 use the menu on the charger entry to **Delete**. No files remain in your configuration;
 if you installed manually, also remove the `custom_components/wattpilot_flex` folder.
 

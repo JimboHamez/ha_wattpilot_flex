@@ -21,6 +21,12 @@ for attribution.
   - actions: `wattpilot.<action>` → `wattpilot_flex.<action>`;
   - event: `wattpilot_property_message` → `wattpilot_flex_property_message`;
   - logger: `custom_components.wattpilot` → `custom_components.wattpilot_flex`.
+- The integration is called **Wattpilot Flex** in Home Assistant (was *Fronius Wattpilot*, the
+  same as the original project's). Its HACS listing stays *Fronius Wattpilot Flex*. Charger device
+  names, and so entity IDs, are unchanged.
+- Releases before Home Assistant 2026.3 show no icon for the integration. They take icons only from
+  the brands repository, which no longer accepts new custom integrations; 2026.3 and later use the
+  images bundled with the integration.
 
 ### Security
 - The go-e cloud API key (`cak`) is no longer fired as a `wattpilot_property_message` event.
