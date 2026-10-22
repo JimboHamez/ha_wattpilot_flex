@@ -29,6 +29,7 @@ from custom_components.wattpilot.const import (
     CONF_LOCAL,
     CONF_SERIAL,
     DOMAIN,
+    EVENT_PROPS,
     EVENT_PROPS_ID,
 )
 from custom_components.wattpilot.models import WattpilotRuntimeData
@@ -219,6 +220,19 @@ async def test_non_event_properties_are_not_fired(hass):
     await utils.async_PropertyUpdateHandler(hass, entry, "amp", "16")
     await hass.async_block_till_done()
 
+    assert events == []
+
+
+async def test_cloud_api_key_is_not_fired_on_the_bus(hass):
+    """The go-e cloud API key never becomes an event, which the recorder would keep."""
+    entry = _entry_with_runtime_data(hass)
+    events = []
+    hass.bus.async_listen(EVENT_PROPS_ID, events.append)
+
+    await utils.async_PropertyUpdateHandler(hass, entry, "cak", "secret-key")
+    await hass.async_block_till_done()
+
+    assert "cak" not in EVENT_PROPS
     assert events == []
 
 

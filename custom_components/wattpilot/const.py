@@ -37,7 +37,10 @@ AVAILABILITY_SCAN_INTERVAL: Final = timedelta(seconds=30)
 AUTH_FAILURE_REAUTH_THRESHOLD: Final = 3
 
 EVENT_PROPS_ID: Final = DOMAIN + "_property_message"
-EVENT_PROPS: Final = ("ftt", "cak")
+# Properties re-broadcast as events. Events land in the recorder and reach every
+# subscriber, so never add a secret here: 'cak' (the go-e cloud API key) was
+# removed for that reason.
+EVENT_PROPS: Final = ("ftt",)
 
 CLOUD_API_URL_PREFIX: Final = "https://"
 CLOUD_API_URL_POSTFIX: Final = ".api.v3.go-e.io/api/"

@@ -10,7 +10,17 @@ for attribution.
 
 ## [Unreleased]
 
-_Nothing yet._
+### Security
+- The go-e cloud API key (`cak`) is no longer fired as a `wattpilot_property_message` event.
+  Events are kept in the recorder's history and reach every event subscriber, so the key ended up
+  in both every time the charger reported it. The event still carries the next-trip time (`ftt`),
+  which is what the example automation uses.
+- The legacy `ID Chip 0`…`ID Chip 9` sensors (`cards_N`, for firmware that still reports the
+  `cards` list) no longer expose the card's `cardId` attribute. The card name and energy stay.
+
+### Documentation
+- The HACS install steps lead with searching for the integration in HACS; adding it as a custom
+  repository is now the fallback.
 
 ## [0.12.3] - 2026-10-09
 
