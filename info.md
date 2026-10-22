@@ -59,7 +59,7 @@ Allows for control of [Fronius Wattpilot](https://www.fronius.com/en/solar-energ
 ![screenshot of Next Trip service](doc/service_view1.jpg)
 
 > **Upgrading from 0.12.x or earlier?** The integration's domain changed from `wattpilot` to
-> `wattpilot_flex` in 0.13.0, and your chargers have to be added again once. Follow
+> `wattpilot_flex` in 1.0.0, and your chargers have to be added again once. Follow
 > [Moving from the `wattpilot` domain](https://github.com/JimboHamez/ha_wattpilot_flex#moving-from-the-wattpilot-domain)
 > **before** you update.
 
@@ -69,6 +69,9 @@ ATTENTION: Default configuration is for wattpilot firmware version > 38.5 !!
 If you are using older firmware, please read "Known Errors" instructions.
 
 ## Installation
+
+Install it either through HACS, which is recommended and keeps it up to date, or manually (see
+[Install manually](https://github.com/JimboHamez/ha_wattpilot_flex#install-manually)).
 
 ### Install with HACS
 
@@ -81,8 +84,8 @@ With [HACS](https://hacs.xyz/) installed:
 
 HACS keeps track of updates from then on.
 
-If the search finds nothing, your HACS has not picked up the default catalog entry yet: add
-`https://github.com/JimboHamez/ha_wattpilot_flex` as a
+If the search finds nothing, your HACS has not picked up the integration's default-catalog entry
+yet: add `https://github.com/JimboHamez/ha_wattpilot_flex` as a
 [custom repository](https://hacs.xyz/docs/faq/custom_repositories/) (type **Integration**) and search again.
 
 ### Install manually
@@ -103,7 +106,7 @@ for the integration to appear within the integration store.
 2. In the sidebar click on Configuration.
 3. From the configuration menu select: Integrations.
 4. In the bottom right, click on the Add Integration button.
-5. From the list, search and select "Fronius Wattpilot".
+5. From the list, search and select "Wattpilot Flex".
 6. Follow the instruction on screen to complete the set up.
 
 ![screenshot of Config Flow](doc/config_flow1.jpg)

@@ -51,7 +51,7 @@ translated entities, discovery/reauth, quality-scale work, and human-scale entit
 tracked in **this** repo, not upstream. Links to `mk-maddin/wattpilot-HA` are credit to the original
 project, so leave them as they are.
 
-**The domain is `wattpilot_flex`** (0.13.0 on; it was `wattpilot` up to 0.12.x). The HACS
+**The domain is `wattpilot_flex`** (1.0.0 on; it was `wattpilot` up to 0.12.x). The HACS
 default-catalog review asked for the change: `wattpilot` is upstream's domain, upstream is in the
 catalog too, and two entries with one domain install into the same `custom_components/<domain>`
 folder and overwrite each other. Never move back to `wattpilot`; `tests/test_const.py` guards it.
@@ -388,15 +388,17 @@ speaks `websockets`, not an aiohttp/httpx session.
 
 `manifest.json` declares **platinum**, backed by an audit rather than by the file alone: the rule
 list was diffed against `script/hassfest/quality_scale.py` in `home-assistant/core@dev` (54 rules,
-none missing, none invented), the `brands` claim was confirmed against
-`home-assistant/brands/custom_integrations/wattpilot` (the same images also ship in
-`custom_components/wattpilot_flex/brand/` — singular, the name Home Assistant 2026.3+ reads local brand
-images from and prefers over the CDN; keep both copies in step). Since the domain rename the brands
-repo still needs a `custom_integrations/wattpilot_flex` entry, or releases before 2026.3 show no icon, and `strict-typing` rests on a clean
-`mypy --strict` plus `py.typed` in both this package and the installed `wattpilot-api`. The two
+none missing, none invented), `brands` rests on `custom_components/wattpilot_flex/brand/`, and
+`strict-typing` rests on a clean `mypy --strict` plus `py.typed` in both this package and the installed `wattpilot-api`. The two
 weakest `docs-*` rules (`docs-use-cases`, `docs-examples`) and `docs-actions` were thin claims
 until the README gained its **Use cases**, **Example automations** and **Actions** sections —
 if you change what those sections cover, the rules go with them.
+
+`brand/` is singular, the name Home Assistant 2026.3+ reads a custom integration's own brand images
+from, in preference to the CDN. Since the domain rename it is the only copy that applies: the
+`home-assistant/brands` repo holds the images only under `custom_integrations/wattpilot` and no longer
+takes new custom integrations, so releases before 2026.3 show no icon for `wattpilot_flex`. That gap
+is accepted; do not try to add an entry there.
 
 The Silver `action-exceptions` rule was in direct tension with the log-and-degrade convention
 below, and the trade was settled deliberately: **actions raise, everything else still logs and
@@ -411,7 +413,8 @@ past actions without agreeing that separately.
 ## HACS packaging
 `hacs.json` (repo root) declares the HACS metadata. `"name"` is the name HACS shows,
 **Fronius Wattpilot Flex**. The integration's own name in Home Assistant is `manifest.json`'s
-`"name"`, "Fronius Wattpilot", and its domain is `wattpilot_flex`. `"homeassistant"` is the **minimum HA version**
+`"name"`, **Wattpilot Flex** (it was "Fronius Wattpilot", the same as upstream's, until 1.0.0), and its
+domain is `wattpilot_flex`. `"homeassistant"` is the **minimum HA version**
 and must not drift below what the code actually needs. It declares **2024.11**, set by the config
 flow: `_get_reauth_entry`, `_get_reconfigure_entry` and `_abort_if_unique_id_mismatch` all arrived
 in that release (`entry.runtime_data`, the previous floor, only needed 2024.6). Bump it whenever a

@@ -1,6 +1,6 @@
 {
   "domain": "wattpilot_flex",
-  "name": "Fronius Wattpilot",
+  "name": "Wattpilot Flex",
   "codeowners": ["@JimboHamez"],
   "config_flow": true,
   "documentation": "https://github.com/JimboHamez/ha_wattpilot_flex",

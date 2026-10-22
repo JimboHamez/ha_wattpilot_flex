@@ -19,9 +19,9 @@ rules:
       The assets ship with the component in
       custom_components/wattpilot_flex/brand/, which Home Assistant 2026.3+
       serves in preference to the brands CDN. Releases before 2026.3 read only
-      home-assistant/brands, which holds them under custom_integrations/wattpilot
-      (the domain before the rename); custom_integrations/wattpilot_flex is
-      still to be added there.
+      home-assistant/brands, which no longer takes new custom integrations, so
+      they show no icon for the wattpilot_flex domain (the images there sit
+      under custom_integrations/wattpilot, the domain before the rename).
   common-modules: done
   config-flow: done
   config-flow-test-coverage: done

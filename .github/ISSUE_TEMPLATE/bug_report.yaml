@@ -61,7 +61,7 @@ body:
     attributes:
       label: What version of Wattpilot integration is installed?
       description: >
-        Can be found in: [Settings ⇒ Devices & services ⇒ Fronius Wattpilot ⇒ upper left; directly below the fronius logo](https://my.home-assistant.io/redirect/integration/?domain=wattpilot_flex).
+        Can be found in: [Settings ⇒ Devices & services ⇒ Wattpilot Flex ⇒ upper left; directly below the fronius logo](https://my.home-assistant.io/redirect/integration/?domain=wattpilot_flex).
         [![Open your Home Assistant instance and show an integration.](https://my.home-assistant.io/badges/integration.svg)](https://my.home-assistant.io/redirect/integration/?domain=wattpilot_flex)
   - type: dropdown
     validations:
@@ -69,7 +69,7 @@ body:
     attributes:
       label: What type of Wattpilot Charger are you using?
       description: >
-        Can be found in: [Settings ⇒ Devices & services ⇒ Fronius Wattpilot ⇒ Select your charger device => upper left; Hardware](https://my.home-assistant.io/redirect/integration/?domain=wattpilot_flex).
+        Can be found in: [Settings ⇒ Devices & services ⇒ Wattpilot Flex ⇒ Select your charger device => upper left; Hardware](https://my.home-assistant.io/redirect/integration/?domain=wattpilot_flex).
         [![Open your Home Assistant instance and show an integration.](https://my.home-assistant.io/badges/integration.svg)](https://my.home-assistant.io/redirect/integration/?domain=wattpilot_flex)
       options:
         - 11KW
