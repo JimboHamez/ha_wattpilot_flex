@@ -558,3 +558,13 @@ to the Default / Eco / Next Trip modes shown in `select.yaml`.
   (`>=`, `<=`, `==`, `<`, `>`) against the charger firmware version; `variant` is `11`/`22`;
   `connection` is `local`/`cloud`.
 - User-facing strings/translations live in `translations/en.json` and `translations/de.json`.
+- **Never expose a secret or an identifying value.** Entity states, attributes and events all reach
+  the recorder and every API/websocket subscriber, and `_unrecorded_attributes` only keeps a value
+  out of history, not out of the live state. `diagnostics.py::REDACT_ALLPROPS` is the list of
+  sensitive charger keys. `tests/test_yaml_catalogs.py` fails when a catalog entity or
+  `EVENT_PROPS` reads one of them, unless the key is in `EXPOSED_REDACTED_KEYS` with a reason.
+  Credentials (`CREDENTIALS`: `cak`, `wak`, `facwak`, the OCPP secrets) can never be listed there,
+  and `FORBIDDEN_ATTRIBUTE_IDS` (`cardId`, `bssid`) can never be attributes. When the charger
+  reports a new key, decide whether it belongs in `REDACT_ALLPROPS` before exposing it. The HACS
+  review caught `cak` in `EVENT_PROPS` and `cardId` as an attribute after both had shipped for a long
+  time.

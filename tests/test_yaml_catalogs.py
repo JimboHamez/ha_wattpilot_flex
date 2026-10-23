@@ -10,6 +10,7 @@ Pure ``pyyaml`` — no Home Assistant import — so they run without the HA stac
 
 from __future__ import annotations
 
+import ast
 import glob
 import os
 import re
@@ -106,11 +107,100 @@ def test_card_energy_sensors_declare_no_default_state():
         assert "default_state" not in entity, f"{entity.get('id')} must not set default_state"
 
 
-def test_no_sensor_exposes_an_rfid_card_identifier():
-    # A card's 'cardId' is what unlocks the charger. State attributes land in the
-    # recorder and reach every subscriber, so it must never become one.
-    for entity in _load("sensor"):
-        assert "cardId" not in (entity.get("attribute_ids") or []), f"{entity.get('id')} exposes cardId"
+# Charger keys that diagnostics.py redacts but an entity exposes anyway, each with
+# the reason it is acceptable. Everything else in REDACT_ALLPROPS must stay out of
+# entity states, attributes and events: they all reach the recorder and every
+# subscriber. Credentials never belong here.
+EXPOSED_REDACTED_KEYS = {
+    **{f"c{slot}n": "RFID card name: a user-chosen label, kept at the HACS reviewer's request" for slot in range(10)},
+    "cards": "legacy RFID card list: only the card name and energy are exposed, never the cardId",
+    "ccw": "WiFi Connection sensor: the SSID plus ip/netmask/gw/channel, but never the bssid",
+}
+CREDENTIALS = {"cak", "facwak", "ocppcc", "ocppck", "ocppsc", "wak"}
+
+# Fields inside an exposed object value that must never become a state attribute.
+FORBIDDEN_ATTRIBUTE_IDS = {
+    "bssid": "the access point's MAC address, which can be looked up to a physical location",
+    "cardId": "the RFID card identifier, which is what unlocks the charger",
+}
+
+
+def _module_literal(filename: str, name: str):
+    """Read a module-level literal without importing the module (which needs Home Assistant)."""
+    with open(os.path.join(COMPONENT_DIR, filename), encoding="utf-8") as handle:
+        tree = ast.parse(handle.read())
+    for node in tree.body:
+        if isinstance(node, ast.Assign) and any(getattr(t, "id", None) == name for t in node.targets):
+            return ast.literal_eval(node.value)
+        if isinstance(node, ast.AnnAssign) and getattr(node.target, "id", None) == name:
+            return ast.literal_eval(node.value)
+    raise AssertionError(f"{name} not found in {filename}")
+
+
+def _exposed_charger_keys() -> dict[str, set[str]]:
+    """Map every charger key an entity reads to the entities reading it."""
+    exposed: dict[str, set[str]] = {}
+    for platform in PLATFORMS:
+        for entity in _load(platform):
+            name = f"{platform}.{entity.get('uid') or entity.get('id')}"
+            source = entity.get("source", "property")
+            keys = list((entity.get("attribute_props") or {}).values())
+            keys += list((entity.get("value_props") or {}).values())
+            if entity.get("options_property"):
+                keys.append(entity["options_property"])
+            if source == "property":
+                keys.append(entity.get("id"))
+            elif source == "namespacelist":
+                # 'cards_0' reads item 0 of the 'cards' property.
+                keys.append(re.sub(r"_\d+$", "", str(entity.get("id"))))
+            for key in keys:
+                exposed.setdefault(str(key), set()).add(name)
+    return exposed
+
+
+def test_no_entity_exposes_a_redacted_key_without_a_reason():
+    redacted = _module_literal("diagnostics.py", "REDACT_ALLPROPS")
+    exposed = _exposed_charger_keys()
+    unexplained = {k: sorted(v) for k, v in exposed.items() if k in redacted and k not in EXPOSED_REDACTED_KEYS}
+    assert not unexplained, (
+        f"entities expose keys that diagnostics redacts: {unexplained}. Leave them out, or add the key to "
+        "EXPOSED_REDACTED_KEYS with the reason it is safe"
+    )
+
+
+def test_exposed_redacted_keys_are_still_redacted_and_used():
+    # Keeps the exception list honest: an entry must still be redacted in
+    # diagnostics, still be read by an entity, and never be a credential.
+    redacted = _module_literal("diagnostics.py", "REDACT_ALLPROPS")
+    exposed = _exposed_charger_keys()
+    assert CREDENTIALS <= redacted, f"credentials not redacted in diagnostics: {sorted(CREDENTIALS - redacted)}"
+    for key in EXPOSED_REDACTED_KEYS:
+        assert key not in CREDENTIALS, f"{key} is a credential and can never be exposed"
+        assert key in redacted, f"{key} is no longer redacted in diagnostics; drop it from EXPOSED_REDACTED_KEYS"
+        assert key in exposed, f"no entity reads {key} any more; drop it from EXPOSED_REDACTED_KEYS"
+
+
+def test_no_credential_is_exposed():
+    exposed = _exposed_charger_keys()
+    leaked = {k: sorted(exposed[k]) for k in CREDENTIALS if k in exposed}
+    assert not leaked, f"credentials exposed by entities: {leaked}"
+
+
+def test_no_event_fires_a_redacted_key():
+    # Events are stored by the recorder and reach every subscriber.
+    redacted = _module_literal("diagnostics.py", "REDACT_ALLPROPS")
+    event_props = set(_module_literal("const.py", "EVENT_PROPS"))
+    assert not event_props & redacted, f"EVENT_PROPS fires redacted keys: {sorted(event_props & redacted)}"
+
+
+@pytest.mark.parametrize("field", sorted(FORBIDDEN_ATTRIBUTE_IDS))
+def test_no_entity_exposes_a_forbidden_attribute(field):
+    # Why each field is forbidden is recorded in FORBIDDEN_ATTRIBUTE_IDS.
+    for platform in PLATFORMS:
+        for entity in _load(platform):
+            assert field not in (entity.get("attribute_ids") or []), (
+                f"{platform}.{entity.get('uid') or entity.get('id')} exposes {field}: {FORBIDDEN_ATTRIBUTE_IDS[field]}"
+            )
 
 
 def test_unique_ids_are_unique_per_platform():
