@@ -10,6 +10,17 @@ for attribution.
 
 ## [Unreleased]
 
+_Nothing yet._
+
+## [1.0.0] - 2026-10-23
+
+The integration is getting ready for the HACS default catalog, and this release makes the changes
+that review asked for. **It is breaking: each charger has to be deleted and added again once.**
+The domain is now `wattpilot_flex`, because `wattpilot` belongs to the original project. Follow
+[Moving from the `wattpilot` domain](https://github.com/JimboHamez/ha_wattpilot_flex#moving-from-the-wattpilot-domain)
+**before** you update. Entity IDs and history carry over if the charger keeps its name. The go-e
+cloud API key and RFID card ids no longer reach the recorder.
+
 ### Changed (breaking)
 - The integration's domain is now `wattpilot_flex`, not `wattpilot`, and it installs into
   `custom_components/wattpilot_flex`. `wattpilot` is the domain of
@@ -29,7 +40,8 @@ for attribution.
   images bundled with the integration.
 
 ### Security
-- The go-e cloud API key (`cak`) is no longer fired as a `wattpilot_property_message` event.
+- The go-e cloud API key (`cak`) is no longer fired as a `wattpilot_property_message` event
+  (now `wattpilot_flex_property_message`).
   Events are kept in the recorder's history and reach every event subscriber, so the key ended up
   in both every time the charger reported it. The event still carries the next-trip time (`ftt`),
   which is what the example automation uses.
@@ -840,7 +852,8 @@ Assistant Integration Quality Scale.
   (services registered in `async_setup`).
 - `manifest.json`: added `integration_type` and `issue_tracker`, and sorted keys.
 
-[Unreleased]: https://github.com/JimboHamez/ha_wattpilot_flex/compare/v0.12.3...HEAD
+[Unreleased]: https://github.com/JimboHamez/ha_wattpilot_flex/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/JimboHamez/ha_wattpilot_flex/compare/v0.12.3...v1.0.0
 [0.12.3]: https://github.com/JimboHamez/ha_wattpilot_flex/compare/v0.12.2...v0.12.3
 [0.12.2]: https://github.com/JimboHamez/ha_wattpilot_flex/compare/v0.12.1...v0.12.2
 [0.12.1]: https://github.com/JimboHamez/ha_wattpilot_flex/compare/v0.12.0...v0.12.1
