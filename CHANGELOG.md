@@ -10,7 +10,17 @@ for attribution.
 
 ## [Unreleased]
 
-_Nothing yet._
+### Security
+- The **WiFi Connection** sensor no longer has a `bssid` attribute. The BSSID is the access point's
+  MAC address and can be looked up to a physical location, and attributes are kept in the recorder
+  and reach every subscriber. Diagnostics already redacted it. The SSID, IP address, netmask,
+  gateway and channel stay.
+
+### Tests
+- A catalog test checks every charger key an entity or event exposes against the keys diagnostics
+  redacts. A redacted key may only be exposed with a recorded reason (the RFID card names, the
+  legacy `cards` list and the WiFi connection info), and a credential never. `bssid` and `cardId`
+  are rejected as attributes.
 
 ## [1.0.0] - 2026-10-23
 

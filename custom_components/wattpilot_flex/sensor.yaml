@@ -408,12 +408,14 @@ sensor:
     description: "WiFi connection information"
     entity_category: diagnostic
     value_id: ssid
+    # 'bssid' (the access point's MAC address) is left out on purpose: it can be
+    # looked up to a physical location, and attributes reach the recorder and
+    # every subscriber. Diagnostics redacts the whole 'ccw' object.
     attribute_ids:
       - ip
       - netmask
       - gw
       - channel
-      - bssid
 
   - source: property
     id: cus
