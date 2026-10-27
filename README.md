@@ -1,6 +1,6 @@
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-41BDF5.svg?style=for-the-badge)](https://github.com/hacs/default)
 ![GitHub Release](https://img.shields.io/github/v/release/JimboHamez/ha_wattpilot_flex?style=for-the-badge)
-[![hacs_downloads](https://img.shields.io/github/downloads/JimboHamez/ha_wattpilot_flex/latest/total?style=for-the-badge)](https://github.com/JimboHamez/ha_wattpilot_flex/releases/latest)
+[![Installs](https://img.shields.io/badge/dynamic/json?color=41BDF5&style=for-the-badge&logo=home-assistant&label=installs&cacheSeconds=15600&url=https://analytics.home-assistant.io/custom_integrations.json&query=$.wattpilot_flex.total)](https://analytics.home-assistant.io/custom_integrations.json)
 [![Quality Scale](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FJimboHamez%2Fha_wattpilot_flex%2Fmain%2Fcustom_components%2Fwattpilot_flex%2Fmanifest.json&query=%24.quality_scale&label=Quality%20Scale&style=for-the-badge&color=E5E4E2)](https://developers.home-assistant.io/docs/core/integration-quality-scale/)
 ![GitHub License](https://img.shields.io/github/license/JimboHamez/ha_wattpilot_flex?style=for-the-badge)
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/y/JimboHamez/ha_wattpilot_flex?style=for-the-badge)
