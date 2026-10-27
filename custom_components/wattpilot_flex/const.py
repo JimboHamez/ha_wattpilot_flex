@@ -36,6 +36,51 @@ AVAILABILITY_SCAN_INTERVAL: Final = timedelta(seconds=30)
 # and only a persistent rejection is treated as genuinely wrong credentials.
 AUTH_FAILURE_REAUTH_THRESHOLD: Final = 3
 
+# Credentials (the cloud key, the WiFi access-point keys, OCPP secrets) and
+# anything that identifies the charger, its network or its users: serial, names,
+# hostname, SSIDs, MAC addresses, the OCPP server URL and the RFID card names.
+# Diagnostics redacts these, and utils.py masks their values in every log line
+# that prints a property, since logs get pasted into issues.
+REDACT_ALLPROPS: Final = {
+    "c0n",
+    "c1n",
+    "c2n",
+    "c3n",
+    "c4n",
+    "c5n",
+    "c6n",
+    "c7n",
+    "c8n",
+    "c9n",
+    "cak",
+    "cards",
+    "ccw",
+    "data",
+    "dll",
+    "facwak",
+    "ffna",
+    "fna",
+    "fwan",
+    "host",
+    "maca",
+    "macs",
+    "ocppcc",
+    "ocppck",
+    "ocppsc",
+    "ocppu",
+    "scan",
+    "sse",
+    "wak",
+    "wan",
+    "wcb",
+    "wfb",
+    "wifis",
+    "wpb",
+    "wss",
+}
+# The mask logged in place of a redacted value, the same one diagnostics uses.
+REDACTED: Final = "**REDACTED**"
+
 EVENT_PROPS_ID: Final = DOMAIN + "_property_message"
 # Properties re-broadcast as events. Events land in the recorder and reach every
 # subscriber, so never add a secret here: 'cak' (the go-e cloud API key) was
