@@ -10,6 +10,15 @@ for attribution.
 
 ## [Unreleased]
 
+_Nothing yet._
+
+## [1.0.1] - 2026-10-27
+
+Closes two more leaks found in the HACS default-catalog review. The go-e cloud API key no longer
+reaches the Home Assistant log when property debugging is on, and the WiFi Connection sensor no
+longer exposes the access point's MAC address. Nothing to do when updating, unless an automation
+reads that sensor's `bssid` attribute.
+
 ### Security
 - The **WiFi Connection** sensor no longer has a `bssid` attribute. The BSSID is the access point's
   MAC address and can be looked up to a physical location, and attributes are kept in the recorder
@@ -869,7 +878,8 @@ Assistant Integration Quality Scale.
   (services registered in `async_setup`).
 - `manifest.json`: added `integration_type` and `issue_tracker`, and sorted keys.
 
-[Unreleased]: https://github.com/JimboHamez/ha_wattpilot_flex/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/JimboHamez/ha_wattpilot_flex/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/JimboHamez/ha_wattpilot_flex/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/JimboHamez/ha_wattpilot_flex/compare/v0.12.3...v1.0.0
 [0.12.3]: https://github.com/JimboHamez/ha_wattpilot_flex/compare/v0.12.2...v0.12.3
 [0.12.2]: https://github.com/JimboHamez/ha_wattpilot_flex/compare/v0.12.1...v0.12.2
