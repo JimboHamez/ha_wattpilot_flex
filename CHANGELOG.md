@@ -15,12 +15,19 @@ for attribution.
   MAC address and can be looked up to a physical location, and attributes are kept in the recorder
   and reach every subscriber. Diagnostics already redacted it. The SSID, IP address, netmask,
   gateway and channel stay.
+- Property-change debug logging (the `set_debug_properties` action) no longer writes secrets to the
+  log. It logged every property and its value at warning level, including the go-e cloud API key
+  (`cak`) each time the charger pushed it once the cloud API was on. Every key that diagnostics
+  redacts is now logged as `**REDACTED**`, whether debugging covers all properties or a named list.
+  The debug lines written when a value is sent to the charger are masked the same way.
 
 ### Tests
 - A catalog test checks every charger key an entity or event exposes against the keys diagnostics
   redacts. A redacted key may only be exposed with a recorded reason (the RFID card names, the
   legacy `cards` list and the WiFi connection info), and a credential never. `bssid` and `cardId`
   are rejected as attributes.
+- Tests check that a redacted property's value never reaches the log, from either debug mode or
+  from a write.
 
 ## [1.0.0] - 2026-10-23
 

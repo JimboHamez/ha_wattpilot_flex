@@ -107,7 +107,7 @@ def test_card_energy_sensors_declare_no_default_state():
         assert "default_state" not in entity, f"{entity.get('id')} must not set default_state"
 
 
-# Charger keys that diagnostics.py redacts but an entity exposes anyway, each with
+# Charger keys that const.py::REDACT_ALLPROPS redacts but an entity exposes anyway, each with
 # the reason it is acceptable. Everything else in REDACT_ALLPROPS must stay out of
 # entity states, attributes and events: they all reach the recorder and every
 # subscriber. Credentials never belong here.
@@ -159,7 +159,7 @@ def _exposed_charger_keys() -> dict[str, set[str]]:
 
 
 def test_no_entity_exposes_a_redacted_key_without_a_reason():
-    redacted = _module_literal("diagnostics.py", "REDACT_ALLPROPS")
+    redacted = _module_literal("const.py", "REDACT_ALLPROPS")
     exposed = _exposed_charger_keys()
     unexplained = {k: sorted(v) for k, v in exposed.items() if k in redacted and k not in EXPOSED_REDACTED_KEYS}
     assert not unexplained, (
@@ -171,7 +171,7 @@ def test_no_entity_exposes_a_redacted_key_without_a_reason():
 def test_exposed_redacted_keys_are_still_redacted_and_used():
     # Keeps the exception list honest: an entry must still be redacted in
     # diagnostics, still be read by an entity, and never be a credential.
-    redacted = _module_literal("diagnostics.py", "REDACT_ALLPROPS")
+    redacted = _module_literal("const.py", "REDACT_ALLPROPS")
     exposed = _exposed_charger_keys()
     assert CREDENTIALS <= redacted, f"credentials not redacted in diagnostics: {sorted(CREDENTIALS - redacted)}"
     for key in EXPOSED_REDACTED_KEYS:
@@ -188,7 +188,7 @@ def test_no_credential_is_exposed():
 
 def test_no_event_fires_a_redacted_key():
     # Events are stored by the recorder and reach every subscriber.
-    redacted = _module_literal("diagnostics.py", "REDACT_ALLPROPS")
+    redacted = _module_literal("const.py", "REDACT_ALLPROPS")
     event_props = set(_module_literal("const.py", "EVENT_PROPS"))
     assert not event_props & redacted, f"EVENT_PROPS fires redacted keys: {sorted(event_props & redacted)}"
 

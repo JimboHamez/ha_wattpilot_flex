@@ -27,6 +27,8 @@ from .const import (
     DOMAIN,
     EVENT_PROPS,
     EVENT_PROPS_ID,
+    REDACT_ALLPROPS,
+    REDACTED,
 )
 
 if TYPE_CHECKING:
@@ -142,6 +144,20 @@ def ProgrammingDebug(obj: object, show_all: bool = False) -> None:
         pass
 
 
+def loggable_value(identifier: str, value: object) -> object:
+    """Return a property value that is safe to write to the log.
+
+    Args:
+        identifier: The charger property short-code.
+        value: The property value.
+
+    Returns:
+        The value, or the redaction mask for a key that diagnostics redacts
+        (credentials such as ``cak``, and identifying values such as ``sse``).
+    """
+    return REDACTED if identifier in REDACT_ALLPROPS else value
+
+
 async def async_PropertyDebug(identifier: str, value: str, include_properties: bool | list[str]) -> None:
     """Log properties if they change."""
     exclude_properties = [
@@ -175,7 +191,11 @@ async def async_PropertyDebug(identifier: str, value: str, include_properties: b
     if (isinstance(include_properties, list) and identifier in include_properties) or (
         isinstance(include_properties, bool) and identifier not in exclude_properties
     ):
-        _LOGGER.warning("async_PropertyDebug: watch_properties: %s => %s ", identifier, value)
+        # The mask applies in both modes: naming a secret in the watch list
+        # must not be a way to write it to the log.
+        _LOGGER.warning(
+            "async_PropertyDebug: watch_properties: %s => %s ", identifier, loggable_value(identifier, value)
+        )
 
 
 async def async_PropertyUpdateHandler(
@@ -297,7 +317,12 @@ async def async_SetChargerProp(
         # SimpleNamespace values (e.g. the 'cll' current-limit object) are sent
         # as their underlying dict, and a dict or list (a charging schedule
         # built by the service) is already the JSON value to send.
-        _LOGGER.debug("%s - async_SetChargerProp: Prepare new property value: %s=%s", DOMAIN, identifier, value)
+        _LOGGER.debug(
+            "%s - async_SetChargerProp: Prepare new property value: %s=%s",
+            DOMAIN,
+            identifier,
+            loggable_value(identifier, value),
+        )
         v: Any
         if isinstance(value, (dict, list)):
             v = value
@@ -314,13 +339,18 @@ async def async_SetChargerProp(
                 "%s - async_SetChargerProp: Set for namespace detected - this is untested: %s=%s",
                 DOMAIN,
                 identifier,
-                value,
+                loggable_value(identifier, value),
             )
             v = value.__dict__
         else:
             v = str(value)
 
-        _LOGGER.debug("%s - async_SetChargerProp: Send property update to charger: %s=%s", DOMAIN, identifier, v)
+        _LOGGER.debug(
+            "%s - async_SetChargerProp: Send property update to charger: %s=%s",
+            DOMAIN,
+            identifier,
+            loggable_value(identifier, v),
+        )
         await charger.set_property(identifier, v)
         return True
     except Exception as e:

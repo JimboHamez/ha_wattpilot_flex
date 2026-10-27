@@ -31,6 +31,8 @@ from custom_components.wattpilot_flex.const import (
     DOMAIN,
     EVENT_PROPS,
     EVENT_PROPS_ID,
+    REDACT_ALLPROPS,
+    REDACTED,
 )
 from custom_components.wattpilot_flex.models import WattpilotRuntimeData
 
@@ -173,6 +175,32 @@ async def test_property_debug_honours_an_explicit_property_list(caplog):
     messages = [r.getMessage() for r in caplog.records]
     assert any("nrg => 1" in m for m in messages)
     assert not any("amp" in m for m in messages)
+
+
+@pytest.mark.parametrize("watch", [True, ["cak"]], ids=["all", "watch-list"])
+async def test_property_debug_masks_secrets(caplog, watch):
+    """A redacted property is logged masked, whichever mode named it."""
+    with caplog.at_level(logging.WARNING, logger="custom_components.wattpilot_flex.utils"):
+        await utils.async_PropertyDebug("cak", "secret-cloud-key", watch)
+    messages = [r.getMessage() for r in caplog.records]
+    assert any("cak => **REDACTED**" in m for m in messages)
+    assert not any("secret-cloud-key" in m for m in messages)
+
+
+def test_loggable_value_masks_every_redacted_key():
+    """Every key diagnostics redacts is masked, and other values pass through."""
+    for key in REDACT_ALLPROPS:
+        assert utils.loggable_value(key, "x") == REDACTED, key
+    assert utils.loggable_value("amp", 16) == 16
+
+
+async def test_set_property_does_not_log_a_secret_value(mock_charger, caplog):
+    """The write path's debug lines mask a redacted property's value too."""
+    mock_charger.all_properties["cak"] = ""
+    with caplog.at_level(logging.DEBUG, logger="custom_components.wattpilot_flex.utils"):
+        assert await utils.async_SetChargerProp(mock_charger, "cak", "secret-cloud-key") is True
+    assert "secret-cloud-key" not in caplog.text
+    assert "cak=**REDACTED**" in caplog.text
 
 
 # --- async_PropertyUpdateHandler ---------------------------------------------
