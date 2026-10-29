@@ -1,0 +1,825 @@
+{
+    "config": {
+        "flow_title": "{name}",
+        "step": {
+            "connection": {
+                "title": "Stazione di ricarica Wattpilot",
+                "description": "Scegli come Home Assistant deve connettersi alla tua stazione di ricarica Wattpilot.",
+                "data": {
+                    "connection": "Tipo di connessione"
+                },
+                "data_description": {
+                    "connection": "Locale si connette direttamente tramite la tua rete locale (LAN). Cloud si connette tramite il cloud go-e usando il numero di serie della stazione di ricarica."
+                }
+            },
+            "local": {
+                "title": "Connessione locale",
+                "description": "Inserisci i dati di rete locale della tua stazione di ricarica Wattpilot.",
+                "data": {
+                    "friendly_name": "Nome",
+                    "ip_address": "Indirizzo IP",
+                    "password": "Password",
+                    "timeout": "Timeout"
+                },
+                "data_description": {
+                    "friendly_name": "Nome visualizzato della stazione di ricarica in Home Assistant.",
+                    "ip_address": "Indirizzo IP locale della stazione di ricarica nella tua rete.",
+                    "password": "La password locale della stazione di ricarica impostata nell'app Wattpilot.",
+                    "timeout": "Secondi di attesa per stabilire e inizializzare la connessione."
+                }
+            },
+            "cloud": {
+                "title": "Connessione cloud",
+                "description": "Inserisci i dati cloud go-e della tua stazione di ricarica Wattpilot.",
+                "data": {
+                    "friendly_name": "Nome",
+                    "serial": "Numero di serie",
+                    "password": "Password",
+                    "timeout": "Timeout"
+                },
+                "data_description": {
+                    "friendly_name": "Nome visualizzato della stazione di ricarica in Home Assistant.",
+                    "serial": "Numero di serie della stazione di ricarica, usato per raggiungerla tramite il cloud go-e.",
+                    "password": "La password cloud impostata per la tua stazione di ricarica.",
+                    "timeout": "Secondi di attesa per stabilire e inizializzare la connessione."
+                }
+            },
+            "zeroconf_confirm": {
+                "title": "Stazione di ricarica Wattpilot",
+                "description": "Configura la stazione di ricarica Wattpilot rilevata \"{name}\".",
+                "data": {
+                    "password": "Password",
+                    "timeout": "Timeout"
+                },
+                "data_description": {
+                    "password": "La password locale della stazione di ricarica impostata nell'app Wattpilot.",
+                    "timeout": "Secondi di attesa per stabilire e inizializzare la connessione."
+                }
+            },
+            "reauth_confirm": {
+                "title": "Stazione di ricarica Wattpilot",
+                "description": "La password di \"{name}\" non è più valida. Inserisci la password attuale della stazione di ricarica.",
+                "data": {
+                    "password": "Password"
+                },
+                "data_description": {
+                    "password": "La password locale della stazione di ricarica impostata nell'app Wattpilot."
+                }
+            },
+            "reconfigure": {
+                "title": "Stazione di ricarica Wattpilot",
+                "description": "Aggiorna i dati di connessione di \"{name}\". Il tipo di connessione non può essere modificato qui; aggiungi di nuovo la stazione di ricarica per passare da una connessione locale a una cloud o viceversa.",
+                "data": {
+                    "friendly_name": "Nome",
+                    "ip_address": "Indirizzo IP",
+                    "password": "Password",
+                    "serial": "Numero di serie",
+                    "timeout": "Timeout"
+                },
+                "data_description": {
+                    "friendly_name": "Nome visualizzato della stazione di ricarica in Home Assistant.",
+                    "ip_address": "Indirizzo IP locale della stazione di ricarica nella tua rete.",
+                    "password": "La password locale della stazione di ricarica impostata nell'app Wattpilot.",
+                    "serial": "Numero di serie della stazione di ricarica, come mostrato nell'app Wattpilot.",
+                    "timeout": "Secondi di attesa per stabilire e inizializzare la connessione."
+                }
+            }
+        },
+        "abort": {
+            "already_configured": "Questa stazione di ricarica è già configurata.",
+            "exception": "Si è verificato un errore imprevisto. Controlla i log per i dettagli.",
+            "no_ipv4": "La stazione di ricarica rilevata non ha annunciato alcun indirizzo IPv4.",
+            "no_serial": "Il dispositivo rilevato non ha annunciato alcun numero di serie.",
+            "reauth_successful": "La nuova autenticazione è riuscita.",
+            "reconfigure_successful": "I dati di connessione della stazione di ricarica sono stati aggiornati.",
+            "wrong_charger": "Questi dati appartengono a un'altra stazione di ricarica. La riconfigurazione può modificare solo il modo in cui viene raggiunta questa stazione di ricarica."
+        },
+        "error": {
+            "cannot_connect": "Impossibile connettersi alla stazione di ricarica. Verifica che sia online e riprova.",
+            "invalid_auth": "Password non valida. Verifica la password della stazione di ricarica e riprova.",
+            "wrong_charger": "Questi dati appartengono a un'altra stazione di ricarica. La riconfigurazione può modificare solo il modo in cui viene raggiunta questa stazione di ricarica."
+        }
+    },
+    "selector": {
+        "connection": {
+            "options": {
+                "local": "Locale (LAN)",
+                "cloud": "go-e Cloud"
+            }
+        },
+        "day_type": {
+            "options": {
+                "weekdays": "Giorni feriali",
+                "saturday": "Sabato",
+                "sunday": "Domenica"
+            }
+        }
+    },
+    "services": {
+        "set_next_trip": {
+            "name": "Imposta il prossimo viaggio",
+            "description": "Imposta l'orario di partenza usato dalla modalità di ricarica Next Trip.",
+            "fields": {
+                "device_id": {
+                    "name": "Stazione di ricarica",
+                    "description": "Stazione di ricarica a cui applicare la modifica."
+                },
+                "trigger_time": {
+                    "name": "Prossimo viaggio",
+                    "description": "Orario di partenza del prossimo viaggio."
+                }
+            }
+        },
+        "set_charging_schedule": {
+            "name": "Imposta gli orari di ricarica",
+            "description": "Scrive sulla stazione di ricarica un tipo di giorno della programmazione di ricarica dell'app (orari di ricarica). I campi lasciati vuoti mantengono il valore attuale.",
+            "fields": {
+                "device_id": {
+                    "name": "Stazione di ricarica",
+                    "description": "Stazione di ricarica a cui applicare la modifica."
+                },
+                "day_type": {
+                    "name": "Tipo di giorno",
+                    "description": "Programmazione da modificare: giorni feriali, sabato o domenica."
+                },
+                "limit_charging_times": {
+                    "name": "Limita gli orari di ricarica",
+                    "description": "Ricarica solo negli orari di ricarica."
+                },
+                "pv_surplus_outside_times": {
+                    "name": "Surplus FV fuori orario",
+                    "description": "Consenti la ricarica con il surplus fotovoltaico al di fuori degli orari di ricarica."
+                },
+                "ranges": {
+                    "name": "Orari di ricarica",
+                    "description": "Le fasce di ricarica, come elenco di orari di inizio e fine (HH:MM). Ogni fascia deve terminare dopo il suo inizio nello stesso giorno e le fasce non devono sovrapporsi; una fascia che supera la mezzanotte viene divisa in una fascia serale e una mattutina, come fa l'app."
+                }
+            }
+        },
+        "set_goe_cloud": {
+            "name": "Imposta il cloud go-e",
+            "description": "Attiva o disattiva l'accesso al cloud go-e per la stazione di ricarica.",
+            "fields": {
+                "device_id": {
+                    "name": "Stazione di ricarica",
+                    "description": "Stazione di ricarica a cui applicare la modifica."
+                },
+                "cloud_api": {
+                    "name": "API cloud",
+                    "description": "Attiva o disattiva l'accesso all'API cloud go-e."
+                }
+            }
+        },
+        "set_debug_properties": {
+            "name": "Imposta le proprietà di debug",
+            "description": "Attiva o disattiva la registrazione delle modifiche alle proprietà della stazione di ricarica come avvisi nel log.",
+            "fields": {
+                "device_id": {
+                    "name": "Stazione di ricarica",
+                    "description": "Stazione di ricarica a cui applicare la modifica."
+                },
+                "debug_properties": {
+                    "name": "Proprietà di debug",
+                    "description": "TRUE registra tutte le modifiche alle proprietà, FALSE nessuna; in alternativa indica un elenco di codici di proprietà per registrare solo quelli."
+                }
+            }
+        },
+        "disconnect_charger": {
+            "name": "Disconnetti la stazione di ricarica",
+            "description": "Interrompe una connessione attiva con la stazione di ricarica. Le entità restano non disponibili fino alla riconnessione.",
+            "fields": {
+                "device_id": {
+                    "name": "Stazione di ricarica",
+                    "description": "Stazione di ricarica a cui applicare la modifica."
+                }
+            }
+        },
+        "reconnect_charger": {
+            "name": "Riconnetti la stazione di ricarica",
+            "description": "Ristabilisce una connessione interrotta con la stazione di ricarica.",
+            "fields": {
+                "device_id": {
+                    "name": "Stazione di ricarica",
+                    "description": "Stazione di ricarica a cui applicare la modifica."
+                }
+            }
+        }
+    },
+    "entity": {
+        "sensor": {
+            "access_state": {
+                "name": "Stato di accesso",
+                "state": {
+                    "open": "Aperto",
+                    "wait": "In attesa"
+                }
+            },
+            "car_connected": {
+                "name": "Veicolo collegato",
+                "state": {
+                    "unknown": "Sconosciuto",
+                    "no_car": "Nessun veicolo",
+                    "charging": "In ricarica",
+                    "ready": "Pronto",
+                    "complete": "Completato",
+                    "error": "Errore"
+                }
+            },
+            "card_0_energy": {
+                "name": "Energia chip ID 0"
+            },
+            "card_1_energy": {
+                "name": "Energia chip ID 1"
+            },
+            "card_2_energy": {
+                "name": "Energia chip ID 2"
+            },
+            "card_3_energy": {
+                "name": "Energia chip ID 3"
+            },
+            "card_4_energy": {
+                "name": "Energia chip ID 4"
+            },
+            "card_5_energy": {
+                "name": "Energia chip ID 5"
+            },
+            "card_6_energy": {
+                "name": "Energia chip ID 6"
+            },
+            "card_7_energy": {
+                "name": "Energia chip ID 7"
+            },
+            "card_8_energy": {
+                "name": "Energia chip ID 8"
+            },
+            "card_9_energy": {
+                "name": "Energia chip ID 9"
+            },
+            "card_current_name": {
+                "name": "Nome del chip ID attuale"
+            },
+            "cards_0": {
+                "name": "Chip ID 0"
+            },
+            "cards_1": {
+                "name": "Chip ID 1"
+            },
+            "cards_2": {
+                "name": "Chip ID 2"
+            },
+            "cards_3": {
+                "name": "Chip ID 3"
+            },
+            "cards_4": {
+                "name": "Chip ID 4"
+            },
+            "cards_5": {
+                "name": "Chip ID 5"
+            },
+            "cards_6": {
+                "name": "Chip ID 6"
+            },
+            "cards_7": {
+                "name": "Chip ID 7"
+            },
+            "cards_8": {
+                "name": "Chip ID 8"
+            },
+            "cards_9": {
+                "name": "Chip ID 9"
+            },
+            "car": {
+                "name": "Stato del veicolo",
+                "state": {
+                    "unknown": "Sconosciuto",
+                    "idle": "Inattivo",
+                    "charging": "In ricarica",
+                    "wait_car": "In attesa del veicolo",
+                    "complete": "Completato",
+                    "error": "Errore"
+                }
+            },
+            "cci": {
+                "name": "Inverter"
+            },
+            "ccw": {
+                "name": "Connessione Wi-Fi"
+            },
+            "cus": {
+                "name": "Sblocco del cavo",
+                "state": {
+                    "unknown": "Sconosciuto",
+                    "unlocked": "Sbloccato",
+                    "unlockfailed": "Sblocco non riuscito",
+                    "locked": "Bloccato",
+                    "lockfailed": "Blocco non riuscito",
+                    "lockunlockpowerout": "Blocco/sblocco in caso di interruzione di corrente"
+                }
+            },
+            "err": {
+                "name": "Errore interno",
+                "state": {
+                    "none": "Nessun errore",
+                    "fiac": "Corrente di guasto (AC)",
+                    "fidc": "Corrente di guasto (DC)",
+                    "phase": "Errore di fase",
+                    "overvolt": "Sovratensione",
+                    "overamp": "Sovracorrente",
+                    "diode": "Errore del diodo",
+                    "ppinvalid": "Proximity pilot (PP) non valido",
+                    "gndinvalid": "Messa a terra non valida",
+                    "contactorstuck": "Contattore bloccato",
+                    "contactormiss": "Contattore mancante",
+                    "fiunknown": "Corrente di guasto sconosciuta",
+                    "unknown": "Sconosciuto",
+                    "overtemp": "Sovratemperatura",
+                    "nocomm": "Nessuna comunicazione",
+                    "statuslockstuckopen": "Blocco del cavo bloccato (aperto)",
+                    "statuslockstucklocked": "Blocco del cavo bloccato (chiuso)",
+                    "reserved20": "Riservato (20)",
+                    "reserved21": "Riservato (21)",
+                    "reserved22": "Riservato (22)",
+                    "reserved23": "Riservato (23)",
+                    "reserved24": "Riservato (24)"
+                }
+            },
+            "eto": {
+                "name": "Totale caricato"
+            },
+            "ffb": {
+                "name": "Riscontro del blocco",
+                "state": {
+                    "unknown": "Sconosciuto",
+                    "unlocked": "Sbloccato",
+                    "unlockfailed": "Sblocco non riuscito",
+                    "locked": "Bloccato",
+                    "lockfailed": "Blocco non riuscito",
+                    "lockunlockpowerout": "Blocco/sblocco in caso di interruzione di corrente"
+                }
+            },
+            "lck": {
+                "name": "Impostazione di blocco effettiva",
+                "state": {
+                    "normal": "Normale",
+                    "autounlock": "Sblocco automatico",
+                    "alwayslock": "Sempre bloccato",
+                    "forceunlock": "Sblocco forzato"
+                }
+            },
+            "loc": {
+                "name": "Ora locale"
+            },
+            "modelstatus": {
+                "name": "Motivo della ricarica",
+                "state": {
+                    "notchargingbecausenochargectrldata": "Non in ricarica: nessun dato dal controller di ricarica",
+                    "notchargingbecauseovertemperature": "Non in ricarica: sovratemperatura",
+                    "notchargingbecauseaccesscontrolwait": "Non in ricarica: in attesa del controllo accessi",
+                    "chargingbecauseforcestateon": "In ricarica: forzata (attiva)",
+                    "notchargingbecauseforcestateoff": "Non in ricarica: forzata (disattiva)",
+                    "notchargingbecausescheduler": "Non in ricarica: programmazione",
+                    "notchargingbecauseenergylimit": "Non in ricarica: limite di energia raggiunto",
+                    "chargingbecauseawattarpricelow": "In ricarica: prezzo aWATTar basso",
+                    "chargingbecauseautomaticstoptestladung": "In ricarica: arresto automatico (ricarica di prova)",
+                    "chargingbecauseautomaticstopnotenoughtime": "In ricarica: arresto automatico, tempo insufficiente",
+                    "chargingbecauseautomaticstop": "In ricarica: arresto automatico",
+                    "chargingbecauseautomaticstopnoclock": "In ricarica: arresto automatico, nessun orologio",
+                    "chargingbecausepvsurplus": "In ricarica: surplus FV",
+                    "chargingbecausefallbackgoedefault": "In ricarica: ripiego (predefinito go-e)",
+                    "chargingbecausefallbackgoescheduler": "In ricarica: ripiego (programmazione go-e)",
+                    "chargingbecausefallbackdefault": "In ricarica: ripiego (predefinito)",
+                    "notchargingbecausefallbackgoeawattar": "Non in ricarica: ripiego (go-e aWATTar)",
+                    "notchargingbecausefallbackawattar": "Non in ricarica: ripiego (aWATTar)",
+                    "notchargingbecausefallbackautomaticstop": "Non in ricarica: ripiego (arresto automatico)",
+                    "chargingbecausecarcompatibilitykeepalive": "In ricarica: keep-alive per compatibilità con il veicolo",
+                    "chargingbecausechargepausenotallowed": "In ricarica: pausa di ricarica non consentita",
+                    "notchargingbecausesimulateunplugging": "Non in ricarica: simulazione di scollegamento",
+                    "notchargingbecausephaseswitch": "Non in ricarica: commutazione di fase",
+                    "notchargingbecauseminpauseduration": "Non in ricarica: durata minima della pausa",
+                    "notchargingbecauseerror": "Non in ricarica: errore",
+                    "notchargingbecauseloadmanagementdoesntwant": "Non in ricarica: gestione del carico",
+                    "notchargingbecauseocppdoesntwant": "Non in ricarica: OCPP",
+                    "notchargingbecausereconnectdelay": "Non in ricarica: ritardo di riconnessione",
+                    "notchargingbecauseadapterblocking": "Non in ricarica: adattatore bloccante",
+                    "notchargingbecauseunderfrequencycontrol": "Non in ricarica: controllo di sottofrequenza",
+                    "notchargingbecauseunbalancedload": "Non in ricarica: carico squilibrato",
+                    "chargingbecausedischargingpvbattery": "In ricarica: scarica della batteria FV",
+                    "notchargingbecausegridmonitoring": "Non in ricarica: monitoraggio della rete",
+                    "notchargingbecauseocppfallback": "Non in ricarica: ripiego OCPP"
+                }
+            },
+            "nrg": {
+                "name": "Potenza di ricarica"
+            },
+            "qsw": {
+                "name": "Coda del server web"
+            },
+            "rbc": {
+                "name": "Contatore dei riavvii"
+            },
+            "rbt": {
+                "name": "Tempo dall'ultimo riavvio"
+            },
+            "rssi": {
+                "name": "Segnale Wi-Fi"
+            },
+            "schedule_saturday": {
+                "name": "Orari di ricarica sabato",
+                "state": {
+                    "off": "Disattivato",
+                    "charging_times": "Orari di ricarica",
+                    "pv_surplus_outside_times": "Surplus FV fuori orario",
+                    "charging_times_pv_surplus_outside": "Orari di ricarica + surplus FV fuori orario"
+                }
+            },
+            "schedule_sunday": {
+                "name": "Orari di ricarica domenica",
+                "state": {
+                    "off": "Disattivato",
+                    "charging_times": "Orari di ricarica",
+                    "pv_surplus_outside_times": "Surplus FV fuori orario",
+                    "charging_times_pv_surplus_outside": "Orari di ricarica + surplus FV fuori orario"
+                }
+            },
+            "schedule_weekdays": {
+                "name": "Orari di ricarica giorni feriali",
+                "state": {
+                    "off": "Disattivato",
+                    "charging_times": "Orari di ricarica",
+                    "pv_surplus_outside_times": "Surplus FV fuori orario",
+                    "charging_times_pv_surplus_outside": "Orari di ricarica + surplus FV fuori orario"
+                }
+            },
+            "tma": {
+                "name": "Temperatura della stazione di ricarica"
+            },
+            "trx": {
+                "name": "Chip ID attuale",
+                "state": {
+                    "no_chip": "Nessun chip",
+                    "id_chip_0": "Chip ID 0",
+                    "id_chip_1": "Chip ID 1",
+                    "id_chip_2": "Chip ID 2",
+                    "id_chip_3": "Chip ID 3",
+                    "id_chip_4": "Chip ID 4",
+                    "id_chip_5": "Chip ID 5",
+                    "id_chip_6": "Chip ID 6",
+                    "id_chip_7": "Chip ID 7",
+                    "id_chip_8": "Chip ID 8",
+                    "id_chip_9": "Chip ID 9",
+                    "no_transaction": "Nessuna transazione"
+                }
+            },
+            "wcch": {
+                "name": "Client HTTP"
+            },
+            "wccw": {
+                "name": "Client WebSocket"
+            },
+            "wh": {
+                "name": "Energia caricata (sessione)"
+            },
+            "wst": {
+                "name": "Stato Wi-Fi",
+                "state": {
+                    "idle_status": "IDLE_STATUS",
+                    "no_ssid_avail": "NO_SSID_AVAIL",
+                    "scan_completed": "SCAN_COMPLETED",
+                    "connected": "CONNECTED",
+                    "connect_failed": "CONNECT_FAILED",
+                    "connection_lost": "CONNECTION_LOST",
+                    "disconnected": "DISCONNECTED",
+                    "connecting": "CONNECTING",
+                    "disconnecting": "DISCONNECTING",
+                    "no_shield": "NO_SHIELD"
+                }
+            }
+        },
+        "switch": {
+            "bac": {
+                "name": "Selezione del livello di blocco"
+            },
+            "ebe": {
+                "name": "Boost"
+            },
+            "fap": {
+                "name": "Pausa di ricarica"
+            },
+            "fre": {
+                "name": "Rimani in Eco Mode"
+            },
+            "ful": {
+                "name": "Tariffa flessibile (Lumina Strom/aWATTar)"
+            },
+            "fup": {
+                "name": "Surplus FV"
+            },
+            "loe": {
+                "name": "Bilanciamento del carico"
+            },
+            "lse": {
+                "name": "Risparmio energetico LED"
+            },
+            "nmo": {
+                "name": "Controllo della messa a terra"
+            },
+            "pdte": {
+                "name": "Scarica la batteria FV"
+            },
+            "su": {
+                "name": "Simula lo scollegamento"
+            },
+            "tse": {
+                "name": "Network Time Protocol"
+            },
+            "upo": {
+                "name": "Sblocco in caso di interruzione di corrente"
+            },
+            "wda": {
+                "name": "Disattivazione automatica dell'hotspot"
+            }
+        },
+        "select": {
+            "acs": {
+                "name": "Controllo accessi",
+                "state": {
+                    "open": "Aperto",
+                    "authentication_required": "Autenticazione richiesta"
+                }
+            },
+            "amp_preset": {
+                "name": "Preimpostazione della corrente di ricarica"
+            },
+            "awc": {
+                "name": "Paese aWATTar",
+                "state": {
+                    "austria": "Austria",
+                    "belgium": "Belgio",
+                    "bulgaria": "Bulgaria",
+                    "croatia": "Croazia",
+                    "czechia": "Cechia",
+                    "denmark_dk1": "Danimarca DK1",
+                    "denmark_dk2": "Danimarca DK2",
+                    "denmark_dk1_tibber": "Danimarca DK1 Tibber",
+                    "denmark_dk2_tibber": "Danimarca DK2 Tibber",
+                    "estonia": "Estonia",
+                    "finland": "Finlandia",
+                    "france": "Francia",
+                    "germany": "Germania",
+                    "greece": "Grecia",
+                    "hungary": "Ungheria",
+                    "italy_calabria": "Italia Calabria",
+                    "italy_centre_noth": "Italia Centro-Nord",
+                    "italy_centre_south": "Italia Centro-Sud",
+                    "italy_north": "Italia Nord",
+                    "italy_sacoac": "Italia SacoAC",
+                    "italy_sacodc": "Italia SacoDC",
+                    "italy_sardinia": "Italia Sardegna",
+                    "italy_sicily": "Italia Sicilia",
+                    "italy_south": "Italia Sud",
+                    "latvia": "Lettonia",
+                    "lithuania": "Lituania",
+                    "montenegro": "Montenegro",
+                    "netherlands": "Paesi Bassi",
+                    "norway_elspot1": "Norvegia Elspot1",
+                    "norway_elspot2": "Norvegia Elspot2",
+                    "norway_elspot3": "Norvegia Elspot3",
+                    "norway_elspot4": "Norvegia Elspot4",
+                    "norway_elspot5": "Norvegia Elspot5",
+                    "norway_no2nsl": "Norvegia NO2NSL",
+                    "poland": "Polonia",
+                    "portugal": "Portogallo",
+                    "romania": "Romania",
+                    "serbia": "Serbia",
+                    "slovakia": "Slovacchia",
+                    "slovenia": "Slovenia",
+                    "spain": "Spagna",
+                    "sweden_elspot1": "Svezia Elspot1",
+                    "sweden_elspot2": "Svezia Elspot2",
+                    "sweden_elspot3": "Svezia Elspot3",
+                    "sweden_elspot4": "Svezia Elspot4",
+                    "sweden_tibber_elspot1": "Svezia Tibber Elspot1",
+                    "sweden_tibber_elspot2": "Svezia Tibber Elspot2",
+                    "sweden_tibber_elspot3": "Svezia Tibber Elspot3",
+                    "sweden_tibber_elspot4": "Svezia Tibber Elspot4",
+                    "switzerland": "Svizzera",
+                    "ukraine": "Ucraina"
+                }
+            },
+            "bac": {
+                "name": "Selezione del livello di blocco",
+                "state": {
+                    "always_locked": "Sempre bloccato",
+                    "locked_when_car_is_connected": "Bloccato quando il veicolo è collegato",
+                    "never_locked": "Mai bloccato"
+                }
+            },
+            "ct": {
+                "name": "Veicolo",
+                "state": {
+                    "standard": "Standard",
+                    "kia_soul": "Kia Soul",
+                    "renault_zoe_twingo": "Renault Zoe/Twingo",
+                    "mitsubishi_imiev": "Mitsubishi iMiev",
+                    "citroen_c_zero": "Citroen c zero",
+                    "peugeot_ion": "Peugeot iOn",
+                    "opel_corsa_e": "Opel Corsa-e",
+                    "vw_id_sw_3_2": "VW ID (SW <3.2)",
+                    "vw_id_sw_3_2_4_1": "VW ID (SW 3.2-4.1)",
+                    "vw_id_sw_5_x": "VW ID (SW 5.x)",
+                    "cupra_born_standard": "Cupra Born Standard",
+                    "cupra_born_alternativ": "Cupra Born Alternativ",
+                    "ford_explorer": "Ford Explorer",
+                    "porsche_taycan": "Porsche Taycan",
+                    "skoda_enyaq": "Skoda Enyaq",
+                    "dacia_spring": "Dacia Spring",
+                    "mercedes": "Mercedes",
+                    "ssangyong": "Ssangyong"
+                }
+            },
+            "ebo": {
+                "name": "Tipo di boost",
+                "state": {
+                    "one_time": "Una volta",
+                    "repeat_for_as_long_as_vehicle_is_plugged_in": "Ripeti finché il veicolo è collegato"
+                }
+            },
+            "lmo": {
+                "name": "Modalità di ricarica",
+                "state": {
+                    "default": "Predefinita",
+                    "eco": "Eco",
+                    "next_trip": "Next Trip"
+                }
+            },
+            "psm": {
+                "name": "Commutazione di fase",
+                "state": {
+                    "auto": "Automatica",
+                    "1_phase": "1 fase",
+                    "3_phases": "3 fasi"
+                }
+            },
+            "tds": {
+                "name": "Ora legale",
+                "state": {
+                    "none": "Nessuna",
+                    "europeansummertime": "Ora legale europea",
+                    "usdaylighttime": "Ora legale statunitense",
+                    "aueasterndaylighttime": "Ora legale dell'Australia orientale"
+                }
+            },
+            "ust": {
+                "name": "Sblocco del cavo",
+                "state": {
+                    "normal": "Normale",
+                    "autounlock": "Sblocco automatico",
+                    "alwayslock": "Sempre bloccato"
+                }
+            }
+        },
+        "number": {
+            "amp": {
+                "name": "Corrente di ricarica massima"
+            },
+            "awp": {
+                "name": "Prezzo massimo"
+            },
+            "ebt": {
+                "name": "Il boost scarica fino a"
+            },
+            "fam": {
+                "name": "Soglia della batteria FV"
+            },
+            "fmt": {
+                "name": "Tempo di ricarica minimo"
+            },
+            "fot": {
+                "name": "Soglia Ohmpilot"
+            },
+            "fst": {
+                "name": "Avvia la ricarica a"
+            },
+            "fte": {
+                "name": "Ricarica Next Trip"
+            },
+            "mpwst": {
+                "name": "Ritardo della commutazione di fase"
+            },
+            "mptwt": {
+                "name": "Intervallo della commutazione di fase"
+            },
+            "pdt": {
+                "name": "La batteria FV si scarica fino a"
+            },
+            "spl3": {
+                "name": "Livello di potenza trifase"
+            }
+        },
+        "button": {
+            "frc0": {
+                "name": "Avvia la ricarica"
+            },
+            "frc1": {
+                "name": "Arresta la ricarica"
+            },
+            "frc2": {
+                "name": "Forza la ricarica"
+            },
+            "rst": {
+                "name": "Riavvia"
+            },
+            "trx": {
+                "name": "Autentica"
+            }
+        },
+        "update": {
+            "onv": {
+                "name": "Aggiornamento del firmware"
+            }
+        }
+    },
+    "exceptions": {
+        "charger_not_found": {
+            "message": "Impossibile identificare una stazione di ricarica Wattpilot per il dispositivo {device_id}."
+        },
+        "cloud_api_disable_failed": {
+            "message": "Impossibile disattivare l'API cloud go-e sulla stazione di ricarica {charger}."
+        },
+        "cloud_api_enable_failed": {
+            "message": "Impossibile attivare l'API cloud go-e sulla stazione di ricarica {charger}."
+        },
+        "cloud_api_key_timeout": {
+            "message": "La stazione di ricarica non ha restituito alcuna chiave API cloud go-e entro {timeout} secondi."
+        },
+        "entity_action_failed": {
+            "message": "{action} su {entity} non riuscito: {error}"
+        },
+        "entity_write_failed": {
+            "message": "La stazione di ricarica non ha accettato il nuovo valore di {property} per {entity}."
+        },
+        "entry_not_found": {
+            "message": "Impossibile identificare la voce di configurazione Wattpilot per il dispositivo {device_id}."
+        },
+        "entry_not_loaded": {
+            "message": "La voce di configurazione Wattpilot del dispositivo {device_id} non è caricata. Verifica che la stazione di ricarica sia configurata e raggiungibile."
+        },
+        "invalid_boolean": {
+            "message": "{parameter} deve essere true o false, ricevuto: {value}"
+        },
+        "invalid_day_type": {
+            "message": "{parameter} deve essere uno tra {options}, ricevuto: {value}"
+        },
+        "invalid_debug_properties": {
+            "message": "{parameter} deve essere true, false o un elenco di nomi di proprietà, ricevuto: {value}"
+        },
+        "invalid_option": {
+            "message": "{option} non è un'opzione di {entity}. Opzioni valide: {options}"
+        },
+        "invalid_schedule_ranges": {
+            "message": "{parameter} deve essere un elenco di orari di inizio e fine (HH:MM), ricevuto: {value}"
+        },
+        "invalid_trigger_time": {
+            "message": "{parameter} non è un orario valido: {trigger_time}"
+        },
+        "missing_parameter": {
+            "message": "{parameter} è un parametro obbligatorio."
+        },
+        "reconnect_failed": {
+            "message": "Impossibile riconnettere la stazione di ricarica Wattpilot del dispositivo {device_id}."
+        },
+        "schedule_not_supported": {
+            "message": "La stazione di ricarica {charger} non riporta alcuna programmazione di ricarica ({property})."
+        },
+        "schedule_nothing_to_set": {
+            "message": "Niente da modificare: indica almeno uno tra {parameters}."
+        },
+        "schedule_range_crosses_midnight": {
+            "message": "{parameter}: una fascia di ricarica deve terminare dopo il suo inizio nello stesso giorno (il giorno successivo ha la propria programmazione) - dividila a mezzanotte: {ranges}"
+        },
+        "schedule_ranges_overlap": {
+            "message": "{parameter}: le fasce di ricarica non devono sovrapporsi: {ranges}"
+        },
+        "service_failed": {
+            "message": "L'azione Wattpilot {service} non è riuscita: {error}"
+        },
+        "set_next_trip_failed": {
+            "message": "Impossibile impostare l'orario del prossimo viaggio sulla stazione di ricarica {charger}."
+        },
+        "set_schedule_failed": {
+            "message": "Impossibile scrivere la programmazione di ricarica {day_type} sulla stazione di ricarica {charger}."
+        },
+        "update_install_timeout": {
+            "message": "{entity}: la stazione di ricarica non ha avviato l'installazione dell'aggiornamento entro {timeout} secondi."
+        },
+        "update_no_version": {
+            "message": "{entity}: non c'è alcuna versione del firmware da installare."
+        },
+        "update_restart_timeout": {
+            "message": "{entity}: la stazione di ricarica non è tornata disponibile entro {timeout} secondi dall'installazione dell'aggiornamento."
+        },
+        "update_unknown_version": {
+            "message": "{entity}: la versione {version} non è offerta dalla stazione di ricarica. Disponibili: {versions}"
+        }
+    }
+}

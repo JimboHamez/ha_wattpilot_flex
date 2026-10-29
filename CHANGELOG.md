@@ -10,6 +10,13 @@ for attribution.
 
 ## [Unreleased]
 
+### Added
+- French, Italian and Dutch translations of the setup screens, entity names and states, actions
+  and error messages, for the markets Fronius sells the Wattpilot Flex in. They follow the terms
+  Fronius uses on its own pages in each language and have not yet been reviewed by a native
+  speaker; corrections are welcome. Entity names are set in the system language when an entity is
+  created, so existing entities keep their current names.
+
 ### Changed
 - Internal typing only, with no change for users. The YAML catalog entries are typed as
   `models.py::EntityDefinition` and the charging-schedule objects as TypedDicts in `schedule.py`,

@@ -365,6 +365,26 @@ integration is developed against a physical **Wattpilot Flex (22 kW, firmware 43
 other models rely on the community library and may expose a slightly different set of
 properties.
 
+## Languages
+
+The integration's setup screens, entity names and states, actions and error messages are
+available in **English**, **German**, **French**, **Italian** and **Dutch**. Any other language
+shows English.
+
+French, Italian and Dutch are new and **have not yet been reviewed by a native speaker**. They
+follow the terms Fronius uses on its own pages in each language, which keep *Eco Mode* and
+*Next Trip* in English. If a word is wrong or reads oddly, please
+[open an issue](https://github.com/JimboHamez/ha_wattpilot_flex/issues) or a pull request.
+
+Home Assistant names an entity in the **system language at the moment the entity is created**,
+and keeps that name afterwards. Changing the language, or a later fix to a translation, changes
+the names of new entities only. Rename an existing entity in its settings if you want its new
+name.
+
+To add a language, copy `custom_components/wattpilot_flex/translations/en.json` to
+`<language code>.json` in the same folder and translate the values, keeping the keys and the
+`{placeholders}` as they are. The tests check both.
+
 ## How data updates work
 
 The integration is **local push** (`iot_class: local_push`): it keeps a WebSocket

@@ -556,7 +556,7 @@ to the Default / Eco / Next Trip modes shown in `select.yaml`.
   so those validation errors stay uniform. Every raise passes `translation_domain=DOMAIN` and a
   `translation_key` (plus `translation_placeholders`, values stringified) instead of a literal
   message — quality-scale `exception-translations`. A new key means adding an `exceptions` entry
-  to `strings.json`, `translations/en.json` **and** `translations/de.json`;
+  to `strings.json` **and every file in `translations/`**;
   `tests/test_exception_translations.py` (which scans every module, not just `services.py`) fails
   on a missing key, an orphaned one, or a message interpolating a placeholder the raise does not
   pass.
@@ -568,7 +568,13 @@ to the Default / Eco / Next Trip modes shown in `select.yaml`.
 - Firmware/variant/connection gating strings in YAML: firmware uses comparison prefixes
   (`>=`, `<=`, `==`, `<`, `>`) against the charger firmware version; `variant` is `11`/`22`;
   `connection` is `local`/`cloud`.
-- User-facing strings/translations live in `translations/en.json` and `translations/de.json`.
+- User-facing strings live in `strings.json` (the English source) and `translations/`: `en.json`
+  (identical to `strings.json`), `de.json`, and `fr.json` / `it.json` / `nl.json`. The last three
+  were drafted in October 2026 without a native-speaker review, from the terms Fronius uses on
+  its own pages in each language (*Eco Mode* and *Next Trip* stay in English, as Fronius writes
+  them). Every string change has to reach all five files: `tests/test_translations.py` fails on a
+  key missing from any of them. Home Assistant names an entity in the system language when it is
+  created and keeps that name, so a corrected translation only renames new entities.
 - **Never expose a secret or an identifying value.** Entity states, attributes and events all reach
   the recorder and every API/websocket subscriber, and `_unrecorded_attributes` only keeps a value
   out of history, not out of the live state. `const.py::REDACT_ALLPROPS` is the list of
