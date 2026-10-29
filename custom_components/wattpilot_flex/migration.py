@@ -22,6 +22,7 @@ from homeassistant.core import callback
 from homeassistant.helpers import entity_registry as er
 
 from .const import CONF_SERIAL, DOMAIN
+from .models import entry_config
 from .utils import legacy_unique_prefix
 
 if TYPE_CHECKING:
@@ -54,7 +55,7 @@ async def _async_migrate_entity_unique_ids(hass: HomeAssistant, entry: Wattpilot
     continuity with, so it is left for the user to remove. An id that is already
     taken is skipped with a warning rather than failing the whole setup.
     """
-    old_prefix = f"{legacy_unique_prefix(entry.data)}-"
+    old_prefix = f"{legacy_unique_prefix(entry_config(entry))}-"
     new_prefix = f"{serial}-"
     if old_prefix == new_prefix:
         return
@@ -95,7 +96,7 @@ def _async_migrate_entry_unique_id(hass: HomeAssistant, entry: WattpilotConfigEn
     If another entry already holds this serial, the same charger is configured
     twice; the entry is left as it is and the duplicate is reported.
     """
-    if entry.unique_id == serial or entry.unique_id != entry.data.get(CONF_IP_ADDRESS):
+    if entry.unique_id == serial or entry.unique_id != entry_config(entry).get(CONF_IP_ADDRESS):
         return
     duplicate = next(
         (

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Final
+from typing import TYPE_CHECKING, Any, Final, cast
 
 from wattpilot_api.exceptions import AuthenticationError
 
@@ -22,6 +22,7 @@ from .configuration_schema import (
     async_get_RECONFIGURE_LOCAL_SCHEMA,
 )
 from .const import CONF_CLOUD, CONF_CONNECTION, CONF_LOCAL, CONF_SERIAL, DEFAULT_NAME, DEFAULT_TIMEOUT, DOMAIN
+from .models import entry_config
 from .utils import GetChargerProp, async_ConnectCharger, async_DisconnectCharger
 
 if TYPE_CHECKING:
@@ -29,6 +30,8 @@ if TYPE_CHECKING:
 
     from homeassistant.config_entries import ConfigFlowResult
     from homeassistant.helpers.service_info.zeroconf import ZeroconfServiceInfo
+
+    from .models import WattpilotEntryData
 
 REDACT_CONFIG = {CONF_PASSWORD}
 
@@ -42,7 +45,7 @@ class ConfigFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
     def __init__(self) -> None:
         """Initialize."""
-        self.data: dict[str, Any] = {}
+        self.data: WattpilotEntryData = {}
         _LOGGER.debug("%s - ConfigFlowHandler: __init__", DOMAIN)
 
     async def async_step_user(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
@@ -75,7 +78,7 @@ class ConfigFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         errors: dict[str, str] = {}
         reauth_entry = self._get_reauth_entry()
         if user_input is not None:
-            data = {**reauth_entry.data, CONF_PASSWORD: user_input[CONF_PASSWORD]}
+            data: WattpilotEntryData = {**entry_config(reauth_entry), CONF_PASSWORD: user_input[CONF_PASSWORD]}
             try:
                 charger = await async_ConnectCharger("reauth", data)
             except AuthenticationError:
@@ -151,7 +154,7 @@ class ConfigFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             name = self.data.get(CONF_FRIENDLY_NAME, DEFAULT_NAME)
             errors: dict[str, str] = {}
             if user_input is not None:
-                data = {
+                data: WattpilotEntryData = {
                     **self.data,
                     CONF_PASSWORD: user_input[CONF_PASSWORD],
                     CONF_TIMEOUT: user_input.get(CONF_TIMEOUT, DEFAULT_TIMEOUT),
@@ -182,7 +185,7 @@ class ConfigFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             )
             return self.async_abort(reason="exception")
 
-    async def _async_validate_charger(self, data: dict[str, Any]) -> tuple[str | None, str | None]:
+    async def _async_validate_charger(self, data: WattpilotEntryData) -> tuple[str | None, str | None]:
         """Try to connect with the given data and identify the charger behind it.
 
         Args:
@@ -204,7 +207,7 @@ class ConfigFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         await async_DisconnectCharger("config", charger)
         return None, str(serial) if serial else None
 
-    async def _async_test_connection(self, data: dict[str, Any]) -> str | None:
+    async def _async_test_connection(self, data: WattpilotEntryData) -> str | None:
         """Try to connect with the given data; return an error key or None on success."""
         error, _serial = await self._async_validate_charger(data)
         return error
@@ -222,10 +225,15 @@ class ConfigFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         )
         try:
             entry = self._get_reconfigure_entry()
-            connection = entry.data.get(CONF_CONNECTION, CONF_LOCAL)
+            connection = entry_config(entry).get(CONF_CONNECTION, CONF_LOCAL)
             errors: dict[str, str] = {}
             if user_input is not None:
-                data = {**entry.data, **user_input, CONF_CONNECTION: connection}
+                # The reconfigure form only offers the fields this entry stores.
+                data: WattpilotEntryData = {
+                    **entry_config(entry),
+                    **cast("WattpilotEntryData", user_input),
+                    CONF_CONNECTION: connection,
+                }
                 if connection == CONF_CLOUD:
                     # A cloud entry is identified by the serial the user typed, so a
                     # changed serial means a different charger, not a reconfiguration.
@@ -254,9 +262,9 @@ class ConfigFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                         data_updates=data,
                     )
             if connection == CONF_CLOUD:
-                schema = await async_get_RECONFIGURE_CLOUD_SCHEMA(entry.data)
+                schema = await async_get_RECONFIGURE_CLOUD_SCHEMA(entry_config(entry))
             else:
-                schema = await async_get_RECONFIGURE_LOCAL_SCHEMA(entry.data)
+                schema = await async_get_RECONFIGURE_LOCAL_SCHEMA(entry_config(entry))
             return self.async_show_form(
                 step_id="reconfigure",
                 data_schema=schema,
@@ -290,12 +298,12 @@ class ConfigFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             a manually added local entry stores no serial, and a charger that reports
             none cannot be identified.
         """
-        known = entry.data.get(CONF_SERIAL)
+        known = entry_config(entry).get(CONF_SERIAL)
         return not known or not serial or str(known) == serial
 
     @staticmethod
     def _reconfigured_unique_id(
-        entry: config_entries.ConfigEntry, data: dict[str, Any], serial: str | None
+        entry: config_entries.ConfigEntry, data: WattpilotEntryData, serial: str | None
     ) -> str | None:
         """Return the unique id the entry should carry after a reconfiguration.
 
@@ -310,7 +318,7 @@ class ConfigFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             serial, or - for a charger that reports none - to the new address.
             Serial-keyed entries keep the identity they were created with.
         """
-        if entry.unique_id and entry.unique_id == entry.data.get(CONF_IP_ADDRESS):
+        if entry.unique_id and entry.unique_id == entry_config(entry).get(CONF_IP_ADDRESS):
             return serial or str(data.get(CONF_IP_ADDRESS, entry.unique_id))
         return entry.unique_id
 
@@ -357,8 +365,10 @@ class ConfigFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                     DOMAIN,
                     async_redact_data(user_input, REDACT_CONFIG),
                 )
-                user_input[CONF_CONNECTION] = CONF_LOCAL
-                error, serial = await self._async_validate_charger(user_input)
+                # LOCAL_SCHEMA only collects fields the entry stores.
+                data = cast("WattpilotEntryData", user_input)
+                data[CONF_CONNECTION] = CONF_LOCAL
+                error, serial = await self._async_validate_charger(data)
                 if error is None:
                     # Key the entry by the serial the charger reports, the identity
                     # zeroconf discovery uses too, so the same charger cannot be
@@ -367,13 +377,13 @@ class ConfigFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                     # that entry there. Only a charger that reports no serial
                     # falls back to its IP address.
                     if serial:
-                        user_input[CONF_SERIAL] = serial
+                        data[CONF_SERIAL] = serial
                         await self.async_set_unique_id(serial, raise_on_progress=False)
-                        self._abort_if_unique_id_configured(updates={CONF_IP_ADDRESS: user_input[CONF_IP_ADDRESS]})
+                        self._abort_if_unique_id_configured(updates={CONF_IP_ADDRESS: data[CONF_IP_ADDRESS]})
                     else:
-                        await self.async_set_unique_id(str(user_input[CONF_IP_ADDRESS]), raise_on_progress=False)
+                        await self.async_set_unique_id(str(data[CONF_IP_ADDRESS]), raise_on_progress=False)
                         self._abort_if_unique_id_configured()
-                    self.data = user_input
+                    self.data = data
                     return await self.async_step_final()
                 errors["base"] = error
             return self.async_show_form(
@@ -406,14 +416,16 @@ class ConfigFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                     DOMAIN,
                     async_redact_data(user_input, REDACT_CONFIG),
                 )
-                user_input[CONF_CONNECTION] = CONF_CLOUD
+                # CLOUD_SCHEMA only collects fields the entry stores.
+                data = cast("WattpilotEntryData", user_input)
+                data[CONF_CONNECTION] = CONF_CLOUD
                 # Prevent the same charger (identified by its serial) from
                 # being configured twice.
-                await self.async_set_unique_id(str(user_input[CONF_SERIAL]))
+                await self.async_set_unique_id(str(data[CONF_SERIAL]))
                 self._abort_if_unique_id_configured()
-                error = await self._async_test_connection(user_input)
+                error = await self._async_test_connection(data)
                 if error is None:
-                    self.data = user_input
+                    self.data = data
                     return await self.async_step_final()
                 errors["base"] = error
             return self.async_show_form(

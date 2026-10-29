@@ -444,7 +444,7 @@ async def test_connect_reraises_authentication_errors():
     instance.connect = AsyncMock(side_effect=AuthenticationError("bad password"))
 
     with patch("custom_components.wattpilot_flex.utils.Wattpilot", client), pytest.raises(AuthenticationError):
-        await utils.async_ConnectCharger("entry-1", {CONF_IP_ADDRESS: "1.2.3.4"})
+        await utils.async_ConnectCharger("entry-1", {CONF_IP_ADDRESS: "1.2.3.4", CONF_PASSWORD: "p"})
 
 
 @pytest.mark.parametrize("error", [WattpilotError("offline"), RuntimeError("boom")])
@@ -454,7 +454,30 @@ async def test_connect_failures_return_false(error):
     instance.connect = AsyncMock(side_effect=error)
 
     with patch("custom_components.wattpilot_flex.utils.Wattpilot", client):
-        assert await utils.async_ConnectCharger("entry-1", {CONF_IP_ADDRESS: "1.2.3.4"}) is False
+        assert await utils.async_ConnectCharger("entry-1", {CONF_IP_ADDRESS: "1.2.3.4", CONF_PASSWORD: "p"}) is False
+
+
+@pytest.mark.parametrize(
+    ("data", "missing"),
+    [
+        ({CONF_CONNECTION: CONF_LOCAL, CONF_PASSWORD: "hunter2-secret"}, CONF_IP_ADDRESS),
+        ({CONF_CONNECTION: CONF_LOCAL, CONF_IP_ADDRESS: "10.98.76.54"}, CONF_IP_ADDRESS),
+        ({CONF_CONNECTION: CONF_CLOUD, CONF_PASSWORD: "hunter2-secret"}, CONF_SERIAL),
+        ({CONF_CONNECTION: CONF_CLOUD, CONF_SERIAL: "SN-918273"}, CONF_SERIAL),
+    ],
+)
+async def test_connect_without_an_address_or_password_returns_false(data, missing, caplog):
+    """An entry without what a connection needs fails without building a client, naming no value."""
+    client, _instance = _client_mock()
+
+    with patch("custom_components.wattpilot_flex.utils.Wattpilot", client):
+        assert await utils.async_ConnectCharger("entry-1", data) is False
+
+    client.assert_not_called()
+    assert f"the entry stores no {missing} or no {CONF_PASSWORD}" in caplog.text
+    for value in data.values():
+        if value not in (CONF_LOCAL, CONF_CLOUD):
+            assert value not in caplog.text
 
 
 async def test_preload_api_definition_fills_the_client_cache(hass, make_charger):

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Final
+from typing import TYPE_CHECKING, Final
 
 import homeassistant.helpers.config_validation as cv
 from homeassistant.const import CONF_FRIENDLY_NAME, CONF_IP_ADDRESS, CONF_PASSWORD, CONF_TIMEOUT
@@ -13,7 +13,7 @@ from .compat import vol
 from .const import CONF_CLOUD, CONF_CONNECTION, CONF_LOCAL, CONF_SERIAL, DEFAULT_NAME, DEFAULT_TIMEOUT, DOMAIN
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping
+    from .models import WattpilotEntryData
 
 _LOGGER: Final = logging.getLogger(__name__)
 
@@ -46,7 +46,7 @@ CLOUD_SCHEMA: Final = vol.Schema(
 )
 
 
-async def async_get_RECONFIGURE_LOCAL_SCHEMA(current_data: Mapping[str, Any]) -> vol.Schema:
+async def async_get_RECONFIGURE_LOCAL_SCHEMA(current_data: WattpilotEntryData) -> vol.Schema:
     """Async: return an schema object with current values as default."""
     try:
         _LOGGER.debug("%s - async_get_RECONFIGURE_LOCAL_SCHEMA", DOMAIN)
@@ -70,7 +70,7 @@ async def async_get_RECONFIGURE_LOCAL_SCHEMA(current_data: Mapping[str, Any]) ->
         return LOCAL_SCHEMA
 
 
-async def async_get_RECONFIGURE_CLOUD_SCHEMA(current_data: Mapping[str, Any]) -> vol.Schema:
+async def async_get_RECONFIGURE_CLOUD_SCHEMA(current_data: WattpilotEntryData) -> vol.Schema:
     """Async: return an schema object with current values as default."""
     try:
         _LOGGER.debug("%s - async_get_RECONFIGURE_CLOUD_SCHEMA", DOMAIN)

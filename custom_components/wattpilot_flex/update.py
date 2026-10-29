@@ -16,6 +16,7 @@ from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
 from .catalog import async_setup_catalog_entities
 from .const import DEFAULT_TIMEOUT, DOMAIN
 from .entities import ChargerPlatformEntity
+from .models import entry_config
 from .utils import GetChargerProp
 
 if TYPE_CHECKING:
@@ -164,7 +165,7 @@ class ChargerUpdate(ChargerPlatformEntity, UpdateEntity):
             # Resolve the configured connection timeout (falling back to the
             # default). A firmware flash plus reboot takes far longer than a
             # normal connect, so allow up to 4x that budget below.
-            timeout = self._entry.data.get(CONF_TIMEOUT, DEFAULT_TIMEOUT) * 4
+            timeout = entry_config(self._entry).get(CONF_TIMEOUT, DEFAULT_TIMEOUT) * 4
             # The charger drops its WebSocket while flashing: first wait for it
             # to disconnect (update started), then wait for it to reconnect.
             timer = 0

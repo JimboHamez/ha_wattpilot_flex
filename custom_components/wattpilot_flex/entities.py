@@ -16,6 +16,7 @@ from homeassistant.helpers.entity import Entity
 from homeassistant.util import slugify
 
 from .const import CONF_CONNECTION, CONF_LOCAL, DEFAULT_NAME, DOMAIN
+from .models import entry_config
 from .utils import (
     GetChargerProp,
     async_GetChargerProp,
@@ -65,7 +66,7 @@ class ChargerPlatformEntity(Entity):
     ) -> None:
         """Initialize the object."""
         try:
-            self._charger_id = legacy_unique_prefix(entry.data)
+            self._charger_id = legacy_unique_prefix(entry_config(entry))
             self._source = entity_cfg.get("source", "property")
             # Only a namespacelist id carries its item index as a suffix
             # ('cards_0' -> property 'cards', item 0). Every other id is used
@@ -332,7 +333,7 @@ class ChargerPlatformEntity(Entity):
             return True
         # An entry without a connection type predates the cloud option and was
         # connected locally, which is also how async_ConnectCharger reads it.
-        connection = self._entry.data.get(CONF_CONNECTION, CONF_LOCAL)
+        connection = entry_config(self._entry).get(CONF_CONNECTION, CONF_LOCAL)
         v = str(connection).upper() == str(c_tst).upper()
         _LOGGER.debug(
             "%s - %s: _check_connection_supported complete (%s=%s -> %s)",
