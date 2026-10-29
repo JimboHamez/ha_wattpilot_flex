@@ -14,7 +14,7 @@ from homeassistant.loader import async_get_integration
 from .availability import ChargerConnectionMonitor
 from .const import AUTH_FAILURE_REAUTH_THRESHOLD, DOMAIN, SUPPORTED_PLATFORMS
 from .migration import async_migrate_unique_ids
-from .models import WattpilotRuntimeData
+from .models import WattpilotRuntimeData, entry_config
 from .services import (
     async_registerService,
     async_service_DisconnectCharger,
@@ -97,7 +97,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: WattpilotConfigEntry) ->
     charger: Wattpilot | Literal[False] = False
     try:
         _LOGGER.debug("%s - async_setup_entry: Connecting charger", entry.entry_id)
-        charger = await async_ConnectCharger(entry.entry_id, entry.data)
+        charger = await async_ConnectCharger(entry.entry_id, entry_config(entry))
         # Signal "not ready" so Home Assistant retries setup later instead of
         # marking the entry permanently failed (e.g. charger briefly offline).
         if charger is False:
@@ -161,7 +161,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: WattpilotConfigEntry) ->
 
     try:
         _LOGGER.debug("%s - async_setup_entry: Creating runtime data store for %s", entry.entry_id, DOMAIN)
-        entry.runtime_data = WattpilotRuntimeData(charger=charger, params=entry.data)
+        entry.runtime_data = WattpilotRuntimeData(charger=charger, params=entry_config(entry))
         entry_data = entry.runtime_data
     except Exception as e:
         _LOGGER.exception(

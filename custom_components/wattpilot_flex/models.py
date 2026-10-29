@@ -1,20 +1,54 @@
-"""Typed per-entry runtime data and catalog definitions for the Fronius Wattpilot integration."""
+"""Typed entry data, runtime data and catalog definitions for the Fronius Wattpilot integration."""
 
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal, TypedDict
+from typing import TYPE_CHECKING, Any, Literal, TypedDict, cast
 
 from homeassistant.config_entries import ConfigEntry
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Mapping
+    from collections.abc import Callable
 
     from wattpilot_api import Wattpilot
 
 # Where an entity reads its value. "none" is what the button platform forces:
 # a button has no state to read.
 type EntitySource = Literal["attribute", "namespacelist", "none", "property"]
+
+
+class WattpilotEntryData(TypedDict, total=False):
+    """The connection details a config entry stores in ``entry.data``.
+
+    Every field is optional. ``connection`` is missing on entries created before
+    the cloud option, which were all local. ``serial`` is missing on a local
+    entry whose charger reports none, and ``ip_address`` on a cloud entry. Each
+    reader supplies its own default, ``DEFAULT_TIMEOUT`` for ``timeout``.
+    """
+
+    connection: Literal["cloud", "local"]
+    friendly_name: str
+    ip_address: str
+    password: str
+    serial: str
+    timeout: int
+
+
+def entry_config(entry: ConfigEntry[Any]) -> WattpilotEntryData:
+    """Return a config entry's data, typed as the connection details it stores.
+
+    Home Assistant types ``entry.data`` as ``MappingProxyType[str, Any]``, and this
+    is the one place the integration narrows it. The cast does not check anything
+    at runtime, and the mapping stays read-only: change an entry through
+    ``async_update_entry`` or ``async_update_reload_and_abort``, never in place.
+
+    Args:
+        entry: A config entry of this integration.
+
+    Returns:
+        The entry's data.
+    """
+    return cast("WattpilotEntryData", entry.data)
 
 
 class EntityDefinition(TypedDict, total=False):
@@ -86,7 +120,7 @@ class WattpilotRuntimeData:
     """
 
     charger: Wattpilot
-    params: Mapping[str, Any]
+    params: WattpilotEntryData
     debug_properties: bool | list[str] = False
     property_updates_unsub: Callable[[], None] | None = None
     connection_monitor_cancel: Callable[[], None] | None = None

@@ -15,6 +15,13 @@ for attribution.
   `models.py::EntityDefinition` and the charging-schedule objects as TypedDicts in `schedule.py`,
   where both were `dict[str, Any]`. A new test fails when a catalog uses a key `EntityDefinition`
   does not declare, which catches a misspelled field the code would otherwise silently ignore.
+- The connection details a config entry stores are typed as `models.py::WattpilotEntryData`, read
+  through one `entry_config()` accessor instead of the untyped `entry.data`.
+
+### Fixed
+- An entry missing its address (IP address or serial) or its password now fails to connect with a
+  log line naming the missing field, instead of handing `None` to the client. The setup forms
+  require both, so a normal entry is not affected.
 
 ## [1.0.1] - 2026-10-27
 

@@ -12,11 +12,13 @@ from homeassistant.const import CONF_FRIENDLY_NAME, CONF_IP_ADDRESS, CONF_PASSWO
 from custom_components.wattpilot_flex.compat import vol
 from custom_components.wattpilot_flex.configuration_schema import (
     CLOUD_SCHEMA,
+    CONNECTION_SCHEMA,
     LOCAL_SCHEMA,
     async_get_RECONFIGURE_CLOUD_SCHEMA,
     async_get_RECONFIGURE_LOCAL_SCHEMA,
 )
 from custom_components.wattpilot_flex.const import CONF_SERIAL, DEFAULT_TIMEOUT
+from custom_components.wattpilot_flex.models import WattpilotEntryData
 
 
 def _defaults(schema: vol.Schema) -> dict:
@@ -56,3 +58,11 @@ async def test_options_schema_falls_back_to_the_blank_form(caplog, builder, fall
 
     assert schema is fallback
     assert any("failed" in r.getMessage() for r in caplog.records)
+
+
+@pytest.mark.parametrize(
+    "schema", [CONNECTION_SCHEMA, LOCAL_SCHEMA, CLOUD_SCHEMA], ids=["connection", "local", "cloud"]
+)
+def test_every_form_field_is_declared_in_the_entry_data_type(schema):
+    """The config-flow forms fill entry.data, so WattpilotEntryData must declare each field they collect."""
+    assert {str(key) for key in schema.schema} <= WattpilotEntryData.__optional_keys__

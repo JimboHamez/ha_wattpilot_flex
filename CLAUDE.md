@@ -345,7 +345,14 @@ Always go through the `utils.py` helpers rather than touching the charger object
   `debug_properties`, the `on_property_change` unsubscribe handle (`property_updates_unsub`),
   the connection-monitor cancel callable (`connection_monitor_cancel`), and the
   `set_goe_cloud` results (`cloud_api_key`, `cloud_api_url`). Code that needs connection settings
-  outside setup (the connection gate, the update timeout) reads `entry.data` directly.
+  outside setup (the connection gate, the update timeout) reads the entry's data directly.
+- **Entry data is typed as `models.py::WattpilotEntryData`** (a `total=False` TypedDict of the six
+  keys the flows store: `connection`, `friendly_name`, `ip_address`, `password`, `serial`,
+  `timeout`). Home Assistant types `entry.data` as `MappingProxyType[str, Any]`, so read it through
+  `models.py::entry_config(entry)`, the one place it is cast, rather than `entry.data`. Writes
+  (`async_create_entry`, `async_update_entry`, `async_update_reload_and_abort`) take a `Mapping`
+  and need nothing. `tests/test_configuration_schema.py` fails if a config-flow form collects a
+  field the TypedDict does not declare.
   `models.py` is its own module because `utils`, `catalog` and `services` all need the type and
   `__init__` imports them. `utils.py` has `async_GetChargerFromDeviceID` /
   `async_GetDataStoreFromDeviceID` to resolve these from a HA `device_id` (used by services);

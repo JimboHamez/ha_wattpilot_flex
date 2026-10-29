@@ -32,13 +32,11 @@ from .const import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping
-
     from wattpilot_api.definition import ApiDefinition
 
     from homeassistant.core import HomeAssistant
 
-    from .models import WattpilotConfigEntry, WattpilotRuntimeData
+    from .models import WattpilotConfigEntry, WattpilotEntryData, WattpilotRuntimeData
 
 _LOGGER: Final = logging.getLogger(__name__)
 
@@ -89,7 +87,7 @@ def charger_serial(charger: Wattpilot) -> str | None:
     return str(serial) if serial else None
 
 
-def legacy_unique_prefix(data: Mapping[str, Any]) -> str:
+def legacy_unique_prefix(data: WattpilotEntryData) -> str:
     """Return the prefix entity unique ids were built from before 0.12.0.
 
     Entities used to be keyed by the entry's friendly name, else its IP address,
@@ -449,8 +447,28 @@ async def async_GetChargerFromDeviceID(hass: HomeAssistant, device_id: str) -> A
         return False
 
 
+def _connection_details_missing(entry_or_device_id: str, address_key: str) -> Literal[False]:
+    """Log that an entry lacks what a connection needs, and report the connection as failed.
+
+    Args:
+        entry_or_device_id: The entry or device id, to tag the log line.
+        address_key: The entry data key the charger is addressed by.
+
+    Returns:
+        ``False``, the value ``async_ConnectCharger`` returns for a failed connection.
+    """
+    # Only the key names are logged, never the values.
+    _LOGGER.error(
+        "%s - async_ConnectCharger: Connecting charger failed: the entry stores no %s or no %s",
+        entry_or_device_id,
+        address_key,
+        CONF_PASSWORD,
+    )
+    return False
+
+
 async def async_ConnectCharger(
-    entry_or_device_id: str, data: Mapping[str, Any], charger: Wattpilot | None = None
+    entry_or_device_id: str, data: WattpilotEntryData, charger: Wattpilot | None = None
 ) -> Wattpilot | Literal[False]:
     """Async: connect charger and handle connection errors.
 
@@ -463,27 +481,32 @@ async def async_ConnectCharger(
     try:
         con = data.get(CONF_CONNECTION, CONF_LOCAL)
         timeout = data.get(CONF_TIMEOUT, DEFAULT_TIMEOUT)
+        password = data.get(CONF_PASSWORD)
         if charger is None and con == CONF_CLOUD:
-            id = data.get(CONF_SERIAL, None)
+            id = data.get(CONF_SERIAL)
+            if not id or not password:
+                return _connection_details_missing(entry_or_device_id, CONF_SERIAL)
             _LOGGER.debug(
                 "%s - async_ConnectCharger: Connecting %s charger by serial: %s", entry_or_device_id, CONF_CLOUD, id
             )
             charger = Wattpilot(
                 host=id,
-                password=data.get(CONF_PASSWORD, None),
+                password=password,
                 serial=id,
                 cloud=True,
                 connect_timeout=timeout,
                 init_timeout=timeout,
             )
         elif charger is None:
-            id = data.get(CONF_IP_ADDRESS, None)
+            id = data.get(CONF_IP_ADDRESS)
+            if not id or not password:
+                return _connection_details_missing(entry_or_device_id, CONF_IP_ADDRESS)
             _LOGGER.debug(
                 "%s - async_ConnectCharger: Connecting %s charger by ip: %s", entry_or_device_id, CONF_LOCAL, id
             )
             charger = Wattpilot(
                 host=id,
-                password=data.get(CONF_PASSWORD, None),
+                password=password,
                 serial=id,
                 connect_timeout=timeout,
                 init_timeout=timeout,
