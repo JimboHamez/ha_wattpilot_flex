@@ -10,7 +10,11 @@ for attribution.
 
 ## [Unreleased]
 
-_Nothing yet._
+### Changed
+- Internal typing only, with no change for users. The YAML catalog entries are typed as
+  `models.py::EntityDefinition` and the charging-schedule objects as TypedDicts in `schedule.py`,
+  where both were `dict[str, Any]`. A new test fails when a catalog uses a key `EntityDefinition`
+  does not declare, which catches a misspelled field the code would otherwise silently ignore.
 
 ## [1.0.1] - 2026-10-27
 

@@ -20,7 +20,7 @@ from __future__ import annotations
 
 import datetime
 from itertools import pairwise
-from typing import Any, Final
+from typing import Any, Final, TypedDict
 
 # The property behind each day type of the app's charging-times screen.
 SCHEDULE_PROPS: Final = {"weekdays": "sch_week", "saturday": "sch_satur", "sunday": "sch_sund"}
@@ -35,6 +35,44 @@ ATTR_PV_SURPLUS_OUTSIDE_TIMES: Final = "pv_surplus_outside_times"
 ATTR_RANGES: Final = "ranges"
 ATTR_BEGIN: Final = "begin"
 ATTR_END: Final = "end"
+
+
+class ScheduleTime(TypedDict):
+    """A time of day as the charger stores it."""
+
+    hour: int
+    minute: int
+    second: int
+
+
+class ScheduleRange(TypedDict):
+    """A charging window as the charger stores it."""
+
+    begin: ScheduleTime
+    end: ScheduleTime
+
+
+class ChargerSchedule(TypedDict):
+    """A schedule object in the form the charger takes it back."""
+
+    control: int
+    ranges: list[ScheduleRange]
+
+
+class ScheduleWindow(TypedDict):
+    """A decoded charging window, with ``HH:MM`` times."""
+
+    begin: str
+    end: str
+
+
+class DecodedSchedule(TypedDict):
+    """A schedule object in the form the sensor and the service work with."""
+
+    control: int
+    limit_charging_times: bool
+    pv_surplus_outside_times: bool
+    ranges: list[ScheduleWindow]
 
 
 def _field(obj: Any, key: str, default: Any = None) -> Any:
@@ -81,7 +119,7 @@ def format_time(value: Any) -> str:
     return parsed.isoformat(timespec="seconds" if parsed.second else "minutes")
 
 
-def decode_schedule(value: Any) -> dict[str, Any] | None:
+def decode_schedule(value: Any) -> DecodedSchedule | None:
     """Return a charger schedule object in the form the sensor and the service work with.
 
     Args:
@@ -96,7 +134,7 @@ def decode_schedule(value: Any) -> dict[str, Any] | None:
     if control is None:
         return None
     control = int(control)
-    ranges = [
+    ranges: list[ScheduleWindow] = [
         {ATTR_BEGIN: format_time(_field(item, ATTR_BEGIN)), ATTR_END: format_time(_field(item, ATTR_END))}
         for item in (_field(value, ATTR_RANGES) or [])
     ]
@@ -157,7 +195,7 @@ def build_schedule(
     limit_charging_times: bool,
     pv_surplus_outside_times: bool,
     ranges: list[tuple[datetime.time, datetime.time]],
-) -> dict[str, Any]:
+) -> ChargerSchedule:
     """Return the object to write to a schedule property.
 
     Args:

@@ -229,3 +229,37 @@ def test_firmware_gate_uses_known_operator():
             fw = entity.get("firmware")
             if fw is not None:
                 assert str(fw).startswith(valid_prefixes), f"{entity.get('id')} bad firmware gate: {fw}"
+
+
+def _typeddict_fields(filename: str, name: str) -> set[str]:
+    """Read a TypedDict's field names without importing the module (which needs Home Assistant)."""
+    with open(os.path.join(COMPONENT_DIR, filename), encoding="utf-8") as handle:
+        tree = ast.parse(handle.read())
+    for node in tree.body:
+        if isinstance(node, ast.ClassDef) and node.name == name:
+            return {stmt.target.id for stmt in node.body if isinstance(stmt, ast.AnnAssign)}
+    raise AssertionError(f"{name} not found in {filename}")
+
+
+def test_catalog_keys_are_declared_in_entity_definition():
+    # models.py::EntityDefinition types the definitions the code reads, but the
+    # catalogs are plain YAML that nothing checks against it. A key missing there
+    # is either a typo in the YAML, which the code would silently never read, or
+    # a new field that needs declaring.
+    fields = _typeddict_fields("models.py", "EntityDefinition")
+    for platform in PLATFORMS:
+        for entity in _load(platform):
+            unknown = set(entity) - fields
+            assert not unknown, (
+                f"{platform}.{entity.get('uid') or entity.get('id')} uses keys EntityDefinition does not declare: "
+                f"{sorted(unknown)}"
+            )
+
+
+def test_entity_definition_fields_are_sorted():
+    # CLAUDE.md asks for alphabetically sorted keys; the AST keeps declaration order.
+    with open(os.path.join(COMPONENT_DIR, "models.py"), encoding="utf-8") as handle:
+        tree = ast.parse(handle.read())
+    node = next(n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == "EntityDefinition")
+    names = [stmt.target.id for stmt in node.body if isinstance(stmt, ast.AnnAssign)]
+    assert names == sorted(names)
