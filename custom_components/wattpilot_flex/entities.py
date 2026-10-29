@@ -30,7 +30,7 @@ if TYPE_CHECKING:
 
     from homeassistant.core import HomeAssistant
 
-    from .models import WattpilotConfigEntry
+    from .models import EntityDefinition, WattpilotConfigEntry
 
 _LOGGER: Final = logging.getLogger(__name__)
 
@@ -61,7 +61,7 @@ class ChargerPlatformEntity(Entity):
     _unrecorded_attributes = frozenset({"description"})
 
     def __init__(
-        self, hass: HomeAssistant, entry: WattpilotConfigEntry, entity_cfg: dict[str, Any], charger: Wattpilot
+        self, hass: HomeAssistant, entry: WattpilotConfigEntry, entity_cfg: EntityDefinition, charger: Wattpilot
     ) -> None:
         """Initialize the object."""
         try:
@@ -148,7 +148,7 @@ class ChargerPlatformEntity(Entity):
             self._entity_category = self._entity_cfg.get("entity_category", None)
             self._set_type = self._entity_cfg.get("set_type", None)
 
-            self._attributes = {}
+            self._attributes: dict[str, Any] = {}
             self._attributes["description"] = self._entity_cfg.get("description", None)
             setattr(self, self._state_attr, self._entity_cfg.get("default_state", STATE_UNKNOWN))
 
@@ -632,7 +632,7 @@ class ChargerPlatformEntity(Entity):
                         self._identifier,
                     )
                     return None
-                state = getattr(namespace, self._entity_cfg.get("value_id", STATE_UNKNOWN), STATE_UNKNOWN)
+                state = getattr(namespace, str(self._entity_cfg.get("value_id", STATE_UNKNOWN)), STATE_UNKNOWN)
                 for attr_id in self._entity_cfg.get("attribute_ids") or []:
                     self._attributes[attr_id] = getattr(namespace, attr_id, STATE_UNKNOWN)
             elif isinstance(state, list):

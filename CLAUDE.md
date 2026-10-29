@@ -183,6 +183,10 @@ file (`sensor.yaml`, `switch.yaml`, `select.yaml`, `number.yaml`, `button.yaml`,
 `sensor.yaml`'s header comment documents every supported field
 (`source`, `id`, `uid`, `enum`, `firmware`, `variant`, `connection`, `value_id`, `namespace_id`,
 `attribute_ids`, `attribute_props`, `value_props`, `default_state`, etc.).
+The same fields are typed in `models.py::EntityDefinition`, which is what the code reads
+(`entity_cfg` / `self._entity_cfg`). A new field goes in both places: `tests/test_yaml_catalogs.py`
+fails on a catalog key `EntityDefinition` does not declare, so a misspelled field cannot be silently
+ignored.
 
 **Icons are the one exception to "edit the YAML".** They live in `icons.json`, keyed by platform
 and then by the entity's translation key — `slugify(uid or id)`, the same key

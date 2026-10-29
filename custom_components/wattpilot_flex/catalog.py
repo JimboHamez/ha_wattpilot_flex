@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import logging
 import os
-from typing import TYPE_CHECKING, Any, Final
+from typing import TYPE_CHECKING, Any, Final, cast
 
 import yaml
 
@@ -26,7 +26,7 @@ if TYPE_CHECKING:
     from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
     from .entities import ChargerPlatformEntity
-    from .models import WattpilotConfigEntry
+    from .models import EntityDefinition, EntitySource, WattpilotConfigEntry
 
 _LOGGER: Final = logging.getLogger(__name__)
 
@@ -50,7 +50,9 @@ def _read_catalog(platform: str) -> Any:
         return yaml.safe_load(handle)
 
 
-async def async_load_catalog(hass: HomeAssistant, entry: WattpilotConfigEntry, platform: str) -> list[Any] | None:
+async def async_load_catalog(
+    hass: HomeAssistant, entry: WattpilotConfigEntry, platform: str
+) -> list[EntityDefinition] | None:
     """Read a platform's YAML catalog and return its entity definitions.
 
     Args:
@@ -78,7 +80,8 @@ async def async_load_catalog(hass: HomeAssistant, entry: WattpilotConfigEntry, p
         return None
     if not isinstance(yaml_cfg, dict):
         return []
-    return list(yaml_cfg.get(platform) or [])
+    # The definitions are parsed YAML: the cast declares their shape, it does not check it.
+    return cast("list[EntityDefinition]", list(yaml_cfg.get(platform) or []))
 
 
 def get_charger(entry: WattpilotConfigEntry, platform: str) -> Wattpilot | None:
@@ -109,7 +112,7 @@ def get_charger(entry: WattpilotConfigEntry, platform: str) -> Wattpilot | None:
 
 
 def _definition_is_complete(
-    entry: WattpilotConfigEntry, platform: str, entity_cfg: Any, required: tuple[str, ...]
+    entry: WattpilotConfigEntry, platform: str, entity_cfg: EntityDefinition, required: tuple[str, ...]
 ) -> bool:
     """Report whether a catalog definition carries every key its platform needs.
 
@@ -143,7 +146,7 @@ async def async_setup_catalog_entities(
     platform: str,
     entity_class: type[ChargerPlatformEntity],
     *,
-    source: str | None = None,
+    source: EntitySource | None = None,
     required: tuple[str, ...] = ("id", "source"),
 ) -> None:
     """Build and register every entity a platform's YAML catalog defines.
