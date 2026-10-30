@@ -96,7 +96,13 @@ There is no build step (it is an HA custom component, copied into `config/custom
   that way (`ruff format`, `ruff check`). `.github/workflows/test.yml` **gates** on this:
   `pytest --cov-fail-under=95`, `ruff format --check` + `ruff check`, and `mypy` run as three
   separate jobs, with ruff and mypy pinned so a new release cannot break `main` without a
-  deliberate bump. `pytest` runs on Python 3.13 **and** 3.14: each installs the newest
+  deliberate bump. `.github/workflows/security.yml` gates only on `pip-audit` (the `manifest.json`
+  requirements); Bandit, Semgrep and Gitleaks are report-only and upload SARIF to the Security tab
+  (skipped on fork PRs, whose token cannot write it). A false positive is suppressed in place: a
+  `# nosemgrep: <rule> -- <reason>` comment, or a fingerprint in `.gitleaksignore`. Every action is
+  pinned to a commit SHA with its version in a comment, and every workflow declares `permissions:`.
+  Dependabot (`.github/dependabot.yml`) bumps the pins, except `hacs/action` and
+  `home-assistant/actions`, which are used from a branch head and bumped by hand. `pytest` runs on Python 3.13 **and** 3.14: each installs the newest
   `pytest-homeassistant-custom-component` it can, so 3.14 tests the current Home Assistant and
   3.13 tests 2026.2, the last release that supports it (which keeps the `compat.py` fallbacks
   exercised). `mypy` runs on 3.14 only, against the current release's type hints, and fails

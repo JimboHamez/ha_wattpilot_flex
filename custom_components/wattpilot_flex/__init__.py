@@ -114,6 +114,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: WattpilotConfigEntry) ->
         failures = _AUTH_FAILURE_COUNTS.get(entry.entry_id, 0) + 1
         _AUTH_FAILURE_COUNTS[entry.entry_id] = failures
         if failures < AUTH_FAILURE_REAUTH_THRESHOLD:
+            # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure -- logs the entry id and attempt count, never the password  # noqa: E501
             _LOGGER.warning(
                 "%s - async_setup_entry: charger rejected the password (attempt %s of %s), "
                 "retrying in case it is still starting up",
