@@ -17,6 +17,11 @@ for attribution.
   does not declare, which catches a misspelled field the code would otherwise silently ignore.
 - The connection details a config entry stores are typed as `models.py::WattpilotEntryData`, read
   through one `entry_config()` accessor instead of the untyped `entry.data`.
+- CI security scanning is wider and its workflows are locked down. The Security workflow adds
+  Semgrep and Gitleaks (a SHA-256-checked download), and Bandit now reports to the Security tab
+  instead of the job log; all three are report-only, while `pip-audit` still gates. Every action
+  is pinned to a commit SHA, Dependabot keeps those pins current, and every workflow declares
+  read-only permissions, with `security-events: write` only on the jobs that upload results.
 
 ### Fixed
 - An entry missing its address (IP address or serial) or its password now fails to connect with a

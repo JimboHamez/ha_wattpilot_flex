@@ -8,31 +8,138 @@ on:
     - cron: "0 6 * * 1"
   workflow_dispatch:
 
+# Read-only by default. The jobs that publish findings to the Security tab
+# (Code scanning) add `security-events: write` for themselves.
+permissions:
+  contents: read
+
 jobs:
-  scan:
+  # Audits the integration's declared runtime dependencies (manifest.json)
+  # for known-vulnerable packages. This is the one job that gates.
+  pip-audit:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
           python-version: "3.13"
           cache: pip
 
-      - name: Install scanners
-        run: pip install bandit pip-audit
+      - name: Install pip-audit
+        run: pip install pip-audit
 
-      # Scoped to this repo's own code; the vendored upstream wattpilot library
-      # is excluded. Informational — findings don't fail the build (the code
-      # predates the strict standards in CLAUDE.md), but they surface in logs.
-      - name: Bandit
-        continue-on-error: true
-        run: bandit -r custom_components/wattpilot_flex -x custom_components/wattpilot_flex/wattpilot
-
-      # Audits the integration's declared runtime dependencies (manifest.json)
-      # for known-vulnerable packages. This one gates the job.
       - name: pip-audit (manifest requirements)
         run: |
           python -c "import json; print('\n'.join(json.load(open('custom_components/wattpilot_flex/manifest.json'))['requirements']))" > requirements-manifest.txt
           pip-audit -r requirements-manifest.txt
+
+  # The scanners below are report-only: a finding never fails the job, it is
+  # uploaded to the Security tab to be triaged there. A pull request from a
+  # fork gets a read-only token and cannot upload, so it only runs the scan.
+  bandit:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Install Bandit
+        run: pip install "bandit[sarif]"
+
+      - name: Scan
+        run: bandit -r custom_components/wattpilot_flex -f sarif -o bandit.sarif --exit-zero
+
+      - name: Upload SARIF
+        if: always() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+        uses: github/codeql-action/upload-sarif@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
+        with:
+          sarif_file: bandit.sarif
+          category: bandit
+
+  # Scoped like scan.sh to the integration package, plus the workflows for the
+  # github-actions rules. tests/ is left out: its live scripts handle charger
+  # credentials on purpose.
+  semgrep:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Install Semgrep
+        run: pip install semgrep
+
+      # Without --error a finding does not fail the step.
+      - name: Scan
+        run: |
+          semgrep scan \
+            --sarif --output semgrep.sarif \
+            --config p/python \
+            --config p/security-audit \
+            --config p/secrets \
+            --config p/github-actions \
+            custom_components/wattpilot_flex .github
+
+      - name: Upload SARIF
+        if: always() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+        uses: github/codeql-action/upload-sarif@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
+        with:
+          sarif_file: semgrep.sarif
+          category: semgrep
+
+  # Scans the whole git history with generic patterns, which GitHub's own
+  # secret scanning (provider tokens only) does not cover.
+  gitleaks:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    env:
+      GITLEAKS_VERSION: "8.30.1"
+      GITLEAKS_SHA256: "551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb"
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          fetch-depth: 0
+
+      # The release archive is checked against its published checksum, so a
+      # replaced download fails here instead of running.
+      - name: Install Gitleaks
+        run: |
+          curl -sSfL -o gitleaks.tar.gz \
+            "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          echo "${GITLEAKS_SHA256}  gitleaks.tar.gz" | sha256sum --check --strict
+          tar -xzf gitleaks.tar.gz gitleaks
+          sudo mv gitleaks /usr/local/bin/
+
+      # --redact keeps any secret it finds out of the log and the report.
+      - name: Scan
+        run: |
+          gitleaks detect \
+            --redact \
+            --report-format sarif \
+            --report-path gitleaks.sarif \
+            --exit-code 0
+
+      - name: Upload SARIF
+        if: always() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+        uses: github/codeql-action/upload-sarif@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
+        with:
+          sarif_file: gitleaks.sarif
+          category: gitleaks
