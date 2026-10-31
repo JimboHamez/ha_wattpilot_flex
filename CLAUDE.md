@@ -105,7 +105,10 @@ There is no build step (it is an HA custom component, copied into `config/custom
   a comment, which `.gitleaksignore` itself once did. Every action is
   pinned to a commit SHA with its version in a comment, and every workflow declares `permissions:`.
   Dependabot (`.github/dependabot.yml`) bumps the pins, except `hacs/action` and
-  `home-assistant/actions`, which are used from a branch head and bumped by hand. `pytest` runs on Python 3.13 **and** 3.14: each installs the newest
+  `home-assistant/actions`, which are used from a branch head and bumped by hand. Pinning
+  `hacs/action` freezes only its wrapper: its `action.yml` runs the floating
+  `ghcr.io/hacs/action:main` image, which is pulled on every run, so a new HACS check (such as
+  `integration_categories`, added 2026-10-19) applies without a bump and can fail the nightly run. `pytest` runs on Python 3.13 **and** 3.14: each installs the newest
   `pytest-homeassistant-custom-component` it can, so 3.14 tests the current Home Assistant and
   3.13 tests 2026.2, the last release that supports it (which keeps the `compat.py` fallbacks
   exercised). `mypy` runs on 3.14 only, against the current release's type hints, and fails
