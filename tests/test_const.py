@@ -44,6 +44,10 @@ def test_manifest_domain_matches_const():
     assert manifest["domain"] == _const().DOMAIN
     assert manifest["version"], "manifest.json must declare a non-empty version (HACS requirement)"
     assert manifest["codeowners"], "manifest.json must declare codeowners (HACS requirement)"
+    # HACS warns without categories and fails on a malformed list; hassfest wants 1-3 unique ones.
+    categories = manifest["categories"]
+    assert 1 <= len(categories) <= 3 and len(set(categories)) == len(categories)
+    assert all(re.fullmatch(r"[a-z0-9_]+(\.[a-z0-9_]+)?", category) for category in categories)
 
 
 def test_domain_matches_folder_and_service_selectors():
