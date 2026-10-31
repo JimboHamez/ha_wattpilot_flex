@@ -1,6 +1,7 @@
 {
   "domain": "wattpilot_flex",
   "name": "Wattpilot Flex",
+  "categories": ["energy.ev_charging"],
   "codeowners": ["@JimboHamez"],
   "config_flow": true,
   "documentation": "https://github.com/JimboHamez/ha_wattpilot_flex",

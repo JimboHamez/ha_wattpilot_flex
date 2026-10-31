@@ -22,6 +22,9 @@ for attribution.
   instead of the job log; all three are report-only, while `pip-audit` still gates. Every action
   is pinned to a commit SHA, Dependabot keeps those pins current, and every workflow declares
   read-only permissions, with `security-events: write` only on the jobs that upload results.
+- `manifest.json` declares `"categories": ["energy.ev_charging"]`, the key Home Assistant
+  accepts from custom integrations since October 2026 and HACS now checks. Home Assistant
+  releases that predate it ignore the key.
 
 ### Fixed
 - An entry missing its address (IP address or serial) or its password now fails to connect with a
