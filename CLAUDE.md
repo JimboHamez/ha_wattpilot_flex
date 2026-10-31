@@ -99,7 +99,10 @@ There is no build step (it is an HA custom component, copied into `config/custom
   deliberate bump. `.github/workflows/security.yml` gates only on `pip-audit` (the `manifest.json`
   requirements); Bandit, Semgrep and Gitleaks are report-only and upload SARIF to the Security tab
   (skipped on fork PRs, whose token cannot write it). A false positive is suppressed in place: a
-  `# nosemgrep: <rule> -- <reason>` comment, or a fingerprint in `.gitleaksignore`. Every action is
+  `# nosemgrep: <rule> -- <reason>` comment (the job strips suppressed results from the SARIF, which
+  code scanning would otherwise open as alerts), or a fingerprint in `.gitleaksignore`. Gitleaks
+  scans committed history, so check a fix after committing, and never quote the flagged text in
+  a comment, which `.gitleaksignore` itself once did. Every action is
   pinned to a commit SHA with its version in a comment, and every workflow declares `permissions:`.
   Dependabot (`.github/dependabot.yml`) bumps the pins, except `hacs/action` and
   `home-assistant/actions`, which are used from a branch head and bumped by hand. `pytest` runs on Python 3.13 **and** 3.14: each installs the newest
