@@ -1,0 +1,825 @@
+{
+    "config": {
+        "flow_title": "{name}",
+        "step": {
+            "connection": {
+                "title": "Wattpilot-laadpaal",
+                "description": "Kies hoe Home Assistant verbinding moet maken met je Wattpilot-laadpaal.",
+                "data": {
+                    "connection": "Verbindingstype"
+                },
+                "data_description": {
+                    "connection": "Lokaal maakt rechtstreeks verbinding via je lokale netwerk (LAN). Cloud maakt verbinding via de go-e-cloud met behulp van het serienummer van de laadpaal."
+                }
+            },
+            "local": {
+                "title": "Lokale verbinding",
+                "description": "Voer de lokale netwerkgegevens van je Wattpilot-laadpaal in.",
+                "data": {
+                    "friendly_name": "Naam",
+                    "ip_address": "IP-adres",
+                    "password": "Wachtwoord",
+                    "timeout": "Time-out"
+                },
+                "data_description": {
+                    "friendly_name": "Weergavenaam van de laadpaal in Home Assistant.",
+                    "ip_address": "Lokaal IP-adres van de laadpaal in je netwerk.",
+                    "password": "Het lokale wachtwoord van de laadpaal, ingesteld in de Wattpilot-app.",
+                    "timeout": "Aantal seconden wachten tot de verbinding tot stand is gebracht en geïnitialiseerd."
+                }
+            },
+            "cloud": {
+                "title": "Cloudverbinding",
+                "description": "Voer de go-e-cloudgegevens van je Wattpilot-laadpaal in.",
+                "data": {
+                    "friendly_name": "Naam",
+                    "serial": "Serienummer",
+                    "password": "Wachtwoord",
+                    "timeout": "Time-out"
+                },
+                "data_description": {
+                    "friendly_name": "Weergavenaam van de laadpaal in Home Assistant.",
+                    "serial": "Serienummer van de laadpaal, waarmee deze via de go-e-cloud wordt bereikt.",
+                    "password": "Het cloudwachtwoord dat voor je laadpaal is ingesteld.",
+                    "timeout": "Aantal seconden wachten tot de verbinding tot stand is gebracht en geïnitialiseerd."
+                }
+            },
+            "zeroconf_confirm": {
+                "title": "Wattpilot-laadpaal",
+                "description": "Stel de gevonden Wattpilot-laadpaal \"{name}\" in.",
+                "data": {
+                    "password": "Wachtwoord",
+                    "timeout": "Time-out"
+                },
+                "data_description": {
+                    "password": "Het lokale wachtwoord van de laadpaal, ingesteld in de Wattpilot-app.",
+                    "timeout": "Aantal seconden wachten tot de verbinding tot stand is gebracht en geïnitialiseerd."
+                }
+            },
+            "reauth_confirm": {
+                "title": "Wattpilot-laadpaal",
+                "description": "Het wachtwoord voor \"{name}\" is niet meer geldig. Voer het huidige wachtwoord van de laadpaal in.",
+                "data": {
+                    "password": "Wachtwoord"
+                },
+                "data_description": {
+                    "password": "Het lokale wachtwoord van de laadpaal, ingesteld in de Wattpilot-app."
+                }
+            },
+            "reconfigure": {
+                "title": "Wattpilot-laadpaal",
+                "description": "Werk de verbindingsgegevens voor \"{name}\" bij. Het verbindingstype kan hier niet worden gewijzigd; voeg de laadpaal opnieuw toe om te wisselen tussen een lokale en een cloudverbinding.",
+                "data": {
+                    "friendly_name": "Naam",
+                    "ip_address": "IP-adres",
+                    "password": "Wachtwoord",
+                    "serial": "Serienummer",
+                    "timeout": "Time-out"
+                },
+                "data_description": {
+                    "friendly_name": "Weergavenaam van de laadpaal in Home Assistant.",
+                    "ip_address": "Lokaal IP-adres van de laadpaal in je netwerk.",
+                    "password": "Het lokale wachtwoord van de laadpaal, ingesteld in de Wattpilot-app.",
+                    "serial": "Serienummer van de laadpaal, zoals weergegeven in de Wattpilot-app.",
+                    "timeout": "Aantal seconden wachten tot de verbinding tot stand is gebracht en geïnitialiseerd."
+                }
+            }
+        },
+        "abort": {
+            "already_configured": "Deze laadpaal is al geconfigureerd.",
+            "exception": "Er is een onverwachte fout opgetreden. Bekijk de logboeken voor details.",
+            "no_ipv4": "De gevonden laadpaal heeft geen IPv4-adres doorgegeven.",
+            "no_serial": "Het gevonden apparaat heeft geen serienummer doorgegeven.",
+            "reauth_successful": "Opnieuw verifiëren is gelukt.",
+            "reconfigure_successful": "De verbindingsgegevens van de laadpaal zijn bijgewerkt.",
+            "wrong_charger": "Deze gegevens horen bij een andere laadpaal. Met opnieuw configureren kun je alleen wijzigen hoe deze laadpaal wordt bereikt."
+        },
+        "error": {
+            "cannot_connect": "Kan geen verbinding maken met de laadpaal. Controleer of deze online is en probeer het opnieuw.",
+            "invalid_auth": "Ongeldig wachtwoord. Controleer het wachtwoord van de laadpaal en probeer het opnieuw.",
+            "wrong_charger": "Deze gegevens horen bij een andere laadpaal. Met opnieuw configureren kun je alleen wijzigen hoe deze laadpaal wordt bereikt."
+        }
+    },
+    "selector": {
+        "connection": {
+            "options": {
+                "local": "Lokaal (LAN)",
+                "cloud": "go-e Cloud"
+            }
+        },
+        "day_type": {
+            "options": {
+                "weekdays": "Werkdagen",
+                "saturday": "Zaterdag",
+                "sunday": "Zondag"
+            }
+        }
+    },
+    "services": {
+        "set_next_trip": {
+            "name": "Volgende rit instellen",
+            "description": "Stelt de vertrektijd in die de laadmodus Next Trip gebruikt.",
+            "fields": {
+                "device_id": {
+                    "name": "Laadpaal",
+                    "description": "Laadpaal waarop de wijziging wordt toegepast."
+                },
+                "trigger_time": {
+                    "name": "Volgende rit",
+                    "description": "Vertrektijd van de volgende rit."
+                }
+            }
+        },
+        "set_charging_schedule": {
+            "name": "Laadtijden instellen",
+            "description": "Schrijft één dagtype van het laadschema van de app (laadtijden) naar de laadpaal. Velden die leeg blijven, behouden hun huidige waarde.",
+            "fields": {
+                "device_id": {
+                    "name": "Laadpaal",
+                    "description": "Laadpaal waarop de wijziging wordt toegepast."
+                },
+                "day_type": {
+                    "name": "Dagtype",
+                    "description": "Welk schema wordt gewijzigd: werkdagen, zaterdag of zondag."
+                },
+                "limit_charging_times": {
+                    "name": "Laadtijden beperken",
+                    "description": "Alleen binnen de laadtijden laden."
+                },
+                "pv_surplus_outside_times": {
+                    "name": "PV-overschot buiten de laadtijden",
+                    "description": "Laden met PV-overschot buiten de laadtijden toestaan."
+                },
+                "ranges": {
+                    "name": "Laadtijden",
+                    "description": "De laadvensters, als lijst van begin- en eindtijden (HH:MM). Elk venster moet op dezelfde dag na het begin eindigen en vensters mogen elkaar niet overlappen; een venster over middernacht wordt, net als in de app, gesplitst in een avond- en een ochtendvenster."
+                }
+            }
+        },
+        "set_goe_cloud": {
+            "name": "go-e-cloud instellen",
+            "description": "Schakelt de toegang tot de go-e-cloud voor de laadpaal in of uit.",
+            "fields": {
+                "device_id": {
+                    "name": "Laadpaal",
+                    "description": "Laadpaal waarop de wijziging wordt toegepast."
+                },
+                "cloud_api": {
+                    "name": "Cloud-API",
+                    "description": "Schakel de toegang tot de go-e-cloud-API in of uit."
+                }
+            }
+        },
+        "set_debug_properties": {
+            "name": "Debug-eigenschappen instellen",
+            "description": "Schakelt het loggen van eigenschapswijzigingen van de laadpaal als waarschuwingen in het logboek in of uit.",
+            "fields": {
+                "device_id": {
+                    "name": "Laadpaal",
+                    "description": "Laadpaal waarop de wijziging wordt toegepast."
+                },
+                "debug_properties": {
+                    "name": "Debug-eigenschappen",
+                    "description": "TRUE logt alle eigenschapswijzigingen, FALSE geen; of geef een lijst met eigenschapscodes op om alleen die te loggen."
+                }
+            }
+        },
+        "disconnect_charger": {
+            "name": "Laadpaal loskoppelen",
+            "description": "Verbreekt een bestaande verbinding met de laadpaal. Entiteiten zijn niet beschikbaar tot er opnieuw verbinding is.",
+            "fields": {
+                "device_id": {
+                    "name": "Laadpaal",
+                    "description": "Laadpaal waarop de wijziging wordt toegepast."
+                }
+            }
+        },
+        "reconnect_charger": {
+            "name": "Laadpaal opnieuw verbinden",
+            "description": "Herstelt een verbroken verbinding met de laadpaal.",
+            "fields": {
+                "device_id": {
+                    "name": "Laadpaal",
+                    "description": "Laadpaal waarop de wijziging wordt toegepast."
+                }
+            }
+        }
+    },
+    "entity": {
+        "sensor": {
+            "access_state": {
+                "name": "Toegangsstatus",
+                "state": {
+                    "open": "Open",
+                    "wait": "Wachten"
+                }
+            },
+            "car_connected": {
+                "name": "Voertuig verbonden",
+                "state": {
+                    "unknown": "Onbekend",
+                    "no_car": "Geen voertuig",
+                    "charging": "Laden",
+                    "ready": "Gereed",
+                    "complete": "Voltooid",
+                    "error": "Fout"
+                }
+            },
+            "card_0_energy": {
+                "name": "Energie ID-chip 0"
+            },
+            "card_1_energy": {
+                "name": "Energie ID-chip 1"
+            },
+            "card_2_energy": {
+                "name": "Energie ID-chip 2"
+            },
+            "card_3_energy": {
+                "name": "Energie ID-chip 3"
+            },
+            "card_4_energy": {
+                "name": "Energie ID-chip 4"
+            },
+            "card_5_energy": {
+                "name": "Energie ID-chip 5"
+            },
+            "card_6_energy": {
+                "name": "Energie ID-chip 6"
+            },
+            "card_7_energy": {
+                "name": "Energie ID-chip 7"
+            },
+            "card_8_energy": {
+                "name": "Energie ID-chip 8"
+            },
+            "card_9_energy": {
+                "name": "Energie ID-chip 9"
+            },
+            "card_current_name": {
+                "name": "Naam huidige ID-chip"
+            },
+            "cards_0": {
+                "name": "ID-chip 0"
+            },
+            "cards_1": {
+                "name": "ID-chip 1"
+            },
+            "cards_2": {
+                "name": "ID-chip 2"
+            },
+            "cards_3": {
+                "name": "ID-chip 3"
+            },
+            "cards_4": {
+                "name": "ID-chip 4"
+            },
+            "cards_5": {
+                "name": "ID-chip 5"
+            },
+            "cards_6": {
+                "name": "ID-chip 6"
+            },
+            "cards_7": {
+                "name": "ID-chip 7"
+            },
+            "cards_8": {
+                "name": "ID-chip 8"
+            },
+            "cards_9": {
+                "name": "ID-chip 9"
+            },
+            "car": {
+                "name": "Voertuigstatus",
+                "state": {
+                    "unknown": "Onbekend",
+                    "idle": "Inactief",
+                    "charging": "Laden",
+                    "wait_car": "Wachten op voertuig",
+                    "complete": "Voltooid",
+                    "error": "Fout"
+                }
+            },
+            "cci": {
+                "name": "Omvormer"
+            },
+            "ccw": {
+                "name": "Wifi-verbinding"
+            },
+            "cus": {
+                "name": "Kabelontgrendeling",
+                "state": {
+                    "unknown": "Onbekend",
+                    "unlocked": "Ontgrendeld",
+                    "unlockfailed": "Ontgrendelen mislukt",
+                    "locked": "Vergrendeld",
+                    "lockfailed": "Vergrendelen mislukt",
+                    "lockunlockpowerout": "Vergrendelen/ontgrendelen bij stroomuitval"
+                }
+            },
+            "err": {
+                "name": "Interne fout",
+                "state": {
+                    "none": "Geen fout",
+                    "fiac": "Lekstroom (AC)",
+                    "fidc": "Lekstroom (DC)",
+                    "phase": "Fasefout",
+                    "overvolt": "Overspanning",
+                    "overamp": "Overstroom",
+                    "diode": "Diodefout",
+                    "ppinvalid": "Ongeldige proximity pilot (PP)",
+                    "gndinvalid": "Ongeldige aarding",
+                    "contactorstuck": "Magneetschakelaar vastgelopen",
+                    "contactormiss": "Magneetschakelaar ontbreekt",
+                    "fiunknown": "Onbekende lekstroomfout",
+                    "unknown": "Onbekend",
+                    "overtemp": "Te hoge temperatuur",
+                    "nocomm": "Geen communicatie",
+                    "statuslockstuckopen": "Kabelvergrendeling klemt (open)",
+                    "statuslockstucklocked": "Kabelvergrendeling klemt (vergrendeld)",
+                    "reserved20": "Gereserveerd (20)",
+                    "reserved21": "Gereserveerd (21)",
+                    "reserved22": "Gereserveerd (22)",
+                    "reserved23": "Gereserveerd (23)",
+                    "reserved24": "Gereserveerd (24)"
+                }
+            },
+            "eto": {
+                "name": "Totaal geladen"
+            },
+            "ffb": {
+                "name": "Terugmelding vergrendeling",
+                "state": {
+                    "unknown": "Onbekend",
+                    "unlocked": "Ontgrendeld",
+                    "unlockfailed": "Ontgrendelen mislukt",
+                    "locked": "Vergrendeld",
+                    "lockfailed": "Vergrendelen mislukt",
+                    "lockunlockpowerout": "Vergrendelen/ontgrendelen bij stroomuitval"
+                }
+            },
+            "lck": {
+                "name": "Effectieve vergrendelingsinstelling",
+                "state": {
+                    "normal": "Normaal",
+                    "autounlock": "Automatisch ontgrendelen",
+                    "alwayslock": "Altijd vergrendelen",
+                    "forceunlock": "Ontgrendelen forceren"
+                }
+            },
+            "loc": {
+                "name": "Lokale tijd"
+            },
+            "modelstatus": {
+                "name": "Laadreden",
+                "state": {
+                    "notchargingbecausenochargectrldata": "Laadt niet: geen gegevens van laadregelaar",
+                    "notchargingbecauseovertemperature": "Laadt niet: te hoge temperatuur",
+                    "notchargingbecauseaccesscontrolwait": "Laadt niet: wacht op toegangscontrole",
+                    "chargingbecauseforcestateon": "Laadt: geforceerd (aan)",
+                    "notchargingbecauseforcestateoff": "Laadt niet: geforceerd (uit)",
+                    "notchargingbecausescheduler": "Laadt niet: planning",
+                    "notchargingbecauseenergylimit": "Laadt niet: energielimiet bereikt",
+                    "chargingbecauseawattarpricelow": "Laadt: aWATTar-prijs laag",
+                    "chargingbecauseautomaticstoptestladung": "Laadt: automatische stop (testlading)",
+                    "chargingbecauseautomaticstopnotenoughtime": "Laadt: automatische stop, onvoldoende tijd",
+                    "chargingbecauseautomaticstop": "Laadt: automatische stop",
+                    "chargingbecauseautomaticstopnoclock": "Laadt: automatische stop, geen klok",
+                    "chargingbecausepvsurplus": "Laadt: PV-overschot",
+                    "chargingbecausefallbackgoedefault": "Laadt: terugvaloptie (go-e standaard)",
+                    "chargingbecausefallbackgoescheduler": "Laadt: terugvaloptie (go-e planning)",
+                    "chargingbecausefallbackdefault": "Laadt: terugvaloptie (standaard)",
+                    "notchargingbecausefallbackgoeawattar": "Laadt niet: terugvaloptie (go-e aWATTar)",
+                    "notchargingbecausefallbackawattar": "Laadt niet: terugvaloptie (aWATTar)",
+                    "notchargingbecausefallbackautomaticstop": "Laadt niet: terugvaloptie (automatische stop)",
+                    "chargingbecausecarcompatibilitykeepalive": "Laadt: keep-alive voor voertuigcompatibiliteit",
+                    "chargingbecausechargepausenotallowed": "Laadt: laadpauze niet toegestaan",
+                    "notchargingbecausesimulateunplugging": "Laadt niet: loskoppelen wordt gesimuleerd",
+                    "notchargingbecausephaseswitch": "Laadt niet: faseomschakeling",
+                    "notchargingbecauseminpauseduration": "Laadt niet: minimale pauzeduur",
+                    "notchargingbecauseerror": "Laadt niet: fout",
+                    "notchargingbecauseloadmanagementdoesntwant": "Laadt niet: load management",
+                    "notchargingbecauseocppdoesntwant": "Laadt niet: OCPP",
+                    "notchargingbecausereconnectdelay": "Laadt niet: vertraging bij opnieuw verbinden",
+                    "notchargingbecauseadapterblocking": "Laadt niet: adapter blokkeert",
+                    "notchargingbecauseunderfrequencycontrol": "Laadt niet: onderfrequentieregeling",
+                    "notchargingbecauseunbalancedload": "Laadt niet: onbalans",
+                    "chargingbecausedischargingpvbattery": "Laadt: PV-batterij wordt ontladen",
+                    "notchargingbecausegridmonitoring": "Laadt niet: netbewaking",
+                    "notchargingbecauseocppfallback": "Laadt niet: OCPP-terugvaloptie"
+                }
+            },
+            "nrg": {
+                "name": "Laadvermogen"
+            },
+            "qsw": {
+                "name": "Webserverwachtrij"
+            },
+            "rbc": {
+                "name": "Aantal herstarts"
+            },
+            "rbt": {
+                "name": "Tijd sinds herstart"
+            },
+            "rssi": {
+                "name": "Wifi-signaal"
+            },
+            "schedule_saturday": {
+                "name": "Laadtijden zaterdag",
+                "state": {
+                    "off": "Uit",
+                    "charging_times": "Laadtijden",
+                    "pv_surplus_outside_times": "PV-overschot buiten de laadtijden",
+                    "charging_times_pv_surplus_outside": "Laadtijden + PV-overschot daarbuiten"
+                }
+            },
+            "schedule_sunday": {
+                "name": "Laadtijden zondag",
+                "state": {
+                    "off": "Uit",
+                    "charging_times": "Laadtijden",
+                    "pv_surplus_outside_times": "PV-overschot buiten de laadtijden",
+                    "charging_times_pv_surplus_outside": "Laadtijden + PV-overschot daarbuiten"
+                }
+            },
+            "schedule_weekdays": {
+                "name": "Laadtijden werkdagen",
+                "state": {
+                    "off": "Uit",
+                    "charging_times": "Laadtijden",
+                    "pv_surplus_outside_times": "PV-overschot buiten de laadtijden",
+                    "charging_times_pv_surplus_outside": "Laadtijden + PV-overschot daarbuiten"
+                }
+            },
+            "tma": {
+                "name": "Temperatuur laadpaal"
+            },
+            "trx": {
+                "name": "Huidige ID-chip",
+                "state": {
+                    "no_chip": "Geen chip",
+                    "id_chip_0": "ID-chip 0",
+                    "id_chip_1": "ID-chip 1",
+                    "id_chip_2": "ID-chip 2",
+                    "id_chip_3": "ID-chip 3",
+                    "id_chip_4": "ID-chip 4",
+                    "id_chip_5": "ID-chip 5",
+                    "id_chip_6": "ID-chip 6",
+                    "id_chip_7": "ID-chip 7",
+                    "id_chip_8": "ID-chip 8",
+                    "id_chip_9": "ID-chip 9",
+                    "no_transaction": "Geen transactie"
+                }
+            },
+            "wcch": {
+                "name": "HTTP-clients"
+            },
+            "wccw": {
+                "name": "WebSocket-clients"
+            },
+            "wh": {
+                "name": "Geladen (sessie)"
+            },
+            "wst": {
+                "name": "Wifi-status",
+                "state": {
+                    "idle_status": "IDLE_STATUS",
+                    "no_ssid_avail": "NO_SSID_AVAIL",
+                    "scan_completed": "SCAN_COMPLETED",
+                    "connected": "CONNECTED",
+                    "connect_failed": "CONNECT_FAILED",
+                    "connection_lost": "CONNECTION_LOST",
+                    "disconnected": "DISCONNECTED",
+                    "connecting": "CONNECTING",
+                    "disconnecting": "DISCONNECTING",
+                    "no_shield": "NO_SHIELD"
+                }
+            }
+        },
+        "switch": {
+            "bac": {
+                "name": "Keuze vergrendelingsniveau"
+            },
+            "ebe": {
+                "name": "Boost"
+            },
+            "fap": {
+                "name": "Laadpauze"
+            },
+            "fre": {
+                "name": "In Eco Mode blijven"
+            },
+            "ful": {
+                "name": "Flexibel tarief (Lumina Strom/aWATTar)"
+            },
+            "fup": {
+                "name": "PV-overschot"
+            },
+            "loe": {
+                "name": "Load balancing"
+            },
+            "lse": {
+                "name": "Led-energiebesparing"
+            },
+            "nmo": {
+                "name": "Aardingscontrole"
+            },
+            "pdte": {
+                "name": "PV-batterij ontladen"
+            },
+            "su": {
+                "name": "Loskoppelen simuleren"
+            },
+            "tse": {
+                "name": "Network Time Protocol"
+            },
+            "upo": {
+                "name": "Ontgrendelen bij stroomuitval"
+            },
+            "wda": {
+                "name": "Hotspot automatisch uitschakelen"
+            }
+        },
+        "select": {
+            "acs": {
+                "name": "Toegangscontrole",
+                "state": {
+                    "open": "Open",
+                    "authentication_required": "Authenticatie vereist"
+                }
+            },
+            "amp_preset": {
+                "name": "Voorinstelling laadstroom"
+            },
+            "awc": {
+                "name": "aWATTar-land",
+                "state": {
+                    "austria": "Oostenrijk",
+                    "belgium": "België",
+                    "bulgaria": "Bulgarije",
+                    "croatia": "Kroatië",
+                    "czechia": "Tsjechië",
+                    "denmark_dk1": "Denemarken DK1",
+                    "denmark_dk2": "Denemarken DK2",
+                    "denmark_dk1_tibber": "Denemarken DK1 Tibber",
+                    "denmark_dk2_tibber": "Denemarken DK2 Tibber",
+                    "estonia": "Estland",
+                    "finland": "Finland",
+                    "france": "Frankrijk",
+                    "germany": "Duitsland",
+                    "greece": "Griekenland",
+                    "hungary": "Hongarije",
+                    "italy_calabria": "Italië Calabrië",
+                    "italy_centre_noth": "Italië Midden-Noord",
+                    "italy_centre_south": "Italië Midden-Zuid",
+                    "italy_north": "Italië Noord",
+                    "italy_sacoac": "Italië SacoAC",
+                    "italy_sacodc": "Italië SacoDC",
+                    "italy_sardinia": "Italië Sardinië",
+                    "italy_sicily": "Italië Sicilië",
+                    "italy_south": "Italië Zuid",
+                    "latvia": "Letland",
+                    "lithuania": "Litouwen",
+                    "montenegro": "Montenegro",
+                    "netherlands": "Nederland",
+                    "norway_elspot1": "Noorwegen Elspot1",
+                    "norway_elspot2": "Noorwegen Elspot2",
+                    "norway_elspot3": "Noorwegen Elspot3",
+                    "norway_elspot4": "Noorwegen Elspot4",
+                    "norway_elspot5": "Noorwegen Elspot5",
+                    "norway_no2nsl": "Noorwegen NO2NSL",
+                    "poland": "Polen",
+                    "portugal": "Portugal",
+                    "romania": "Roemenië",
+                    "serbia": "Servië",
+                    "slovakia": "Slowakije",
+                    "slovenia": "Slovenië",
+                    "spain": "Spanje",
+                    "sweden_elspot1": "Zweden Elspot1",
+                    "sweden_elspot2": "Zweden Elspot2",
+                    "sweden_elspot3": "Zweden Elspot3",
+                    "sweden_elspot4": "Zweden Elspot4",
+                    "sweden_tibber_elspot1": "Zweden Tibber Elspot1",
+                    "sweden_tibber_elspot2": "Zweden Tibber Elspot2",
+                    "sweden_tibber_elspot3": "Zweden Tibber Elspot3",
+                    "sweden_tibber_elspot4": "Zweden Tibber Elspot4",
+                    "switzerland": "Zwitserland",
+                    "ukraine": "Oekraïne"
+                }
+            },
+            "bac": {
+                "name": "Keuze vergrendelingsniveau",
+                "state": {
+                    "always_locked": "Altijd vergrendeld",
+                    "locked_when_car_is_connected": "Vergrendeld als een voertuig is verbonden",
+                    "never_locked": "Nooit vergrendeld"
+                }
+            },
+            "ct": {
+                "name": "Voertuig",
+                "state": {
+                    "standard": "Standaard",
+                    "kia_soul": "Kia Soul",
+                    "renault_zoe_twingo": "Renault Zoe/Twingo",
+                    "mitsubishi_imiev": "Mitsubishi iMiev",
+                    "citroen_c_zero": "Citroen c zero",
+                    "peugeot_ion": "Peugeot iOn",
+                    "opel_corsa_e": "Opel Corsa-e",
+                    "vw_id_sw_3_2": "VW ID (SW <3.2)",
+                    "vw_id_sw_3_2_4_1": "VW ID (SW 3.2-4.1)",
+                    "vw_id_sw_5_x": "VW ID (SW 5.x)",
+                    "cupra_born_standard": "Cupra Born Standard",
+                    "cupra_born_alternativ": "Cupra Born Alternativ",
+                    "ford_explorer": "Ford Explorer",
+                    "porsche_taycan": "Porsche Taycan",
+                    "skoda_enyaq": "Skoda Enyaq",
+                    "dacia_spring": "Dacia Spring",
+                    "mercedes": "Mercedes",
+                    "ssangyong": "Ssangyong"
+                }
+            },
+            "ebo": {
+                "name": "Boosttype",
+                "state": {
+                    "one_time": "Eenmalig",
+                    "repeat_for_as_long_as_vehicle_is_plugged_in": "Herhalen zolang het voertuig is aangesloten"
+                }
+            },
+            "lmo": {
+                "name": "Laadmodus",
+                "state": {
+                    "default": "Standaard",
+                    "eco": "Eco",
+                    "next_trip": "Next Trip"
+                }
+            },
+            "psm": {
+                "name": "Faseomschakeling",
+                "state": {
+                    "auto": "Automatisch",
+                    "1_phase": "1 fase",
+                    "3_phases": "3 fasen"
+                }
+            },
+            "tds": {
+                "name": "Zomertijd",
+                "state": {
+                    "none": "Geen",
+                    "europeansummertime": "Europese zomertijd",
+                    "usdaylighttime": "Amerikaanse zomertijd",
+                    "aueasterndaylighttime": "Oost-Australische zomertijd"
+                }
+            },
+            "ust": {
+                "name": "Kabelontgrendeling",
+                "state": {
+                    "normal": "Normaal",
+                    "autounlock": "Automatisch ontgrendelen",
+                    "alwayslock": "Altijd vergrendelen"
+                }
+            }
+        },
+        "number": {
+            "amp": {
+                "name": "Maximale laadstroom"
+            },
+            "awp": {
+                "name": "Maximale prijs"
+            },
+            "ebt": {
+                "name": "Boost ontlaadt tot"
+            },
+            "fam": {
+                "name": "Drempel PV-batterij"
+            },
+            "fmt": {
+                "name": "Minimale laadtijd"
+            },
+            "fot": {
+                "name": "Ohmpilot-drempel"
+            },
+            "fst": {
+                "name": "Laden starten bij"
+            },
+            "fte": {
+                "name": "Next Trip-laden"
+            },
+            "mpwst": {
+                "name": "Vertraging faseomschakeling"
+            },
+            "mptwt": {
+                "name": "Interval faseomschakeling"
+            },
+            "pdt": {
+                "name": "PV-batterij ontlaadt tot"
+            },
+            "spl3": {
+                "name": "Vermogensniveau 3 fasen"
+            }
+        },
+        "button": {
+            "frc0": {
+                "name": "Laden starten"
+            },
+            "frc1": {
+                "name": "Laden stoppen"
+            },
+            "frc2": {
+                "name": "Laden forceren"
+            },
+            "rst": {
+                "name": "Herstarten"
+            },
+            "trx": {
+                "name": "Authenticeren"
+            }
+        },
+        "update": {
+            "onv": {
+                "name": "Firmware-update"
+            }
+        }
+    },
+    "exceptions": {
+        "charger_not_found": {
+            "message": "Kan geen Wattpilot-laadpaal vinden voor apparaat {device_id}."
+        },
+        "cloud_api_disable_failed": {
+            "message": "Kan de go-e-cloud-API op laadpaal {charger} niet uitschakelen."
+        },
+        "cloud_api_enable_failed": {
+            "message": "Kan de go-e-cloud-API op laadpaal {charger} niet inschakelen."
+        },
+        "cloud_api_key_timeout": {
+            "message": "De laadpaal heeft binnen {timeout} seconden geen go-e-cloud-API-sleutel teruggegeven."
+        },
+        "entity_action_failed": {
+            "message": "{action} op {entity} is mislukt: {error}"
+        },
+        "entity_write_failed": {
+            "message": "De laadpaal heeft de nieuwe waarde van {property} voor {entity} niet geaccepteerd."
+        },
+        "entry_not_found": {
+            "message": "Kan de Wattpilot-configuratie voor apparaat {device_id} niet vinden."
+        },
+        "entry_not_loaded": {
+            "message": "De Wattpilot-configuratie voor apparaat {device_id} is niet geladen. Controleer of de laadpaal is ingesteld en bereikbaar is."
+        },
+        "invalid_boolean": {
+            "message": "{parameter} moet true of false zijn, ontvangen: {value}"
+        },
+        "invalid_day_type": {
+            "message": "{parameter} moet een van {options} zijn, ontvangen: {value}"
+        },
+        "invalid_debug_properties": {
+            "message": "{parameter} moet true, false of een lijst met eigenschapsnamen zijn, ontvangen: {value}"
+        },
+        "invalid_option": {
+            "message": "{option} is geen optie van {entity}. Geldige opties: {options}"
+        },
+        "invalid_schedule_ranges": {
+            "message": "{parameter} moet een lijst van begin- en eindtijden (HH:MM) zijn, ontvangen: {value}"
+        },
+        "invalid_trigger_time": {
+            "message": "{parameter} is geen geldige tijd: {trigger_time}"
+        },
+        "missing_parameter": {
+            "message": "{parameter} is een verplichte parameter."
+        },
+        "reconnect_failed": {
+            "message": "Kan de Wattpilot-laadpaal voor apparaat {device_id} niet opnieuw verbinden."
+        },
+        "schedule_not_supported": {
+            "message": "Laadpaal {charger} meldt geen laadschema ({property})."
+        },
+        "schedule_nothing_to_set": {
+            "message": "Niets te wijzigen: geef minstens een van {parameters} op."
+        },
+        "schedule_range_crosses_midnight": {
+            "message": "{parameter}: een laadvenster moet op dezelfde dag na het begin eindigen (de volgende dag heeft een eigen schema) - splits het om middernacht: {ranges}"
+        },
+        "schedule_ranges_overlap": {
+            "message": "{parameter}: laadvensters mogen elkaar niet overlappen: {ranges}"
+        },
+        "service_failed": {
+            "message": "De Wattpilot-actie {service} is mislukt: {error}"
+        },
+        "set_next_trip_failed": {
+            "message": "Kan het tijdstip van de volgende rit niet instellen op laadpaal {charger}."
+        },
+        "set_schedule_failed": {
+            "message": "Kan het laadschema {day_type} niet naar laadpaal {charger} schrijven."
+        },
+        "update_install_timeout": {
+            "message": "{entity}: de laadpaal is niet binnen {timeout} seconden begonnen met het installeren van de update."
+        },
+        "update_no_version": {
+            "message": "{entity}: er is geen firmwareversie om te installeren."
+        },
+        "update_restart_timeout": {
+            "message": "{entity}: de laadpaal was {timeout} seconden na het installeren van de update nog niet terug."
+        },
+        "update_unknown_version": {
+            "message": "{entity}: versie {version} wordt niet door de laadpaal aangeboden. Beschikbaar: {versions}"
+        }
+    }
+}

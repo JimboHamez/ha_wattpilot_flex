@@ -1,0 +1,825 @@
+{
+    "config": {
+        "flow_title": "{name}",
+        "step": {
+            "connection": {
+                "title": "Borne de recharge Wattpilot",
+                "description": "Choisissez comment Home Assistant doit se connecter à votre borne de recharge Wattpilot.",
+                "data": {
+                    "connection": "Type de connexion"
+                },
+                "data_description": {
+                    "connection": "Local se connecte directement via votre réseau local (LAN). Cloud se connecte via le cloud go-e à l'aide du numéro de série de la borne."
+                }
+            },
+            "local": {
+                "title": "Connexion locale",
+                "description": "Saisissez les informations réseau locales de votre borne de recharge Wattpilot.",
+                "data": {
+                    "friendly_name": "Nom",
+                    "ip_address": "Adresse IP",
+                    "password": "Mot de passe",
+                    "timeout": "Délai d'attente"
+                },
+                "data_description": {
+                    "friendly_name": "Nom d'affichage de la borne dans Home Assistant.",
+                    "ip_address": "Adresse IP locale de la borne sur votre réseau.",
+                    "password": "Le mot de passe local de la borne, défini dans l'application Wattpilot.",
+                    "timeout": "Nombre de secondes d'attente pour l'établissement et l'initialisation de la connexion."
+                }
+            },
+            "cloud": {
+                "title": "Connexion cloud",
+                "description": "Saisissez les informations cloud go-e de votre borne de recharge Wattpilot.",
+                "data": {
+                    "friendly_name": "Nom",
+                    "serial": "Numéro de série",
+                    "password": "Mot de passe",
+                    "timeout": "Délai d'attente"
+                },
+                "data_description": {
+                    "friendly_name": "Nom d'affichage de la borne dans Home Assistant.",
+                    "serial": "Numéro de série de la borne, utilisé pour la joindre via le cloud go-e.",
+                    "password": "Le mot de passe cloud défini pour votre borne.",
+                    "timeout": "Nombre de secondes d'attente pour l'établissement et l'initialisation de la connexion."
+                }
+            },
+            "zeroconf_confirm": {
+                "title": "Borne de recharge Wattpilot",
+                "description": "Configurer la borne de recharge Wattpilot découverte « {name} ».",
+                "data": {
+                    "password": "Mot de passe",
+                    "timeout": "Délai d'attente"
+                },
+                "data_description": {
+                    "password": "Le mot de passe local de la borne, défini dans l'application Wattpilot.",
+                    "timeout": "Nombre de secondes d'attente pour l'établissement et l'initialisation de la connexion."
+                }
+            },
+            "reauth_confirm": {
+                "title": "Borne de recharge Wattpilot",
+                "description": "Le mot de passe de « {name} » n'est plus valide. Saisissez le mot de passe actuel de la borne.",
+                "data": {
+                    "password": "Mot de passe"
+                },
+                "data_description": {
+                    "password": "Le mot de passe local de la borne, défini dans l'application Wattpilot."
+                }
+            },
+            "reconfigure": {
+                "title": "Borne de recharge Wattpilot",
+                "description": "Mettez à jour les informations de connexion de « {name} ». Le type de connexion ne peut pas être modifié ici ; ajoutez à nouveau la borne pour passer d'une connexion locale à une connexion cloud, ou inversement.",
+                "data": {
+                    "friendly_name": "Nom",
+                    "ip_address": "Adresse IP",
+                    "password": "Mot de passe",
+                    "serial": "Numéro de série",
+                    "timeout": "Délai d'attente"
+                },
+                "data_description": {
+                    "friendly_name": "Nom d'affichage de la borne dans Home Assistant.",
+                    "ip_address": "Adresse IP locale de la borne sur votre réseau.",
+                    "password": "Le mot de passe local de la borne, défini dans l'application Wattpilot.",
+                    "serial": "Numéro de série de la borne, tel qu'affiché dans l'application Wattpilot.",
+                    "timeout": "Nombre de secondes d'attente pour l'établissement et l'initialisation de la connexion."
+                }
+            }
+        },
+        "abort": {
+            "already_configured": "Cette borne est déjà configurée.",
+            "exception": "Une erreur inattendue s'est produite. Consultez les journaux pour plus de détails.",
+            "no_ipv4": "La borne découverte n'a annoncé aucune adresse IPv4.",
+            "no_serial": "L'appareil découvert n'a annoncé aucun numéro de série.",
+            "reauth_successful": "La réauthentification a réussi.",
+            "reconfigure_successful": "Les informations de connexion de la borne ont été mises à jour.",
+            "wrong_charger": "Ces informations appartiennent à une autre borne. La reconfiguration permet uniquement de modifier la façon de joindre cette borne."
+        },
+        "error": {
+            "cannot_connect": "Impossible de se connecter à la borne. Vérifiez qu'elle est en ligne et réessayez.",
+            "invalid_auth": "Mot de passe invalide. Vérifiez le mot de passe de la borne et réessayez.",
+            "wrong_charger": "Ces informations appartiennent à une autre borne. La reconfiguration permet uniquement de modifier la façon de joindre cette borne."
+        }
+    },
+    "selector": {
+        "connection": {
+            "options": {
+                "local": "Local (LAN)",
+                "cloud": "go-e Cloud"
+            }
+        },
+        "day_type": {
+            "options": {
+                "weekdays": "Jours de semaine",
+                "saturday": "Samedi",
+                "sunday": "Dimanche"
+            }
+        }
+    },
+    "services": {
+        "set_next_trip": {
+            "name": "Définir le prochain trajet",
+            "description": "Définit l'heure de départ utilisée par le mode de charge Next Trip.",
+            "fields": {
+                "device_id": {
+                    "name": "Borne",
+                    "description": "Borne à laquelle appliquer la modification."
+                },
+                "trigger_time": {
+                    "name": "Prochain trajet",
+                    "description": "Heure de départ du prochain trajet."
+                }
+            }
+        },
+        "set_charging_schedule": {
+            "name": "Définir les plages de charge",
+            "description": "Écrit sur la borne un type de jour du programme de charge de l'application (plages de charge). Les champs laissés vides conservent leur valeur actuelle.",
+            "fields": {
+                "device_id": {
+                    "name": "Borne",
+                    "description": "Borne à laquelle appliquer la modification."
+                },
+                "day_type": {
+                    "name": "Type de jour",
+                    "description": "Programme à modifier : jours de semaine, samedi ou dimanche."
+                },
+                "limit_charging_times": {
+                    "name": "Limiter les plages de charge",
+                    "description": "Charger uniquement pendant les plages de charge."
+                },
+                "pv_surplus_outside_times": {
+                    "name": "Surplus PV hors plages",
+                    "description": "Autoriser la charge avec le surplus photovoltaïque en dehors des plages de charge."
+                },
+                "ranges": {
+                    "name": "Plages de charge",
+                    "description": "Les plages de charge, sous forme de liste d'heures de début et de fin (HH:MM). Chaque plage doit se terminer après son début, le même jour, et les plages ne doivent pas se chevaucher ; une plage qui passe minuit est scindée en une plage du soir et une plage du matin, comme le fait l'application."
+                }
+            }
+        },
+        "set_goe_cloud": {
+            "name": "Configurer le cloud go-e",
+            "description": "Active ou désactive l'accès au cloud go-e pour la borne.",
+            "fields": {
+                "device_id": {
+                    "name": "Borne",
+                    "description": "Borne à laquelle appliquer la modification."
+                },
+                "cloud_api": {
+                    "name": "API cloud",
+                    "description": "Active ou désactive l'accès à l'API cloud go-e."
+                }
+            }
+        },
+        "set_debug_properties": {
+            "name": "Définir les propriétés de débogage",
+            "description": "Active ou désactive l'enregistrement des changements de propriétés de la borne sous forme d'avertissements dans le journal.",
+            "fields": {
+                "device_id": {
+                    "name": "Borne",
+                    "description": "Borne à laquelle appliquer la modification."
+                },
+                "debug_properties": {
+                    "name": "Propriétés de débogage",
+                    "description": "TRUE enregistre tous les changements de propriétés, FALSE aucun ; vous pouvez aussi indiquer une liste de codes de propriétés pour n'enregistrer que ceux-ci."
+                }
+            }
+        },
+        "disconnect_charger": {
+            "name": "Déconnecter la borne",
+            "description": "Interrompt une connexion établie avec la borne. Les entités deviennent indisponibles jusqu'à la reconnexion.",
+            "fields": {
+                "device_id": {
+                    "name": "Borne",
+                    "description": "Borne à laquelle appliquer la modification."
+                }
+            }
+        },
+        "reconnect_charger": {
+            "name": "Reconnecter la borne",
+            "description": "Rétablit une connexion interrompue avec la borne.",
+            "fields": {
+                "device_id": {
+                    "name": "Borne",
+                    "description": "Borne à laquelle appliquer la modification."
+                }
+            }
+        }
+    },
+    "entity": {
+        "sensor": {
+            "access_state": {
+                "name": "État d'accès",
+                "state": {
+                    "open": "Ouvert",
+                    "wait": "Attente"
+                }
+            },
+            "car_connected": {
+                "name": "Véhicule connecté",
+                "state": {
+                    "unknown": "Inconnu",
+                    "no_car": "Aucun véhicule",
+                    "charging": "En charge",
+                    "ready": "Prêt",
+                    "complete": "Terminé",
+                    "error": "Erreur"
+                }
+            },
+            "card_0_energy": {
+                "name": "Énergie badge ID 0"
+            },
+            "card_1_energy": {
+                "name": "Énergie badge ID 1"
+            },
+            "card_2_energy": {
+                "name": "Énergie badge ID 2"
+            },
+            "card_3_energy": {
+                "name": "Énergie badge ID 3"
+            },
+            "card_4_energy": {
+                "name": "Énergie badge ID 4"
+            },
+            "card_5_energy": {
+                "name": "Énergie badge ID 5"
+            },
+            "card_6_energy": {
+                "name": "Énergie badge ID 6"
+            },
+            "card_7_energy": {
+                "name": "Énergie badge ID 7"
+            },
+            "card_8_energy": {
+                "name": "Énergie badge ID 8"
+            },
+            "card_9_energy": {
+                "name": "Énergie badge ID 9"
+            },
+            "card_current_name": {
+                "name": "Nom du badge ID actuel"
+            },
+            "cards_0": {
+                "name": "Badge ID 0"
+            },
+            "cards_1": {
+                "name": "Badge ID 1"
+            },
+            "cards_2": {
+                "name": "Badge ID 2"
+            },
+            "cards_3": {
+                "name": "Badge ID 3"
+            },
+            "cards_4": {
+                "name": "Badge ID 4"
+            },
+            "cards_5": {
+                "name": "Badge ID 5"
+            },
+            "cards_6": {
+                "name": "Badge ID 6"
+            },
+            "cards_7": {
+                "name": "Badge ID 7"
+            },
+            "cards_8": {
+                "name": "Badge ID 8"
+            },
+            "cards_9": {
+                "name": "Badge ID 9"
+            },
+            "car": {
+                "name": "État du véhicule",
+                "state": {
+                    "unknown": "Inconnu",
+                    "idle": "Inactif",
+                    "charging": "En charge",
+                    "wait_car": "En attente du véhicule",
+                    "complete": "Terminé",
+                    "error": "Erreur"
+                }
+            },
+            "cci": {
+                "name": "Onduleur"
+            },
+            "ccw": {
+                "name": "Connexion Wi-Fi"
+            },
+            "cus": {
+                "name": "Déverrouillage du câble",
+                "state": {
+                    "unknown": "Inconnu",
+                    "unlocked": "Déverrouillé",
+                    "unlockfailed": "Échec du déverrouillage",
+                    "locked": "Verrouillé",
+                    "lockfailed": "Échec du verrouillage",
+                    "lockunlockpowerout": "Verrouillage/déverrouillage en cas de coupure de courant"
+                }
+            },
+            "err": {
+                "name": "Erreur interne",
+                "state": {
+                    "none": "Aucune erreur",
+                    "fiac": "Courant de défaut (AC)",
+                    "fidc": "Courant de défaut (DC)",
+                    "phase": "Erreur de phase",
+                    "overvolt": "Surtension",
+                    "overamp": "Surintensité",
+                    "diode": "Erreur de diode",
+                    "ppinvalid": "Proximity pilot (PP) invalide",
+                    "gndinvalid": "Mise à la terre invalide",
+                    "contactorstuck": "Contacteur bloqué",
+                    "contactormiss": "Contacteur absent",
+                    "fiunknown": "Courant de défaut inconnu",
+                    "unknown": "Inconnu",
+                    "overtemp": "Surchauffe",
+                    "nocomm": "Aucune communication",
+                    "statuslockstuckopen": "Verrouillage du câble bloqué (ouvert)",
+                    "statuslockstucklocked": "Verrouillage du câble bloqué (verrouillé)",
+                    "reserved20": "Réservé (20)",
+                    "reserved21": "Réservé (21)",
+                    "reserved22": "Réservé (22)",
+                    "reserved23": "Réservé (23)",
+                    "reserved24": "Réservé (24)"
+                }
+            },
+            "eto": {
+                "name": "Total chargé"
+            },
+            "ffb": {
+                "name": "Retour de verrouillage",
+                "state": {
+                    "unknown": "Inconnu",
+                    "unlocked": "Déverrouillé",
+                    "unlockfailed": "Échec du déverrouillage",
+                    "locked": "Verrouillé",
+                    "lockfailed": "Échec du verrouillage",
+                    "lockunlockpowerout": "Verrouillage/déverrouillage en cas de coupure de courant"
+                }
+            },
+            "lck": {
+                "name": "Réglage de verrouillage effectif",
+                "state": {
+                    "normal": "Normal",
+                    "autounlock": "Déverrouillage automatique",
+                    "alwayslock": "Toujours verrouillé",
+                    "forceunlock": "Déverrouillage forcé"
+                }
+            },
+            "loc": {
+                "name": "Heure locale"
+            },
+            "modelstatus": {
+                "name": "Raison de charge",
+                "state": {
+                    "notchargingbecausenochargectrldata": "Pas de charge : aucune donnée du contrôleur de charge",
+                    "notchargingbecauseovertemperature": "Pas de charge : surchauffe",
+                    "notchargingbecauseaccesscontrolwait": "Pas de charge : en attente du contrôle d'accès",
+                    "chargingbecauseforcestateon": "Charge : forcée (marche)",
+                    "notchargingbecauseforcestateoff": "Pas de charge : forcée (arrêt)",
+                    "notchargingbecausescheduler": "Pas de charge : programmation",
+                    "notchargingbecauseenergylimit": "Pas de charge : limite d'énergie atteinte",
+                    "chargingbecauseawattarpricelow": "Charge : prix aWATTar bas",
+                    "chargingbecauseautomaticstoptestladung": "Charge : arrêt automatique (charge de test)",
+                    "chargingbecauseautomaticstopnotenoughtime": "Charge : arrêt automatique, temps insuffisant",
+                    "chargingbecauseautomaticstop": "Charge : arrêt automatique",
+                    "chargingbecauseautomaticstopnoclock": "Charge : arrêt automatique, pas d'horloge",
+                    "chargingbecausepvsurplus": "Charge : surplus PV",
+                    "chargingbecausefallbackgoedefault": "Charge : repli (go-e par défaut)",
+                    "chargingbecausefallbackgoescheduler": "Charge : repli (programmation go-e)",
+                    "chargingbecausefallbackdefault": "Charge : repli (par défaut)",
+                    "notchargingbecausefallbackgoeawattar": "Pas de charge : repli (go-e aWATTar)",
+                    "notchargingbecausefallbackawattar": "Pas de charge : repli (aWATTar)",
+                    "notchargingbecausefallbackautomaticstop": "Pas de charge : repli (arrêt automatique)",
+                    "chargingbecausecarcompatibilitykeepalive": "Charge : maintien pour compatibilité véhicule",
+                    "chargingbecausechargepausenotallowed": "Charge : pause de charge non autorisée",
+                    "notchargingbecausesimulateunplugging": "Pas de charge : simulation de débranchement",
+                    "notchargingbecausephaseswitch": "Pas de charge : commutation de phase",
+                    "notchargingbecauseminpauseduration": "Pas de charge : durée de pause minimale",
+                    "notchargingbecauseerror": "Pas de charge : erreur",
+                    "notchargingbecauseloadmanagementdoesntwant": "Pas de charge : gestion de charge",
+                    "notchargingbecauseocppdoesntwant": "Pas de charge : OCPP",
+                    "notchargingbecausereconnectdelay": "Pas de charge : délai de reconnexion",
+                    "notchargingbecauseadapterblocking": "Pas de charge : adaptateur bloquant",
+                    "notchargingbecauseunderfrequencycontrol": "Pas de charge : régulation de sous-fréquence",
+                    "notchargingbecauseunbalancedload": "Pas de charge : charge déséquilibrée",
+                    "chargingbecausedischargingpvbattery": "Charge : décharge de la batterie PV",
+                    "notchargingbecausegridmonitoring": "Pas de charge : surveillance du réseau",
+                    "notchargingbecauseocppfallback": "Pas de charge : repli OCPP"
+                }
+            },
+            "nrg": {
+                "name": "Puissance de charge"
+            },
+            "qsw": {
+                "name": "File d'attente du serveur web"
+            },
+            "rbc": {
+                "name": "Compteur de redémarrages"
+            },
+            "rbt": {
+                "name": "Temps depuis le redémarrage"
+            },
+            "rssi": {
+                "name": "Signal Wi-Fi"
+            },
+            "schedule_saturday": {
+                "name": "Plages de charge samedi",
+                "state": {
+                    "off": "Désactivé",
+                    "charging_times": "Plages de charge",
+                    "pv_surplus_outside_times": "Surplus PV hors plages",
+                    "charging_times_pv_surplus_outside": "Plages de charge + surplus PV hors plages"
+                }
+            },
+            "schedule_sunday": {
+                "name": "Plages de charge dimanche",
+                "state": {
+                    "off": "Désactivé",
+                    "charging_times": "Plages de charge",
+                    "pv_surplus_outside_times": "Surplus PV hors plages",
+                    "charging_times_pv_surplus_outside": "Plages de charge + surplus PV hors plages"
+                }
+            },
+            "schedule_weekdays": {
+                "name": "Plages de charge jours de semaine",
+                "state": {
+                    "off": "Désactivé",
+                    "charging_times": "Plages de charge",
+                    "pv_surplus_outside_times": "Surplus PV hors plages",
+                    "charging_times_pv_surplus_outside": "Plages de charge + surplus PV hors plages"
+                }
+            },
+            "tma": {
+                "name": "Température de la borne"
+            },
+            "trx": {
+                "name": "Badge ID actuel",
+                "state": {
+                    "no_chip": "Aucun badge",
+                    "id_chip_0": "Badge ID 0",
+                    "id_chip_1": "Badge ID 1",
+                    "id_chip_2": "Badge ID 2",
+                    "id_chip_3": "Badge ID 3",
+                    "id_chip_4": "Badge ID 4",
+                    "id_chip_5": "Badge ID 5",
+                    "id_chip_6": "Badge ID 6",
+                    "id_chip_7": "Badge ID 7",
+                    "id_chip_8": "Badge ID 8",
+                    "id_chip_9": "Badge ID 9",
+                    "no_transaction": "Aucune transaction"
+                }
+            },
+            "wcch": {
+                "name": "Clients HTTP"
+            },
+            "wccw": {
+                "name": "Clients WebSocket"
+            },
+            "wh": {
+                "name": "Énergie chargée (session)"
+            },
+            "wst": {
+                "name": "État Wi-Fi",
+                "state": {
+                    "idle_status": "IDLE_STATUS",
+                    "no_ssid_avail": "NO_SSID_AVAIL",
+                    "scan_completed": "SCAN_COMPLETED",
+                    "connected": "CONNECTED",
+                    "connect_failed": "CONNECT_FAILED",
+                    "connection_lost": "CONNECTION_LOST",
+                    "disconnected": "DISCONNECTED",
+                    "connecting": "CONNECTING",
+                    "disconnecting": "DISCONNECTING",
+                    "no_shield": "NO_SHIELD"
+                }
+            }
+        },
+        "switch": {
+            "bac": {
+                "name": "Sélection du niveau de verrouillage"
+            },
+            "ebe": {
+                "name": "Boost"
+            },
+            "fap": {
+                "name": "Pause de charge"
+            },
+            "fre": {
+                "name": "Rester en mode Eco"
+            },
+            "ful": {
+                "name": "Tarif flexible (Lumina Strom/aWATTar)"
+            },
+            "fup": {
+                "name": "Surplus PV"
+            },
+            "loe": {
+                "name": "Équilibrage de charge"
+            },
+            "lse": {
+                "name": "Économie d'énergie LED"
+            },
+            "nmo": {
+                "name": "Contrôle de la mise à la terre"
+            },
+            "pdte": {
+                "name": "Décharger la batterie PV"
+            },
+            "su": {
+                "name": "Simuler le débranchement"
+            },
+            "tse": {
+                "name": "Network Time Protocol"
+            },
+            "upo": {
+                "name": "Déverrouillage en cas de coupure de courant"
+            },
+            "wda": {
+                "name": "Désactivation automatique du point d'accès"
+            }
+        },
+        "select": {
+            "acs": {
+                "name": "Contrôle d'accès",
+                "state": {
+                    "open": "Ouvert",
+                    "authentication_required": "Authentification requise"
+                }
+            },
+            "amp_preset": {
+                "name": "Préréglage du courant de charge"
+            },
+            "awc": {
+                "name": "Pays aWATTar",
+                "state": {
+                    "austria": "Autriche",
+                    "belgium": "Belgique",
+                    "bulgaria": "Bulgarie",
+                    "croatia": "Croatie",
+                    "czechia": "Tchéquie",
+                    "denmark_dk1": "Danemark DK1",
+                    "denmark_dk2": "Danemark DK2",
+                    "denmark_dk1_tibber": "Danemark DK1 Tibber",
+                    "denmark_dk2_tibber": "Danemark DK2 Tibber",
+                    "estonia": "Estonie",
+                    "finland": "Finlande",
+                    "france": "France",
+                    "germany": "Allemagne",
+                    "greece": "Grèce",
+                    "hungary": "Hongrie",
+                    "italy_calabria": "Italie Calabre",
+                    "italy_centre_noth": "Italie Centre-Nord",
+                    "italy_centre_south": "Italie Centre-Sud",
+                    "italy_north": "Italie Nord",
+                    "italy_sacoac": "Italie SacoAC",
+                    "italy_sacodc": "Italie SacoDC",
+                    "italy_sardinia": "Italie Sardaigne",
+                    "italy_sicily": "Italie Sicile",
+                    "italy_south": "Italie Sud",
+                    "latvia": "Lettonie",
+                    "lithuania": "Lituanie",
+                    "montenegro": "Monténégro",
+                    "netherlands": "Pays-Bas",
+                    "norway_elspot1": "Norvège Elspot1",
+                    "norway_elspot2": "Norvège Elspot2",
+                    "norway_elspot3": "Norvège Elspot3",
+                    "norway_elspot4": "Norvège Elspot4",
+                    "norway_elspot5": "Norvège Elspot5",
+                    "norway_no2nsl": "Norvège NO2NSL",
+                    "poland": "Pologne",
+                    "portugal": "Portugal",
+                    "romania": "Roumanie",
+                    "serbia": "Serbie",
+                    "slovakia": "Slovaquie",
+                    "slovenia": "Slovénie",
+                    "spain": "Espagne",
+                    "sweden_elspot1": "Suède Elspot1",
+                    "sweden_elspot2": "Suède Elspot2",
+                    "sweden_elspot3": "Suède Elspot3",
+                    "sweden_elspot4": "Suède Elspot4",
+                    "sweden_tibber_elspot1": "Suède Tibber Elspot1",
+                    "sweden_tibber_elspot2": "Suède Tibber Elspot2",
+                    "sweden_tibber_elspot3": "Suède Tibber Elspot3",
+                    "sweden_tibber_elspot4": "Suède Tibber Elspot4",
+                    "switzerland": "Suisse",
+                    "ukraine": "Ukraine"
+                }
+            },
+            "bac": {
+                "name": "Sélection du niveau de verrouillage",
+                "state": {
+                    "always_locked": "Toujours verrouillé",
+                    "locked_when_car_is_connected": "Verrouillé quand un véhicule est connecté",
+                    "never_locked": "Jamais verrouillé"
+                }
+            },
+            "ct": {
+                "name": "Véhicule",
+                "state": {
+                    "standard": "Standard",
+                    "kia_soul": "Kia Soul",
+                    "renault_zoe_twingo": "Renault Zoe/Twingo",
+                    "mitsubishi_imiev": "Mitsubishi iMiev",
+                    "citroen_c_zero": "Citroen c zero",
+                    "peugeot_ion": "Peugeot iOn",
+                    "opel_corsa_e": "Opel Corsa-e",
+                    "vw_id_sw_3_2": "VW ID (SW <3.2)",
+                    "vw_id_sw_3_2_4_1": "VW ID (SW 3.2-4.1)",
+                    "vw_id_sw_5_x": "VW ID (SW 5.x)",
+                    "cupra_born_standard": "Cupra Born Standard",
+                    "cupra_born_alternativ": "Cupra Born Alternativ",
+                    "ford_explorer": "Ford Explorer",
+                    "porsche_taycan": "Porsche Taycan",
+                    "skoda_enyaq": "Skoda Enyaq",
+                    "dacia_spring": "Dacia Spring",
+                    "mercedes": "Mercedes",
+                    "ssangyong": "Ssangyong"
+                }
+            },
+            "ebo": {
+                "name": "Type de boost",
+                "state": {
+                    "one_time": "Une fois",
+                    "repeat_for_as_long_as_vehicle_is_plugged_in": "Répéter tant que le véhicule est branché"
+                }
+            },
+            "lmo": {
+                "name": "Mode de charge",
+                "state": {
+                    "default": "Par défaut",
+                    "eco": "Eco",
+                    "next_trip": "Next Trip"
+                }
+            },
+            "psm": {
+                "name": "Commutation de phase",
+                "state": {
+                    "auto": "Automatique",
+                    "1_phase": "1 phase",
+                    "3_phases": "3 phases"
+                }
+            },
+            "tds": {
+                "name": "Heure d'été",
+                "state": {
+                    "none": "Aucune",
+                    "europeansummertime": "Heure d'été européenne",
+                    "usdaylighttime": "Heure d'été américaine",
+                    "aueasterndaylighttime": "Heure d'été de l'Est australien"
+                }
+            },
+            "ust": {
+                "name": "Déverrouillage du câble",
+                "state": {
+                    "normal": "Normal",
+                    "autounlock": "Déverrouillage automatique",
+                    "alwayslock": "Toujours verrouillé"
+                }
+            }
+        },
+        "number": {
+            "amp": {
+                "name": "Courant de charge maximal"
+            },
+            "awp": {
+                "name": "Prix maximal"
+            },
+            "ebt": {
+                "name": "Le boost décharge jusqu'à"
+            },
+            "fam": {
+                "name": "Seuil de la batterie PV"
+            },
+            "fmt": {
+                "name": "Durée de charge minimale"
+            },
+            "fot": {
+                "name": "Seuil Ohmpilot"
+            },
+            "fst": {
+                "name": "Démarrer la charge à"
+            },
+            "fte": {
+                "name": "Charge Next Trip"
+            },
+            "mpwst": {
+                "name": "Délai de commutation de phase"
+            },
+            "mptwt": {
+                "name": "Intervalle de commutation de phase"
+            },
+            "pdt": {
+                "name": "La batterie PV se décharge jusqu'à"
+            },
+            "spl3": {
+                "name": "Niveau de puissance triphasé"
+            }
+        },
+        "button": {
+            "frc0": {
+                "name": "Démarrer la charge"
+            },
+            "frc1": {
+                "name": "Arrêter la charge"
+            },
+            "frc2": {
+                "name": "Forcer la charge"
+            },
+            "rst": {
+                "name": "Redémarrer"
+            },
+            "trx": {
+                "name": "Authentifier"
+            }
+        },
+        "update": {
+            "onv": {
+                "name": "Mise à jour du firmware"
+            }
+        }
+    },
+    "exceptions": {
+        "charger_not_found": {
+            "message": "Impossible d'identifier une borne Wattpilot pour l'appareil {device_id}."
+        },
+        "cloud_api_disable_failed": {
+            "message": "Impossible de désactiver l'API cloud go-e sur la borne {charger}."
+        },
+        "cloud_api_enable_failed": {
+            "message": "Impossible d'activer l'API cloud go-e sur la borne {charger}."
+        },
+        "cloud_api_key_timeout": {
+            "message": "La borne n'a renvoyé aucune clé API cloud go-e dans un délai de {timeout} secondes."
+        },
+        "entity_action_failed": {
+            "message": "Échec de {action} sur {entity} : {error}"
+        },
+        "entity_write_failed": {
+            "message": "La borne n'a pas accepté la nouvelle valeur de {property} pour {entity}."
+        },
+        "entry_not_found": {
+            "message": "Impossible d'identifier l'entrée de configuration Wattpilot pour l'appareil {device_id}."
+        },
+        "entry_not_loaded": {
+            "message": "L'entrée de configuration Wattpilot de l'appareil {device_id} n'est pas chargée. Vérifiez que la borne est configurée et joignable."
+        },
+        "invalid_boolean": {
+            "message": "{parameter} doit valoir true ou false, reçu : {value}"
+        },
+        "invalid_day_type": {
+            "message": "{parameter} doit être l'une des valeurs {options}, reçu : {value}"
+        },
+        "invalid_debug_properties": {
+            "message": "{parameter} doit valoir true, false ou une liste de noms de propriétés, reçu : {value}"
+        },
+        "invalid_option": {
+            "message": "{option} n'est pas une option de {entity}. Options valides : {options}"
+        },
+        "invalid_schedule_ranges": {
+            "message": "{parameter} doit être une liste d'heures de début et de fin (HH:MM), reçu : {value}"
+        },
+        "invalid_trigger_time": {
+            "message": "{parameter} n'est pas une heure valide : {trigger_time}"
+        },
+        "missing_parameter": {
+            "message": "{parameter} est un paramètre obligatoire."
+        },
+        "reconnect_failed": {
+            "message": "Impossible de reconnecter la borne Wattpilot de l'appareil {device_id}."
+        },
+        "schedule_not_supported": {
+            "message": "La borne {charger} ne signale aucun programme de charge ({property})."
+        },
+        "schedule_nothing_to_set": {
+            "message": "Rien à modifier : indiquez au moins l'un des paramètres {parameters}."
+        },
+        "schedule_range_crosses_midnight": {
+            "message": "{parameter} : une plage de charge doit se terminer après son début, le même jour (le jour suivant a son propre programme) - scindez-la à minuit : {ranges}"
+        },
+        "schedule_ranges_overlap": {
+            "message": "{parameter} : les plages de charge ne doivent pas se chevaucher : {ranges}"
+        },
+        "service_failed": {
+            "message": "L'action Wattpilot {service} a échoué : {error}"
+        },
+        "set_next_trip_failed": {
+            "message": "Impossible de définir l'heure du prochain trajet sur la borne {charger}."
+        },
+        "set_schedule_failed": {
+            "message": "Impossible d'écrire le programme de charge {day_type} sur la borne {charger}."
+        },
+        "update_install_timeout": {
+            "message": "{entity} : la borne n'a pas commencé à installer la mise à jour dans un délai de {timeout} secondes."
+        },
+        "update_no_version": {
+            "message": "{entity} : aucune version du firmware à installer."
+        },
+        "update_restart_timeout": {
+            "message": "{entity} : la borne n'est pas revenue en ligne dans les {timeout} secondes suivant l'installation de la mise à jour."
+        },
+        "update_unknown_version": {
+            "message": "{entity} : la version {version} n'est pas proposée par la borne. Disponibles : {versions}"
+        }
+    }
+}
