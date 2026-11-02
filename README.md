@@ -10,24 +10,8 @@
 [![Validate](https://github.com/JimboHamez/ha_wattpilot_flex/actions/workflows/validate.yaml/badge.svg)](https://github.com/JimboHamez/ha_wattpilot_flex/actions/workflows/validate.yaml) [![hassfest](https://github.com/JimboHamez/ha_wattpilot_flex/actions/workflows/hassfest.yaml/badge.svg)](https://github.com/JimboHamez/ha_wattpilot_flex/actions/workflows/hassfest.yaml)
 [![Security](https://github.com/JimboHamez/ha_wattpilot_flex/actions/workflows/security.yml/badge.svg)](https://github.com/JimboHamez/ha_wattpilot_flex/actions/workflows/security.yml)
 
-> **Note:** This repository began as a fork of
-> [mk-maddin/wattpilot-HA](https://github.com/mk-maddin/wattpilot-HA) by Martin Kraemer
-> ([@mk-maddin](https://github.com/mk-maddin)), and the original design is his — full credit
-> belongs upstream, and it is redistributed here under its original [Apache-2.0](LICENSE) license.
->
-> **The two have since diverged substantially.** As of 0.5.0 this fork replaced the vendored,
-> synchronous `wattpilot` library with the maintained async
-> [`wattpilot-api`](https://pypi.org/project/wattpilot-api/), rewrote the entities around it,
-> added translated names and states, mDNS discovery, reauthentication and reconfiguration flows,
-> and now meets every rule of the Home Assistant Integration Quality Scale (self-declared
-> **platinum**). Behaviour, entity names and entity units differ from upstream in ways upstream
-> cannot support.
->
-> **Please report issues with *this* integration
-> [here](https://github.com/JimboHamez/ha_wattpilot_flex/issues), not upstream.** Bug reports about
-> this fork's code are not upstream's to answer. Go to
-> [mk-maddin/wattpilot-HA](https://github.com/mk-maddin/wattpilot-HA) if you are running
-> the original integration.
+Wattpilot Flex is in the [HACS](https://hacs.xyz/) default catalog: search for
+**Fronius Wattpilot Flex** in HACS to install it (see [Installation](#installation)).
 
 > **Upgrading from 0.12.x or earlier?** The integration's domain changed from `wattpilot` to
 > `wattpilot_flex` in 1.0.0, and your chargers have to be added again once. Follow
@@ -228,9 +212,8 @@ With [HACS](https://hacs.xyz/) installed:
 
 HACS keeps track of updates from then on.
 
-If the search finds nothing, your HACS has not picked up the integration's default-catalog entry
-yet: add `https://github.com/JimboHamez/ha_wattpilot_flex` as a
-[custom repository](https://hacs.xyz/docs/faq/custom_repositories/) (type **Integration**) and search again.
+The integration is listed in the HACS default catalog, so there is no need to add this
+repository as a custom repository.
 
 ### Install manually
 Download the repository and save the `custom_components/wattpilot_flex` folder into your home assistant custom_components directory.
@@ -564,6 +547,27 @@ whose data-driven entity design it still uses, and to
 synchronous [`wattpilot`](https://github.com/joscha82/wattpilot) module got this whole thing
 off the ground — it powered this integration up to 0.4.x and is still the reference for the
 charger's WebSocket protocol.
+
+# Origins
+
+This repository began as a fork of
+[mk-maddin/wattpilot-HA](https://github.com/mk-maddin/wattpilot-HA) by Martin Kraemer
+([@mk-maddin](https://github.com/mk-maddin)), and the original design is his — full credit
+belongs upstream, and it is redistributed here under its original [Apache-2.0](LICENSE) license.
+
+**The two have since diverged substantially.** As of 0.5.0 this fork replaced the vendored,
+synchronous `wattpilot` library with the maintained async
+[`wattpilot-api`](https://pypi.org/project/wattpilot-api/), rewrote the entities around it,
+added translated names and states, mDNS discovery, reauthentication and reconfiguration flows,
+and now meets every rule of the Home Assistant Integration Quality Scale (self-declared
+**platinum**). Behaviour, entity names and entity units differ from upstream in ways upstream
+cannot support.
+
+**Please report issues with *this* integration
+[here](https://github.com/JimboHamez/ha_wattpilot_flex/issues), not upstream.** Bug reports about
+this fork's code are not upstream's to answer. Go to
+[mk-maddin/wattpilot-HA](https://github.com/mk-maddin/wattpilot-HA) if you are running
+the original integration.
 
 # License
 
