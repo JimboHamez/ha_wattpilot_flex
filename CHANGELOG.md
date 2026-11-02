@@ -26,6 +26,11 @@ for attribution.
   accepts from custom integrations since October 2026 and HACS now checks. Home Assistant
   releases that predate it ignore the key.
 
+- The integration is now in the HACS default catalog (hacs/default#11718, merged 2026-11-02). The
+  README says so at the top, and its install steps no longer suggest adding the repository as a
+  custom repository. The note on the project's origins moved from the top of the README to an
+  *Origins* section at the end.
+
 ### Fixed
 - An entry missing its address (IP address or serial) or its password now fails to connect with a
   log line naming the missing field, instead of handing `None` to the client. The setup forms
