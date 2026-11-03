@@ -10,6 +10,15 @@ for attribution.
 
 ## [Unreleased]
 
+_Nothing yet._
+
+## [1.1.0] - 2026-11-03
+
+The first release since the integration joined the HACS default catalog. Setup screens, entity
+names and states, actions and error messages are now also in French, Italian and Dutch, and the
+README is brought up to date. Nothing to do when updating: existing entities keep their names,
+because Home Assistant names an entity when it is created.
+
 ### Added
 - French, Italian and Dutch translations of the setup screens, entity names and states, actions
   and error messages, for the markets Fronius sells the Wattpilot Flex in. They follow the terms
@@ -18,6 +27,18 @@ for attribution.
   created, so existing entities keep their current names.
 
 ### Changed
+- The integration is now in the HACS default catalog (hacs/default#11718, merged 2026-11-02). The
+  README says so at the top, and its install steps no longer suggest adding the repository as a
+  custom repository. The note on the project's origins moved from the top of the README to an
+  *Origins* section at the end.
+- README: two Fronius product links that no longer exist are replaced, and the links to the
+  example packages work in HACS's README view, where the folder link returned 404. The manual
+  setup steps follow the current *Settings → Devices & services* menu, the feature list covers
+  the charging schedule and firmware updates, the troubleshooting list includes
+  `set_charging_schedule`, and the supported models read Home, Go and Flex.
+- `manifest.json` declares `"categories": ["energy.ev_charging"]`, the key Home Assistant
+  accepts from custom integrations since October 2026 and HACS now checks. Home Assistant
+  releases that predate it ignore the key.
 - Internal typing only, with no change for users. The YAML catalog entries are typed as
   `models.py::EntityDefinition` and the charging-schedule objects as TypedDicts in `schedule.py`,
   where both were `dict[str, Any]`. A new test fails when a catalog uses a key `EntityDefinition`
@@ -29,22 +50,10 @@ for attribution.
   instead of the job log; all three are report-only, while `pip-audit` still gates. Every action
   is pinned to a commit SHA, Dependabot keeps those pins current, and every workflow declares
   read-only permissions, with `security-events: write` only on the jobs that upload results.
-- `manifest.json` declares `"categories": ["energy.ev_charging"]`, the key Home Assistant
-  accepts from custom integrations since October 2026 and HACS now checks. Home Assistant
-  releases that predate it ignore the key.
 
-- The integration is now in the HACS default catalog (hacs/default#11718, merged 2026-11-02). The
-  README says so at the top, and its install steps no longer suggest adding the repository as a
-  custom repository. The note on the project's origins moved from the top of the README to an
-  *Origins* section at the end.
-
-- README: two Fronius product links that no longer exist are replaced, and the links to the
-  example packages work in HACS's README view, where the folder link returned 404. The manual
-  setup steps follow the current *Settings → Devices & services* menu, the feature list covers
-  the charging schedule and firmware updates, the troubleshooting list includes
-  `set_charging_schedule`, and the supported models read Home, Go and Flex.
-- `info.md` is removed. HACS has shown the README instead since HACS 2.0, so nothing displayed
-  it, and it still described the integration as it was before 0.5.0.
+### Removed
+- `info.md`. HACS has shown the README instead since HACS 2.0, so nothing displayed it, and it
+  still described the integration as it was before 0.5.0.
 
 ### Fixed
 - An entry missing its address (IP address or serial) or its password now fails to connect with a
@@ -917,7 +926,8 @@ Assistant Integration Quality Scale.
   (services registered in `async_setup`).
 - `manifest.json`: added `integration_type` and `issue_tracker`, and sorted keys.
 
-[Unreleased]: https://github.com/JimboHamez/ha_wattpilot_flex/compare/v1.0.1...HEAD
+[Unreleased]: https://github.com/JimboHamez/ha_wattpilot_flex/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/JimboHamez/ha_wattpilot_flex/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/JimboHamez/ha_wattpilot_flex/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/JimboHamez/ha_wattpilot_flex/compare/v0.12.3...v1.0.0
 [0.12.3]: https://github.com/JimboHamez/ha_wattpilot_flex/compare/v0.12.2...v0.12.3
