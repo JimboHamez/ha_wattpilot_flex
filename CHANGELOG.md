@@ -38,6 +38,14 @@ for attribution.
   custom repository. The note on the project's origins moved from the top of the README to an
   *Origins* section at the end.
 
+- README: two Fronius product links that no longer exist are replaced, and the links to the
+  example packages work in HACS's README view, where the folder link returned 404. The manual
+  setup steps follow the current *Settings → Devices & services* menu, the feature list covers
+  the charging schedule and firmware updates, the troubleshooting list includes
+  `set_charging_schedule`, and the supported models read Home, Go and Flex.
+- `info.md` is removed. HACS has shown the README instead since HACS 2.0, so nothing displayed
+  it, and it still described the integration as it was before 0.5.0.
+
 ### Fixed
 - An entry missing its address (IP address or serial) or its password now fails to connect with a
   log line naming the missing field, instead of handing `None` to the client. The setup forms

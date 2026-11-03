@@ -62,7 +62,7 @@ wattpilot` zeroconf matcher (the charger's own mDNS property, not the domain), `
 and history in `CHANGELOG.md` and `doc/`.
 
 The installable component lives entirely in `custom_components/wattpilot_flex/`. Everything else
-(`packages/`, `doc/`, `info.md`, `set_values_test.py`) is documentation, HA config examples,
+(`packages/`, `doc/`, `set_values_test.py`) is documentation, HA config examples,
 or manual test scaffolding.
 
 ## Build / Test / Lint
