@@ -10,7 +10,11 @@ for attribution.
 
 ## [Unreleased]
 
-_Nothing yet._
+### Changed
+- README: new screenshots of the device page, taken on a Wattpilot Flex running this integration,
+  replace the three from the original project (which showed the old `wattpilot` actions and
+  units). The page is split into an overview and one image per entity card, so the entity rows
+  stay readable on a phone.
 
 ## [1.1.0] - 2026-11-03
 
