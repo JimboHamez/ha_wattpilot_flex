@@ -19,7 +19,7 @@ Wattpilot Flex is in the [HACS](https://hacs.xyz/) default catalog: search for
 
 # What This Is:
 
-This is a custom component to allow control of [Fronius Wattpilot](https://www.fronius.com/en/solar-energy/installers-partners/technical-data/all-products/solutions/fronius-wattpilot/fronius-wattpilot/wattpilot-home-11-j) wallbox/electro vehicle charging devices in [Homeassistant](https://home-assistant.io) using the unofficial, reverse-engineered [`wattpilot-api`](https://pypi.org/project/wattpilot-api/) Python library, which talks to the charger over its WebSocket API (locally on the LAN, or via the go-e cloud).
+This is a custom component to allow control of [Fronius Wattpilot](https://www.fronius.com/en/solar-energy/solar-solutions/e-mobility) wallbox/electric vehicle charging devices in [Home Assistant](https://www.home-assistant.io/) using the unofficial, reverse-engineered [`wattpilot-api`](https://pypi.org/project/wattpilot-api/) Python library, which talks to the charger over its WebSocket API (locally on the LAN, or via the go-e cloud).
 
 WARNING:
 There is no official Fronius API. This integration is built entirely on a community, reverse-engineered library and may break at any time (for example after a charger firmware update).
@@ -35,20 +35,22 @@ Not me neither any of contributors to this or any prerequired/dependency project
 
 # What It Does:
 
-Allows for control of [Fronius Wattpilot](https://www.fronius.com/en/solar-energy/installers-partners/products-solutions/residential-energy-solutions/e-mobility-and-photovoltaic-residential/wattpilot-ev-charging-solution-for-homes) wallbox/electro vehicle charging devices via home assistant with the following features:
+Allows for control of [Fronius Wattpilot](https://www.fronius.com/en/help-center/solar-energy/e-mobility/support-wattpilot) wallbox/electric vehicle charging devices via Home Assistant with the following features:
 
-* works with wattpilot, wattpilot V2 & wattpilot flex
+* works with the chargers listed under [Supported devices](#supported-devices)
 * connect charger via local LAN or via Cloud
 * automatic discovery of chargers on your local network (mDNS/zeroconf)
-* re-authentication prompt if the charger password changes
+* re-authentication prompt if the charger password changes, and reconfiguration of the connection details
 * charging mode change
 * start / stop charging
-* configuration for different charging behaviours
+* configuration for different charging behaviours (PV surplus, battery boost, phase switching, …)
 * sensors for charging box status
+* the app's charging times (weekdays / Saturday / Sunday) shown as sensors and set via an action — see [Charging schedule](#charging-schedule)
+* charger firmware updates offered as a Home Assistant update entity
 * manual disconnect/reconnect chargers (Helpful for Wattpilot GO version)
-* next trip timing configuration via service call (& event when next trip timing value is changed) -> you can create an [input_datetime (example)](packages/wattpilot/wattpilot_input_datetime.yaml) entity & corresponding [automation (example)](packages/wattpilot/wattpilot_automation.yaml) which ensures the input_datetime is in sync with the setting wihtin your wattpilot charger
-* log value changes for properties of the wallbox as warnings (enable/disable via service call)
-* can enable/disable e-go cloud charging API (enable/disable via service call) -> this is at your own responsibility - is not clear if fronius/you "pay" in some way for the e-go cloud API and thus are legally allowed to use -> as it is not required at the moment for the functionality of this component, I do not recommend to enable
+* next trip timing configuration via action (& event when next trip timing value is changed) -> you can create an [input_datetime (example)](https://github.com/JimboHamez/ha_wattpilot_flex/blob/main/packages/wattpilot/wattpilot_input_datetime.yaml) entity & corresponding [automation (example)](https://github.com/JimboHamez/ha_wattpilot_flex/blob/main/packages/wattpilot/wattpilot_automation.yaml) which ensures the input_datetime is in sync with the setting within your wattpilot charger
+* log value changes for properties of the wallbox as warnings (enable/disable via action)
+* can enable/disable go-e cloud charging API (enable/disable via action) -> this is at your own responsibility - is not clear if fronius/you "pay" in some way for the go-e cloud API and thus are legally allowed to use -> as it is not required at the moment for the functionality of this component, I do not recommend to enable
 
 ## Use cases
 
@@ -81,11 +83,11 @@ What people actually use this for:
 
 ## Example automations
 
-The [`packages/wattpilot/`](packages/wattpilot) folder holds ready-to-use configuration:
-[`wattpilot_input_datetime.yaml`](packages/wattpilot/wattpilot_input_datetime.yaml) and
-[`wattpilot_automation.yaml`](packages/wattpilot/wattpilot_automation.yaml) keep an
+The [`packages/wattpilot/`](https://github.com/JimboHamez/ha_wattpilot_flex/tree/main/packages/wattpilot) folder holds ready-to-use configuration:
+[`wattpilot_input_datetime.yaml`](https://github.com/JimboHamez/ha_wattpilot_flex/blob/main/packages/wattpilot/wattpilot_input_datetime.yaml) and
+[`wattpilot_automation.yaml`](https://github.com/JimboHamez/ha_wattpilot_flex/blob/main/packages/wattpilot/wattpilot_automation.yaml) keep an
 `input_datetime` helper and the charger's next-trip time in sync in both directions, and
-[`wattpilot_logger.yaml`](packages/wattpilot/wattpilot_logger.yaml) turns on debug logging.
+[`wattpilot_logger.yaml`](https://github.com/JimboHamez/ha_wattpilot_flex/blob/main/packages/wattpilot/wattpilot_logger.yaml) turns on debug logging.
 Copy them into your `packages/` directory and replace the `device_id` with your charger's.
 
 Two smaller examples to start from — both use the entity names this integration ships, so
@@ -268,7 +270,7 @@ too (see step 7).
    | logger `custom_components.wattpilot` | logger `custom_components.wattpilot_flex` |
    | the charger's old `device_id` (actions, device triggers) | pick the re-added device again |
 
-   The [example packages](packages/wattpilot) already use the new names.
+   The [example packages](https://github.com/JimboHamez/ha_wattpilot_flex/tree/main/packages/wattpilot) already use the new names.
 
 ## Configuration
 
@@ -278,12 +280,10 @@ too (see step 7).
 
 ### Manually:
 
-1. Browse to your Home Assistant instance.
-2. In the sidebar click on Configuration.
-3. From the configuration menu select: Integrations.
-4. In the bottom right, click on the Add Integration button.
-5. From the list, search and select "Wattpilot Flex".
-6. Follow the instruction on screen to complete the set up.
+1. In Home Assistant, go to **Settings → Devices & services**.
+2. Select **Add integration** (bottom right).
+3. Search for and select **Wattpilot Flex**.
+4. Follow the instructions on screen to complete the setup.
    (If connecting local/LAN you will require the local IP - for cloud connection your wattpilot serial is required)
 
 ![screenshot of Config Flow](doc/config_flow1.jpg)
@@ -342,11 +342,11 @@ to it.
 
 ## Supported devices
 
-Fronius Wattpilot **Home / Home 2 / V2 / Flex**, in both the **11 kW** and **22 kW**
+Fronius Wattpilot **Home**, **Go** and **Flex**, in both the **11 kW** and **22 kW**
 variants (the correct entities are enabled automatically for your variant). The
-integration is developed against a physical **Wattpilot Flex (22 kW, firmware 43.4)**;
-other models rely on the community library and may expose a slightly different set of
-properties.
+integration is developed and tested against a physical **Wattpilot Flex (22 kW, firmware
+43.4)**. Home and Go rely on the community library's support for them and may expose a
+slightly different set of properties.
 
 ## Languages
 
@@ -545,8 +545,9 @@ work on it directly.
 - **Watch specific charger properties** as log warnings using the `wattpilot_flex.set_debug_properties`
   service, and download a redacted **diagnostics** file from the device page to share when
   reporting an issue.
-- Services (`disconnect_charger`, `reconnect_charger`, `set_goe_cloud`, `set_debug_properties`,
-  `set_next_trip`) are available under **Developer Tools → Actions**.
+- All of the integration's [actions](#actions) (`set_next_trip`, `set_charging_schedule`,
+  `set_goe_cloud`, `set_debug_properties`, `disconnect_charger`, `reconnect_charger`) can be run
+  by hand under **Developer Tools → Actions**.
 
 ## Removing the integration
 
