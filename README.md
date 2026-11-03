@@ -184,13 +184,13 @@ When reporting, include the integration version, your charger model/variant and 
 
 # Screenshots
 
-### Example Device (additional sensors + buttons can be enabled)
+### The charger's device page
 
-![screenshot of Wattpilot Device](doc/device_view1.jpg)
+A Wattpilot Flex (22 kW, firmware 43.5). Many more entities can be enabled from the device page.
 
-![screenshot of Wattpilot Device](doc/device_view2.jpg)
+![Device page: device info, related automations, controls and recent activity](https://raw.githubusercontent.com/JimboHamez/ha_wattpilot_flex/main/doc/wattpilot_flex_overview.png)
 
-![screenshot of Wattpilot Device](doc/device_view3.jpg)
+![Sensors card](https://raw.githubusercontent.com/JimboHamez/ha_wattpilot_flex/main/doc/wattpilot_flex_sensors.png) ![Configuration card](https://raw.githubusercontent.com/JimboHamez/ha_wattpilot_flex/main/doc/wattpilot_flex_configuration.png) ![Diagnostic card](https://raw.githubusercontent.com/JimboHamez/ha_wattpilot_flex/main/doc/wattpilot_flex_diagnostic.png)
 
 ### Next Trip via timing via Service Call
 
